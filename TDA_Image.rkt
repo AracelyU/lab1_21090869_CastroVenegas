@@ -92,6 +92,26 @@
         (andmap pixmap-check (format_image image))))
 
 
+; definir bit-check
+; Dom: x (int) X y (int) x [0/1] (int) X d (int)
+(define bitmap-check (lambda (L)
+   (if (and (= (length L) 4)
+            (number? (car L))
+            (number? (cadr L))
+            (number? (caddr L)) (or (= (caddr L) 0) (= (caddr L) 1))
+            (number? (cadddr L))
+       
+            ) #t #f)))
+
+; definir bitmap?
+; Dom: image
+; Rec: boleano
+; Descripción: función que permite determinar si la
+; imagen corresponde a un bitmap-d.
+(define bitmap? (lambda (image)
+         (andmap bitmap-check (format_image image))))
+
+
 
 
 

@@ -111,6 +111,28 @@
 (define bitmap? (lambda (image)
          (andmap bitmap-check (format_image image))))
 
+;definir hexmap-check
+; Dom: Lista
+; Rec: Boleano
+(define hexmap-check (lambda (L)
+    (if (and (= (length L) 4)
+             (number? (car L))
+             (number? (cadr L))
+             (string? (caddr L))
+             (number? (cadddr L))
+
+             ) #t #f)))
+
+; definir hexmap.consult
+; Dom: Image
+; Rec: Boleano
+; Descripción: unción que permite determinar si la
+; imagen corresponde a un hexmap-d.
+(define hexmap? (lambda (image)
+          (andmap hexmap-check (format_image image))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 

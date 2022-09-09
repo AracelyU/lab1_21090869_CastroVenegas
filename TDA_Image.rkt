@@ -112,16 +112,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; fliH
+; definir funciones utilizadas para el flipH y flipV
 
-; funcion que te entrega la posicion final en x
+; Descripción: funcion que te entrega la posicion final en x
+; Dom: image
+; Rec: entero
 (define largo_pos_x (lambda (image) (- (width_image image) 1)))
 
-; funcion que te entrega la posicion final en y
+; Descripción: funcion que te entrega la posicion final en y
+; Dom: image
+; Rec: entero
 (define largo_pos_y (lambda (image) (- (height_image image) 1)))
 
 
-; funcion que modifica la posicion en y segun pos_x
+; Descripción: funcion que modifica la posicion en y segun pos_y
+; Dom: posicion (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
+; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
+
 (define modificar_posicion_pixel (lambda (pos_x pixel)
      (cond
        [(pixbit-d? pixel) (cambiar_y_bit pixel pos_x)]
@@ -133,7 +140,9 @@
 
 
 
-; funcion que te entrega una lista de las posiciones invertidas pixeles
+; Descripción: funcion que te entrega una lista de las posiciones invertidas pixeles
+; Dom: fila (lista) x image
+; Rec: pixeles (lista)
 (define flipH-formato (lambda (formato_fila image)
 
      (define flipHN (lambda (formato_fila pos_x)
@@ -142,14 +151,13 @@
          [(null? formato_fila) null]
          [(< pos_x 0) null]
          [else (reverse (cons (modificar_posicion_pixel pos_x (car formato_fila)) (flipHN (cdr formato_fila) (- pos_x 1))))
-               ]) 
+               ])))
 
-          ))
+      (flipHN formato_fila (largo_pos_x image))))
 
-      (flipHN formato_fila (largo_pos_x image))
-                ))
-
-; funcion que entrega una fila de la matriz
+; Descipción: funcion que entrega una fila de la matriz según n
+; Dom: n (int) x formato_pixeles (lista)
+; Rec: fila (lista)
 (define fila_n (lambda (n lista)
     (if (null? lista)
         null
@@ -158,8 +166,10 @@
             (fila_n n (cdr lista))
             ))))
 
-; funcion flipH
-(define flipH (lambda (image)
+; Descripción: función que intercambia las posiciones del formato de pixeles de la imagen HORIZONTALMENTE
+; Dom: image
+; Rec: formato de pixeles de la image
+(define flipH-cambio (lambda (image)
 
     (define flipHC (lambda (pos_y)   
         (if (> pos_y (largo_pos_y image))
@@ -171,6 +181,15 @@
     (flipHC 0)
                 ))
 
+; Descripción: flipH
+; Dom: image
+; Rec: image
+(define flipH (lambda (image_ingresado)
+     (arreglar_image (image  (width_image image_ingresado) (height_image image_ingresado) (flipH-cambio image_ingresado)))
+
+                ))
+
+;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
 ; funcion para entregar un pixel en funcion de y
 (define obtener_pixel_y (lambda (lista pos_y)
@@ -190,9 +209,20 @@
             (cons (obtener_pixel_y lista pos_y) (ordenar_lista_y lista (+ pos_y 1) image))
         ))))
 
+; funcion que ordena el formato de la imagen por y
 (define ordenar (lambda (lista image)
      (ordenar_lista_y lista 0 image)
                   ))
+
+
+; Dom: imagen
+; Rec: image
+; Descripción: función que arregla el formato de la imagen
+(define arreglar_image (lambda (image_ingresado)
+        (if (= (length (format_image image_ingresado)) 1)
+            (list (width_image image_ingresado) (height_image image_ingresado) (car (format_image image_ingresado)))
+            image_ingresado
+        )))
 
 (define lista (format_image image_2))
 

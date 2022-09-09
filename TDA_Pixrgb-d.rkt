@@ -85,25 +85,29 @@
 (define cambiar_y_rgb (lambda (pixrgb-d_pasado y_nuevo)               
       (pixrgb-d (x_rgb pixrgb-d_pasado) y_nuevo (c1_rgb pixrgb-d_pasado) (c2_rgb pixrgb-d_pasado) (c3_rgb pixrgb-d_pasado) (d_rgb pixrgb-d_pasado))))
 
-#|
 
-; Descripción: modificar el bit de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
-(define cambiar_b_bit (lambda (pixbit-d_pasado b_nuevo)               
-      (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) b_nuevo (d_bit pixbit-d_pasado))))
+; Descripción: modificar el color rojo de un pixrgb-d
+; Dom: pixrgb-d
+; Rec: pixrgb-d
+(define cambiar_c1_rgb (lambda (pixrgb-d_pasado c1_nuevo)               
+      (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) c1_nuevo (c2_rgb pixrgb-d_pasado) (c3_rgb pixrgb-d_pasado) (d_rgb pixrgb-d_pasado))))
+
+; Descripción: modificar el color verde de un pixrgb-d
+; Dom: pixrgb-d
+; Rec: pixrgb-d
+(define cambiar_c2_rgb (lambda (pixrgb-d_pasado c2_nuevo)               
+      (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (c1_rgb pixrgb-d_pasado) c2_nuevo (c3_rgb pixrgb-d_pasado) (d_rgb pixrgb-d_pasado))))
+
+; Descripción: modificar el color azul de un pixrgb-d
+; Dom: pixrgb-d
+; Rec: pixrgb-d
+(define cambiar_c3_rgb (lambda (pixrgb-d_pasado c3_nuevo)               
+      (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (c1_rgb pixrgb-d_pasado) (c2_rgb pixrgb-d_pasado) c3_nuevo (d_rgb pixrgb-d_pasado))))
+
+; Descripción: modificar la profundidad de un pixrgb-d
+; Dom: pixrgb-d
+; Rec: pixrgb-d
+(define cambiar_d_rgb (lambda (pixrgb-d_pasado d_nuevo)               
+      (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (c1_rgb pixrgb-d_pasado) (c2_rgb pixrgb-d_pasado)(c3_rgb pixrgb-d_pasado) d_nuevo)))
 
 
-; Descripción: modificar la profundidad de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
-(define cambiar_d_bit (lambda (pixbit-d_pasado d_nuevo)               
-      (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) (bit pixbit-d_pasado) d_nuevo)))
-
-
-(define lista_bit (list 0 0 0 0))
-
-
-
-
-|#

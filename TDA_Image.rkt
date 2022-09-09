@@ -49,11 +49,16 @@
 ; definir 4 pixeles de un pixbit-d
 (define pixbit_1 (pixbit-d 0 0 0 10)) ; lista_2
 (define pixbit_2 (pixbit-d 0 1 1 20))
-(define pixbit_3 (pixbit-d 1 0 0 30))
-(define pixbit_4 (pixbit-d 1 1 1 4))
+(define pixbit_3 (pixbit-d 0 2 0 30))
+(define pixbit_4 (pixbit-d 1 0 1 40))
+(define pixbit_5 (pixbit-d 1 1 0 50))
+(define pixbit_6 (pixbit-d 1 2 0 60))
+(define pixbit_7 (pixbit-d 2 0 0 70))
+(define pixbit_8 (pixbit-d 2 1 0 80))
+(define pixbit_9 (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 2 2 pixbit_1 pixbit_2 pixbit_3 pixbit_4))
+(define image_2 (image 3 3 pixbit_1 pixbit_2 pixbit_3 pixbit_4 pixbit_5 pixbit_6 pixbit_7 pixbit_8 pixbit_9))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
@@ -108,25 +113,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; fliH
+
+; funcion que te entrega la posicion final en x
 (define largo_pos_x (lambda (image) (- (width_image image) 1)))
+
+; funcion que te entrega la posicion final en y
 (define largo_pos_y (lambda (image) (- (height_image image) 1)))
 
+
+; funcion que modifica la posicion en y segun pos_x
 (define modificar_posicion_pixel (lambda (pos_x pixel)
      (cond
-       [(pixbit-d? pixel) (pixbit-d (pos_0 pixel) pos_x (pos_2 pixel) (pos_3 pixel))]
-       [(pixbit-d? pixel) (pixhex-d (pos_0 pixel) pos_x (pos_2 pixel) (pos_3 pixel))]
-       [(pixbit-d? pixel) (pixrgb-d (pos_0 pixel) pos_x (pos_2 pixel) (pos_3 pixel) (pos_4 pixel) (pos_5 pixel))]
+       [(pixbit-d? pixel) (cambiar_y_bit pixel pos_x)]
+       [(pixhex-d? pixel) (cambiar_y_hex pixel pos_x)]
+       [(pixrgb-d? pixel) (cambiar_y_rgb pixel pos_x)]
        
        )))
 
 
-(define pos_x_final? (lambda (pos_x pos_y image)
-    (if (< pos_y (largo_pos_y image))
-        (largo_pos_x image)
-        pos_x
-        )
 
-                       ))
 
 ; funcion que te entrega una lista de las posiciones invertidas pixeles
 (define flipH-formato (lambda (formato_fila image)
@@ -144,14 +149,7 @@
       (flipHN formato_fila (largo_pos_x image))
                 ))
 
-(define filtro_nulos (lambda (lista)
-    (if (null? lista)
-        null
-        (if (null? (car lista))
-            null
-            (cons (car lista) (filtro_nulos (cdr lista)))))
-                       ))
-
+; funcion que entrega una fila de la matriz
 (define fila_n (lambda (n lista)
     (if (null? lista)
         null
@@ -160,27 +158,58 @@
             (fila_n n (cdr lista))
             ))))
 
+; funcion flipH
 (define flipH (lambda (image)
 
-    (define flipHC (lambda (pos_y)
-         (if (>= (height_image image) 2)      
-             (if (= pos_y (largo_pos_y image))
-                 null
-                 (append (flipH-formato (fila_n pos_y (format_image image)) image) (flipHC (+ pos_y 1)))
+    (define flipHC (lambda (pos_y)   
+        (if (> pos_y (largo_pos_y image))
+             null
+             (append (ordenar (flipH-formato (fila_n pos_y (format_image image)) image) image) (flipHC (+ pos_y 1)))
                  )
-             (flipH-formato (fila_n pos_y (format_image image)) image)
-            )))
+            ))
          
     (flipHC 0)
                 ))
 
-(define lista (format_image image_1))
+
+; funcion para entregar un pixel en funcion de y
+(define obtener_pixel_y (lambda (lista pos_y)
+    (if (null? lista)
+        null
+        (if (= pos_y (cadr(car lista)))
+            (car lista)
+            (obtener_pixel_y (cdr lista) pos_y)
+            ))))
+
+; funcion que ordena una lista en funcion de y
+(define ordenar_lista_y (lambda (lista pos_y image)
+    (if (> pos_y (largo_pos_y image))
+        null
+        (if (< (largo_pos_y image) 2)
+            lista
+            (cons (obtener_pixel_y lista pos_y) (ordenar_lista_y lista (+ pos_y 1) image))
+        ))))
+
+(define ordenar (lambda (lista image)
+     (ordenar_lista_y lista 0 image)
+                  ))
+
+(define lista (format_image image_2))
 
 (define lista_n (fila_n 0 lista))
+
+(define lista_2n (flipH-formato lista_n image_2))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(define filtro_nulos (lambda (lista)
+    (if (null? lista)
+        null
+        (if (null? (car lista))
+            null
+            (cons (car lista) (filtro_nulos (cdr lista)))))
+                       ))
 
 
 

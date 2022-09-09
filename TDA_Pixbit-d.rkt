@@ -3,6 +3,7 @@
 ; exportar la funcion al exterior
 (provide (all-defined-out))
 
+
 ;-----------------------------------TDA PIXBIT-D -----------------------------------------------------------------
 
 ;----------------------------------REPRESENTACION-------------------------------------------------------------
@@ -92,8 +93,31 @@
 (define cambiar_d_bit (lambda (pixbit-d_pasado d_nuevo)               
       (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) (bit pixbit-d_pasado) d_nuevo)))
 
+;------------------------------------------- SELECTORES----------------------------------------------
 
-(define lista_bit (list 0 0 0 0))
+; Descripción: función que recopila número de bit 0
+; Dom: image
+; Rec: entero
+; tipo de recursión: cola
+(define cantidad_bit (lambda (formato_image bit_ingresado result)
+    (if (null? formato_image)
+        result
+        (if (= (bit (car formato_image)) bit_ingresado)
+            (cantidad_bit (cdr formato_image) bit_ingresado (+ result 1))
+            (cantidad_bit (cdr formato_image) bit_ingresado result)
+            
+            ))))
+
+
+
+; Descripción: función histograma que recopila numero de bit
+; Dom: lista (pixeles)
+; Rec: lista
+(define histograma_bit (lambda (formato_image)
+    (list (list (cantidad_bit formato_image 0 0) "0") (list (cantidad_bit formato_image 1 0) "1"))))
+
+
+(define lista_bit (list (list 0 0 0 0) (list 0 1 1 21) (list 0 0 1 2) (list 1 2 1 543)))
 
 
 

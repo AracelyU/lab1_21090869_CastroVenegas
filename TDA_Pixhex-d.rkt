@@ -111,6 +111,20 @@
                (hex_iguales (cdr formato_image) e (+ result 1))
                (hex_iguales (cdr formato_image) e result)))))
 
+
+;---------------------------------------------------- OTROS -----------------------------------------------------------------------------------
+; definir 4 pixeles de un pixhex-d
+(define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
+(define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
+(define pixhex_3 (pixhex-d 1 0 "#0000FF" 30))
+(define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
+
+
+; definir una image 3
+(define lista_3 (list pixhex_1 pixhex_2 pixhex_3 pixhex_4 pixhex_4 pixhex_4 pixhex_4))
+
+
+
 ; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
 ; Dom: lista (pixeles)
 ; Rec: lista
@@ -118,4 +132,31 @@
     (if (null? formato_image)
         null
         (cons (list (hex_iguales formato_image (hex (car formato_image)) 0) (hex (car formato_image))) (histograma_hex (filtro_iguales_hex formato_image (hex (car formato_image))))))))
+
+
+(define lista (histograma_hex lista_3))
+
+; Descripción: función que obtiene el hex más repetido del histograma
+; Dom: lista del histograma
+; Rec: lista
+(define hex_mayor (lambda (lista_hex result)
+    (if (null? lista_hex)
+        (car (cdr result))
+        (if (> (car(car lista_hex)) (car result))
+            (hex_mayor (cdr lista_hex) (car lista_hex))
+            (hex_mayor (cdr lista_hex) result)))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

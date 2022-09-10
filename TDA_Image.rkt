@@ -316,6 +316,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+
+
+
+; Descripción: 
+; compress:
+
+
+
+
 (define filtro_nulos (lambda (lista)
     (if (null? lista)
         null

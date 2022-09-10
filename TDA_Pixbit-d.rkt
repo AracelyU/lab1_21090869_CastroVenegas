@@ -108,19 +108,23 @@
             
             ))))
 
+;-------------------------------------------- OTROS --------------------------------------------------
 
 ; Descripción: función histograma que recopila numero de bit
 ; Dom: lista (pixeles)
 ; Rec: lista
 (define histograma_bit (lambda (formato_image)
-    (list (list (cantidad_bit formato_image 0 0) 0) (list (cantidad_bit formato_image 1 0) 0))))
+    (list (list (cantidad_bit formato_image 0 0) 0) (list (cantidad_bit formato_image 1 0) 1))))
 
 
-(define lista_bit (list (list 0 0 0 0) (list 0 1 1 21) (list 0 0 1 2) (list 1 2 1 543)))
-
-
-
-
+; Descripción: función que obtiene el bit más repetido del histograma
+; Dom: lista de histograma
+; Rec: entero
+(define bit_mayor (lambda (lista_bit)
+    (if (> (car (car lista_bit)) (car (car (cdr lista_bit))))
+        0
+        1
+        )))
 
 
 

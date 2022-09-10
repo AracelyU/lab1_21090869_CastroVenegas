@@ -287,6 +287,59 @@
       [(hexmap? image) (histograma_hex (format_image image))]
       [else image])))
 
+; Descripción: imgRGB->imgHex
+; Dom: Entero
+; Rec: String
+; funcion que retorna un valor entero a un string hexa
+(define valor_hex (lambda (a)
+   (cond
+     [(= a 1) "1"]
+     [(= a 2) "2"]
+     [(= a 3) "3"]
+     [(= a 4) "4"]
+     [(= a 5) "5"]
+     [(= a 6) "6"]
+     [(= a 7) "7"]
+     [(= a 8) "8"]
+     [(= a 9) "9"]
+     [(= a 10) "A"]
+     [(= a 11) "B"]
+     [(= a 12) "C"]
+     [(= a 13) "D"]
+     [(= a 14) "E"]
+     [(= a 15) "F"]
+     [else "0"])))
+
+; Dom: Entero
+; Rec: String
+; funcion que convierte un numero a una cadena de hexa
+(define rgb->hex (lambda (a)
+       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
+
+; Dom: 3 enteros, los colores de rgb
+; Rec: String
+; funcion que convierte 3 colores de rgb a un string en hexa
+(define convertir_rgb (lambda (c1 c2 c3)
+        (string-append (rgb->hex c1)
+                       (rgb->hex c2)
+                       (rgb->hex c3))))
+
+; Dom: Lista
+; Rec: Lista
+; función que cambia un pixel rgb a hexa
+(define convertir_rgb_hex (lambda (pixel)
+       (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel)))))
+
+
+; Dom: Image
+; Rec: Image
+; funcion que pasa de rgb a hexa, en caso de que no sea rgb retorna f
+(define imgRGB->imgHex (lambda (image_rgb)
+  (if (pixmap? image_rgb)
+      (arreglar_image (image (width_image image_rgb) (height_image image_rgb) (map convertir_rgb_hex (format_image image_rgb))))    
+      image_rgb))) ;si se ingresa se retorna la imagen sin cambios
+
+
 (define lista_x (flipV-cambio image_2))
 
 

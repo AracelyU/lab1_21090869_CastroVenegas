@@ -123,7 +123,7 @@
 ; Rec: Boleano
 (define color_igual (lambda (pixel_1 color_lista)
          (if (and
-              (= (c1_rgb pixel_1)(car color_lista))
+              (= (c1_rgb pixel_1) (car color_lista))
               (= (c2_rgb pixel_1) (cadr color_lista))
               (= (c3_rgb pixel_1) (caddr color_lista))) #t #f)))
 
@@ -150,6 +150,7 @@
                (rgb_iguales (cdr formato_image) e (+ result 1))
                (rgb_iguales (cdr formato_image) e result)))))
 
+;--------------------------------------------------- OTROS ----------------------------------------------
 
 ; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
 ; Dom: lista (pixeles)
@@ -159,8 +160,24 @@
         null
         (cons (list (rgb_iguales formato_image (color_lista (car formato_image)) 0) (color_lista (car formato_image))) (histograma_rgb (filtro_iguales_rgb formato_image (color_lista (car formato_image))))))))
 
+; Descripción: función que obtiene el rgb más repetido del histograma
+; Dom: lista del histograma
+; Rec: lista
+(define rgb_mayor (lambda (lista_rgb result)
+    (if (null? lista_rgb)
+        (car (cdr result))
+        (if (> (car(car lista_rgb)) (car result))
+            (rgb_mayor (cdr lista_rgb) (car lista_rgb))
+            (rgb_mayor (cdr lista_rgb) result)))))
 
-(define lista1 (list 0 0 21 3 54 4))
-(define lista2 (list 0 1 21 3 54 3))
+
+
+
+
+
+
+
+
+
 
 

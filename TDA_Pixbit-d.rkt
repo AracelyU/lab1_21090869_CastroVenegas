@@ -126,6 +126,11 @@
         1
         )))
 
-
-
+; Descripción: función que crea una lista sin el bit más repetido
+(define compress-formato-bit (lambda (lista elemento)
+    (if (null? lista)
+        null
+        (if (= elemento (bit (car lista)))
+            (compress-formato-bit (cdr lista) elemento)
+            (cons (car lista) (compress-formato-bit (cdr lista) elemento))))))
 

@@ -80,7 +80,7 @@
 (define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
 
 ; definir una image 3
-(define image_3 (image 2 2 pixhex_1 pixhex_2 pixhex_3 pixhex_4))
+(define image_3 (image 2 2 pixhex_1 pixhex_2 pixhex_3 pixhex_1))
 
 
 ;----------------------------- PERTENENCIA --------------------------------------------------------------------
@@ -119,8 +119,8 @@
 ; Pertenencia
 (define compressed? (lambda (image)
   (if (= (length (formato_image image)) (* (ancho_image image) (largo_image image)))
-      #t
-      #f)))
+      #f
+      #t)))
 
 ;----------------------------------------- SELECTORES ----------------------------------------------
 
@@ -274,34 +274,29 @@
       [(hexmap? image) (histograma_hex (formato_image image))]
       [else image])))
 
-; Descripción: imgRGB->imgHex
-; Dom: Entero
-; Rec: String
-; funcion que retorna un valor entero a un string hexa
-(define valor_hex (lambda (a)
-   (cond
-     [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
-     [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
-     [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
-     [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
-
-; Dom: Entero
-; Rec: String
-; funcion que convierte un numero a una cadena de hexa
-(define rgb->hex (lambda (a)
-       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
-
-; Dom: 3 enteros, los colores de rgb
-; Rec: String
-; funcion que convierte 3 colores de rgb a un string en hexa
-(define convertir_rgb (lambda (c1 c2 c3)
-        (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
 ; Dom: Lista
 ; Rec: Lista
 ; función que cambia un pixel rgb a hexa
 (define convertir_rgb_hex (lambda (pixel)
-       (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel)))))
+
+    ; función auxiliar para convertir un numero a hex
+    (define valor_hex (lambda (a)
+       (cond
+          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+    ; función auxiliar que transforma un c1 a hex
+    (define rgb->hex (lambda (a)
+       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
+
+    ; función auxiliar que tranforma un color rgb->hex
+    (define convertir_rgb (lambda (c1 c2 c3)
+        (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
+
+   (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel)))))
 
 
 ; Dom: Image
@@ -313,8 +308,51 @@
       image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define listar (formato_image image_1))
+
+
+; Descripción: función que crea una lista sin el rgb más repetido
+(define compress-formato-rgb (lambda (lista elemento)
+    (if (null? lista)
+        null
+        (if (color_igual (car lista) elemento)
+            (compress-formato-bit (cdr lista) elemento)
+            (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
+
+
+; Descripción: Compress
+(define compress (lambda (image_ingresada)
+              
+    (cond
+      [(bitmap? image_ingresada)
+       (arreglar_image(image
+                       (ancho_image image_ingresada)
+                       (largo_image image_ingresada)
+                       (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))
+       ))]
+
+      [(hexmap? image_ingresada)
+       (arreglar_image (image
+                        (ancho_image image_ingresada)
+                        (largo_image image_ingresada)
+                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada))))
+       ))]
+
+      [(pixmap? image_ingresada)
+       (arreglar_image (image
+                        (ancho_image image_ingresada)
+                        (largo_image image_ingresada)
+                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada))))
+       ))]
+
+      
+
+
+      )
+
+
+                   ))
 
 
 

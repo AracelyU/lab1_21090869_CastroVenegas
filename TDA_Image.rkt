@@ -340,22 +340,84 @@
       image_rgb))) ;si se ingresa se retorna la imagen sin cambios
 
 
-(define lista_x (flipV-cambio image_2))
-
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
+; Descripción: funcion que modifica la posicion en y e x segun pos_y y pox_x
+; Dom: posicion_y (int) x posicion_x (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
+; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
+; Modificador
+(define modificar_posicion_pixel (lambda (pos_y pos_x pixel)
+     (cond
+       [(pixbit-d? pixel) (cambiar_x_bit (cambiar_y_bit pixel pos_y) pos_x)]
+       [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
+       [(pixrgb-d? pixel) (cambiar_x_rgb (cambiar_y_rgb pixel pos_y) pos_x)])))
 
 
+; Descripción: funcion que te entrega una lista de las posiciones invertidas pixeles
+; Dom: fila (lista) x image
+; Rec: pixeles (lista)
+; tipo de recursión: Natural
+; Modificador
+(define rotate90-formato (lambda (formato_fila image pos_y)
+     (define rotate (lambda (formato_fila pos_y pos_x)
+         (cond
+         [(null? formato_fila) null]
+         [(> pos_x (largo_pos_x image)) null]
+         [else (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (rotate (cdr formato_fila) pos_y (+ pos_x 1)))
+               ])))
+
+      (rotate formato_fila pos_y 0)))
 
 
+; Descripción: función que intercambia las posiciones del formato de pixeles de la imagen rotando 90°
+; Dom: image
+; Rec: lista
+; tipo de recursión: Natural
+; Modificador
+(define rotate90-cambio (lambda (image)
+
+    (define rotateC (lambda (pos_x fila pos_y)
+        (if (< pos_y 0)
+            null
+            (append (rotate90-formato (fila_n fila (format_image image)) image pos_y) (rotateC pos_x (+ fila 1) (- pos_y 1)))
+                   )))
+    (rotateC 0 0 (largo_pos_y image))))
 
 
+; Descripción: funcion que encuentra un pixel según pos_x e pos_y
+; Dom: lista
+; Rec: pixel
+(define encontrar_pixel (lambda (lista pos_x pos_y)
+    (if (null? lista)
+        null
+        (if (and (= (car (car lista)) pos_x) (= (cadr (car lista)) pos_y))
+            (car lista)
+            (encontrar_pixel (cdr lista) pos_x pos_y)))))
+
+; Descripción: funcion que ordena una lista en funcion de x con reverse incluido
+; Dom: lista x int x image
+; Rec: lista
+; tipo de recursión: Natural
+(define ordenar_rotate (lambda (lista pos_x pos_y image contador)
+      (if (= contador (* (width_image image) (height_image image)))
+          null
+          (cond
+            [(<= pos_y (largo_pos_y image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_rotate lista pos_x (+ pos_y 1) image (+ contador 1)))]
+            [else (ordenar_rotate lista (+ pos_x 1) 0 image contador)]
 
 
+            )
+              )))
+
+; Descripción: rotate90, apoyada por funciones donde algunas utilizan recursión natural 
+; Dom: image
+; Rec: image
+(define rotate90 (lambda (image_ingresado)
+   (arreglar_image (image  (width_image image_ingresado) (height_image image_ingresado) (ordenar_rotate (rotate90-cambio image_ingresado) 0 0 image_ingresado 0)))))
+
+
+(define lista_r (rotate90-cambio image_1))
+(define lista_x (flipV-cambio image_2))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -372,8 +434,8 @@
 (define lista_3 (format_image image_3))
 
 
-(define lista (format_image image_2))
+(define lista (format_image image_1))
 (define lista_n (fila_n 0 lista))
-(define lista_2n (flipH-formato lista_n image_2))
+(define lista_2n (fila_n 1 lista))
 
 

@@ -27,19 +27,21 @@
 
 
 ; funciones para recorrer los 3 elementos de la entrada de la image
-(define width_image (lambda (L) (car L))) ; primera posición
-(define height_image (lambda (L) (cadr L))) ; segunda posición
-(define format_image (lambda (L) (caddr L))) ; tercera posición (lista)
+(define ancho_image (lambda (L) (car L))) ; primera posición
+(define largo_image (lambda (L) (cadr L))) ; segunda posición
+(define formato_image (lambda (L) (caddr L))) ; tercera posición (lista)
 
 ; Descripción: funcion que te entrega la posicion final en x
 ; Dom: image
 ; Rec: entero
-(define largo_pos_x (lambda (image) (- (width_image image) 1)))
+(define largo_pos_x (lambda (image) (- (ancho_image image) 1)))
 
 ; Descripción: funcion que te entrega la posicion final en y
 ; Dom: image
 ; Rec: entero
-(define largo_pos_y (lambda (image) (- (height_image image) 1)))
+(define largo_pos_y (lambda (image) (- (largo_image image) 1)))
+
+; ------------------------------- MODIFICADORES------------------------------------------------------
 
 
 
@@ -90,7 +92,7 @@
 ; Descripción: función que permite determinar si la imagen corresponde a un pixmap-d.
 ; Constructor
 (define pixmap? (lambda (image)
-        (andmap pixrgb-d? (format_image image))))
+        (andmap pixrgb-d? (formato_image image))))
 
 
 ; definir bitmap?
@@ -99,7 +101,7 @@
 ; Descripción: función que permite determinar si la imagen corresponde a un bitmap-d.
 ; Pertencencia
 (define bitmap? (lambda (image)
-         (andmap pixbit-d? (format_image image))))
+         (andmap pixbit-d? (formato_image image))))
 
 
 ; definir hexmap?
@@ -108,7 +110,7 @@
 ; Descripción: función que permite determinar si la imagen corresponde a un hexmap-d.
 ; Pertenencia
 (define hexmap? (lambda (image)
-          (andmap pixhex-d? (format_image image))))
+          (andmap pixhex-d? (formato_image image))))
 
 ; definir compressed?
 ; Dom: Image
@@ -116,7 +118,7 @@
 ; Descripción: función que permite determinar si la imagen sufrio una compresión o no
 ; Pertenencia
 (define compressed? (lambda (image)
-  (if (= (length (format_image image)) (* (width_image image) (height_image image)))
+  (if (= (length (formato_image image)) (* (ancho_image image) (largo_image image)))
       #t
       #f)))
 
@@ -135,212 +137,40 @@
             (fila_n n (cdr lista))))))
 
 
-; Descripción: función para entregar un pixel en funcion de pos_y
-; Dom: lista de pixeles, pos_y (int)
-; Rec: lista
-; Selector
-(define obtener_pixel_y (lambda (lista pos_y)
+;----------------------------------------- MODIFICADORES ---------------------------------------------
+; Descripción: funcion que encuentra un pixel según pos_x e pos_y
+; Dom: lista
+; Rec: pixel
+(define encontrar_pixel (lambda (lista pos_x pos_y)
     (if (null? lista)
         null
-        (if (= pos_y (cadr(car lista)))
+        (if (and (= (car (car lista)) pos_x) (= (cadr (car lista)) pos_y))
             (car lista)
-            (obtener_pixel_y (cdr lista) pos_y)))))
+            (encontrar_pixel (cdr lista) pos_x pos_y)))))
 
-;----------------------------------------- MODIFICADORES ---------------------------------------------
+
+; Descripción: funcion que ordena una lista
+; Dom: lista x int x image
+; Rec: lista
+; tipo de recursión: Natural
+(define ordenar_formato (lambda (lista pos_x pos_y image contador)
+      (if (= contador (* (ancho_image image) (largo_image image)))
+          null
+          (cond
+            [(<= pos_y (largo_pos_y image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
+            [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
 
 ; Dom: imagen
 ; Rec: image
 ; Descripción: función que arregla el formato de la imagen
 (define arreglar_image (lambda (image_ingresado)
-        (if (= (length (format_image image_ingresado)) 1)
-            (list (width_image image_ingresado) (height_image image_ingresado) (car (format_image image_ingresado)))
-            image_ingresado
-        )))
+        (if (= (length (formato_image image_ingresado)) 1)
+            (list (ancho_image image_ingresado) (largo_image image_ingresado) (car (formato_image image_ingresado)))
+            image_ingresado)))
 
+;-----------------------------------------------------------------------------------------------
 
-; Descripción: funcion que ordena una lista en funcion de y
-; Dom: lista x int x image
-; Rec: lista
-; Modificador
-(define ordenar_lista_y (lambda (lista pos_y image)
-    (if (> pos_y (largo_pos_y image))
-        null
-        (if (< (height_image image) 2)
-            lista
-            (cons (obtener_pixel_y lista pos_y) (ordenar_lista_y lista (+ pos_y 1) image))))))
-
-; Descripción: funcion que ordena el formato de la imagen por y con apoyo de ordenar_lista_y y obtener_pixel_y
-; Dom: lista x image
-; Rec: lista
-; Modificador
-(define ordenar_y (lambda (lista image)
-     (ordenar_lista_y lista 0 image)))
-
-; Descripción: funcion que modifica la posicion en y segun pos_y
-; Dom: posicion_y (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
-; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
-; Modificador
-(define modificar_posicion_pixel_y (lambda (pos_y pixel)
-     (cond
-       [(pixbit-d? pixel) (cambiar_y_bit pixel pos_y)]
-       [(pixhex-d? pixel) (cambiar_y_hex pixel pos_y)]
-       [(pixrgb-d? pixel) (cambiar_y_rgb pixel pos_y)])))
-
-; Descripción: funcion que te entrega una lista de las posiciones invertidas pixeles
-; Dom: fila (lista) x image
-; Rec: pixeles (lista)
-; tipo de recursión: Natural
-; Modificador
-(define flipH-formato (lambda (formato_fila image)
-     (define flipHN (lambda (formato_fila pos_y)
-         (cond
-         [(null? formato_fila) null]
-         [(< pos_y 0) null]
-         [else (reverse (cons (modificar_posicion_pixel_y pos_y (car formato_fila)) (flipHN (cdr formato_fila) (- pos_y 1))))
-               ])))
-
-      (flipHN formato_fila (largo_pos_x image))))
-
-
-; Descripción: función que intercambia las posiciones del formato de pixeles de la imagen HORIZONTALMENTE
-; Dom: image
-; Rec: formato de pixeles de la image
-; tipo de recursión: Natural
-; Modificador
-(define flipH-cambio (lambda (image)
-    (define flipHC (lambda (pos_y)   
-        (if (> pos_y (largo_pos_y image))
-             null
-             (append (ordenar_y (flipH-formato (fila_n pos_y (format_image image)) image) image) (flipHC (+ pos_y 1)))
-                 )))
-    (flipHC 0)))
-
-; Descripción: función flipH, apoyada por funciones donde algunas utilizan recursión natural 
-; Dom: image
-; Rec: image
-; Modificador
-(define flipH (lambda (image_ingresado)
-     (arreglar_image (image  (width_image image_ingresado) (height_image image_ingresado) (flipH-cambio image_ingresado)))))
-
-
-; Descripción: funcion que modifica la posicion en x segun pos_x
-; Dom: posicion_x (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
-; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
-; Modificador
-(define modificar_posicion_pixel_x (lambda (pos_x pixel)
-     (cond
-       [(pixbit-d? pixel) (cambiar_x_bit pixel pos_x)]
-       [(pixhex-d? pixel) (cambiar_x_hex pixel pos_x)]
-       [(pixrgb-d? pixel) (cambiar_x_rgb pixel pos_x)])))
-
-; Descripción: función que cambiar todos los elementos x de una lista según valor n
-; Dom: lista de pixeles x posicion n
-; Rec: lista
-; tipo de recursión: Natural
-; Modificador
-(define flipV-formato (lambda (fila_n n)
-    (if (null? fila_n)
-        null
-        (cons (modificar_posicion_pixel_x n (car fila_n)) (flipV-formato (cdr fila_n) n)))))
-
-; Descripción: función que intercambia las posiciones del formato de pixeles de la imagen VERTICALMENTE
-; Dom: image
-; Rec: lista
-; tipo de recursión: Natural
-; Modificador
-(define flipV-cambio (lambda (image)
-    (define flipVC (lambda (pos_x fila)
-        (if (< pos_x 0)
-            null
-            (append (flipV-formato (fila_n fila (format_image image)) pos_x) (flipVC (- pos_x 1) (+ fila 1)))
-                   )))
-    (flipVC (largo_pos_y image) 0)))
-
-
-; Descripción: funcion que ordena una lista en funcion de x
-; Dom: lista x int x image
-; Rec: lista
-; tipo de recursión: Natural
-(define ordenar_lista_x (lambda (lista pos_x image)
-    (if (> pos_x (largo_pos_x image))
-        null
-        (if (< (height_image image) 2)
-            lista
-            (append (fila_n pos_x lista) (ordenar_lista_x lista (+ pos_x 1) image))))))
-
-; Descripción: flipV, apoyada por funciones donde algunas utilizan recursión natural 
-; Dom: image
-; Rec: image
-(define flipV (lambda (image_ingresado)
-    (arreglar_image (image  (width_image image_ingresado) (height_image image_ingresado) (ordenar_lista_x (flipV-cambio image_ingresado) 0 image_ingresado)))))
-
-;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
-
-; Descripción: Histograma
-; Dom: image
-; Rec: lista
-(define histograma (lambda (image)
-    (cond
-      [(pixmap? image) (histograma_rgb (format_image image))]
-      [(bitmap? image) (histograma_bit (format_image image))]
-      [(hexmap? image) (histograma_hex (format_image image))]
-      [else image])))
-
-; Descripción: imgRGB->imgHex
-; Dom: Entero
-; Rec: String
-; funcion que retorna un valor entero a un string hexa
-(define valor_hex (lambda (a)
-   (cond
-     [(= a 1) "1"]
-     [(= a 2) "2"]
-     [(= a 3) "3"]
-     [(= a 4) "4"]
-     [(= a 5) "5"]
-     [(= a 6) "6"]
-     [(= a 7) "7"]
-     [(= a 8) "8"]
-     [(= a 9) "9"]
-     [(= a 10) "A"]
-     [(= a 11) "B"]
-     [(= a 12) "C"]
-     [(= a 13) "D"]
-     [(= a 14) "E"]
-     [(= a 15) "F"]
-     [else "0"])))
-
-; Dom: Entero
-; Rec: String
-; funcion que convierte un numero a una cadena de hexa
-(define rgb->hex (lambda (a)
-       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
-
-; Dom: 3 enteros, los colores de rgb
-; Rec: String
-; funcion que convierte 3 colores de rgb a un string en hexa
-(define convertir_rgb (lambda (c1 c2 c3)
-        (string-append (rgb->hex c1)
-                       (rgb->hex c2)
-                       (rgb->hex c3))))
-
-; Dom: Lista
-; Rec: Lista
-; función que cambia un pixel rgb a hexa
-(define convertir_rgb_hex (lambda (pixel)
-       (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel)))))
-
-
-; Dom: Image
-; Rec: Image
-; funcion que pasa de rgb a hexa, en caso de que no sea rgb retorna f
-(define imgRGB->imgHex (lambda (image_rgb)
-  (if (pixmap? image_rgb)
-      (arreglar_image (image (width_image image_rgb) (height_image image_rgb) (map convertir_rgb_hex (format_image image_rgb))))    
-      image_rgb))) ;si se ingresa se retorna la imagen sin cambios
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Descripción: funcion que modifica la posicion en y e x segun pos_y y pox_x
 ; Dom: posicion_y (int) x posicion_x (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
@@ -351,6 +181,56 @@
        [(pixbit-d? pixel) (cambiar_x_bit (cambiar_y_bit pixel pos_y) pos_x)]
        [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
        [(pixrgb-d? pixel) (cambiar_x_rgb (cambiar_y_rgb pixel pos_y) pos_x)])))
+
+
+; Descripción: funcion que te entrega una lista con las posiciones invertidas horizontalmente 
+; Dom: fila (lista) x image
+; Rec: pixeles (lista)
+; tipo de recursión: Natural
+; Modificador
+(define flipH-formato (lambda (formato_fila pos_x image)
+     (define flipHN (lambda (formato_fila pos_y pos_x)
+         (cond
+         [(null? formato_fila) null]
+         [(< pos_y 0) null]
+         [else (reverse (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (flipHN (cdr formato_fila) (- pos_y 1) pos_x)))])))
+
+      (flipHN formato_fila (largo_pos_y image) pos_x)))
+
+; Descripción: función flipH
+; Dom: image
+; Rec: image
+; tipo de recursión: Natural
+(define flipH (lambda (image_ingresado)
+     (define flipHC (lambda (pos_y fila image)   
+        (if (> pos_y (largo_pos_y image))
+             null
+             (append (flipH-formato (fila_n fila (formato_image image)) fila image) (flipHC (+ pos_y 1) (+ fila 1) image)))))
+                
+     (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (ordenar_formato (flipHC 0 0 image_ingresado) 0 0 image_ingresado 0)))))
+
+
+; Descripción: funcion que te entrega una lista con las posiciones invertidas verticalmente 
+; Dom: lista de pixeles x posicion n
+; Rec: lista
+; tipo de recursión: Natural
+; Modificador
+(define flipV-formato (lambda (fila_n pos_x pos_y)
+    (if (null? fila_n)
+        null
+        (cons (modificar_posicion_pixel pos_y pos_x (car fila_n)) (flipV-formato (cdr fila_n) pos_x (+ pos_y 1))))))
+
+; Descripción: flipV, apoyada por funciones donde algunas utilizan recursión natural 
+; Dom: image
+; Rec: image
+; tipo de recursión: natural
+(define flipV (lambda (image_ingresado)   
+    (define flipVC (lambda (pos_x fila pos_y image)
+        (if (< pos_x 0)
+            null
+            (append (flipV-formato (fila_n fila (formato_image image)) pos_x pos_y) (flipVC (- pos_x 1) (+ fila 1) pos_y image)))))
+                
+    (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (ordenar_formato (flipVC (largo_pos_x image_ingresado) 0 0 image_ingresado) 0 0 image_ingresado 0)))))
 
 
 ; Descripción: funcion que te entrega una lista de las posiciones invertidas pixeles
@@ -365,59 +245,74 @@
          [(> pos_x (largo_pos_x image)) null]
          [else (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (rotate (cdr formato_fila) pos_y (+ pos_x 1)))
                ])))
-
       (rotate formato_fila pos_y 0)))
 
-
-; Descripción: función que intercambia las posiciones del formato de pixeles de la imagen rotando 90°
-; Dom: image
-; Rec: lista
-; tipo de recursión: Natural
-; Modificador
-(define rotate90-cambio (lambda (image)
-
-    (define rotateC (lambda (pos_x fila pos_y)
-        (if (< pos_y 0)
-            null
-            (append (rotate90-formato (fila_n fila (format_image image)) image pos_y) (rotateC pos_x (+ fila 1) (- pos_y 1)))
-                   )))
-    (rotateC 0 0 (largo_pos_y image))))
-
-
-; Descripción: funcion que encuentra un pixel según pos_x e pos_y
-; Dom: lista
-; Rec: pixel
-(define encontrar_pixel (lambda (lista pos_x pos_y)
-    (if (null? lista)
-        null
-        (if (and (= (car (car lista)) pos_x) (= (cadr (car lista)) pos_y))
-            (car lista)
-            (encontrar_pixel (cdr lista) pos_x pos_y)))))
-
-; Descripción: funcion que ordena una lista en funcion de x con reverse incluido
-; Dom: lista x int x image
-; Rec: lista
-; tipo de recursión: Natural
-(define ordenar_rotate (lambda (lista pos_x pos_y image contador)
-      (if (= contador (* (width_image image) (height_image image)))
-          null
-          (cond
-            [(<= pos_y (largo_pos_y image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_rotate lista pos_x (+ pos_y 1) image (+ contador 1)))]
-            [else (ordenar_rotate lista (+ pos_x 1) 0 image contador)]
-
-
-            )
-              )))
 
 ; Descripción: rotate90, apoyada por funciones donde algunas utilizan recursión natural 
 ; Dom: image
 ; Rec: image
+; tipo de recursión: Natural
 (define rotate90 (lambda (image_ingresado)
-   (arreglar_image (image  (width_image image_ingresado) (height_image image_ingresado) (ordenar_rotate (rotate90-cambio image_ingresado) 0 0 image_ingresado 0)))))
+    (define rotateC (lambda (pos_x fila pos_y image)
+        (if (< pos_y 0)
+            null
+            (append (rotate90-formato (fila_n fila (formato_image image)) image pos_y) (rotateC pos_x (+ fila 1) (- pos_y 1) image))
+                   )))
+                   
+   (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (ordenar_formato (rotateC 0 0 (largo_pos_y image_ingresado) image_ingresado) 0 0 image_ingresado 0)))))
 
 
-(define lista_r (rotate90-cambio image_1))
-(define lista_x (flipV-cambio image_2))
+;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
+
+; Descripción: Histograma
+; Dom: image
+; Rec: lista
+(define histograma (lambda (image)
+    (cond
+      [(pixmap? image) (histograma_rgb (formato_image image))]
+      [(bitmap? image) (histograma_bit (formato_image image))]
+      [(hexmap? image) (histograma_hex (formato_image image))]
+      [else image])))
+
+; Descripción: imgRGB->imgHex
+; Dom: Entero
+; Rec: String
+; funcion que retorna un valor entero a un string hexa
+(define valor_hex (lambda (a)
+   (cond
+     [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+     [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+     [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+     [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+; Dom: Entero
+; Rec: String
+; funcion que convierte un numero a una cadena de hexa
+(define rgb->hex (lambda (a)
+       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
+
+; Dom: 3 enteros, los colores de rgb
+; Rec: String
+; funcion que convierte 3 colores de rgb a un string en hexa
+(define convertir_rgb (lambda (c1 c2 c3)
+        (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
+
+; Dom: Lista
+; Rec: Lista
+; función que cambia un pixel rgb a hexa
+(define convertir_rgb_hex (lambda (pixel)
+       (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel)))))
+
+
+; Dom: Image
+; Rec: Image
+; funcion que pasa de rgb a hexa, en caso de que no sea rgb retorna f
+(define imgRGB->imgHex (lambda (image_rgb)
+  (if (pixmap? image_rgb)
+      (arreglar_image (image (ancho_image image_rgb) (largo_image image_rgb) (map convertir_rgb_hex (formato_image image_rgb))))    
+      image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -429,12 +324,12 @@
             (cons (car lista) (filtro_nulos (cdr lista)))))
                        ))
 
-(define lista_1 (format_image image_1))
-(define lista_2 (format_image image_2))
-(define lista_3 (format_image image_3))
+(define lista_1 (formato_image image_1))
+(define lista_2 (formato_image image_2))
+(define lista_3 (formato_image image_3))
 
 
-(define lista (format_image image_1))
+(define lista (formato_image image_1))
 (define lista_n (fila_n 0 lista))
 (define lista_2n (fila_n 1 lista))
 

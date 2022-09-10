@@ -88,39 +88,28 @@
 
 
 ;--------------------------------------- SELECTORES ----------------------------------------------
-(define format_image (lambda (L) (caddr L)))
-
-; definir 4 pixeles de un pixhex-d
-(define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
-(define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
-(define pixhex_3 (pixhex-d 1 0 "#00FF00" 30))
-(define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
-
-; definir una image 3
-(define image_3 (list 2 2 (list pixhex_1 pixhex_2 pixhex_3 pixhex_4)))
-(define lista_3 (format_image image_3))
 
 ; Descripción: función que filtra la lista por los elementos iguales a e
 ; Dom: lista x elemento
 ; Rec: lista
 ; tipo de recursión: Natural
-(define filtro_iguales (lambda (formato_image e)
+(define filtro_iguales_hex (lambda (formato_image e)
     (if (null? formato_image)
         null
         (if (not (string-ci=? (hex (car formato_image)) e))
-            (cons (car formato_image) (filtro_iguales (cdr formato_image) e))
-            (filtro_iguales (cdr formato_image) e)))))
+            (cons (car formato_image) (filtro_iguales_hex (cdr formato_image) e))
+            (filtro_iguales_hex (cdr formato_image) e)))))
 
 ; Descripción: función que cuenta los elementos iguales a e en una lista
 ; Dom: lista (pixeles) x elemento
 ; Rec: lista
 ; tipo de recursión: cola
-(define son_iguales (lambda (formato_image e result)
+(define hex_iguales (lambda (formato_image e result)
        (if (null? formato_image)
            result
            (if (string-ci=? (hex (car formato_image)) e)
-               (son_iguales (cdr formato_image) e (+ result 1))
-               (son_iguales (cdr formato_image) e result)))))
+               (hex_iguales (cdr formato_image) e (+ result 1))
+               (hex_iguales (cdr formato_image) e result)))))
 
 ; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
 ; Dom: lista (pixeles)
@@ -128,7 +117,5 @@
 (define histograma_hex (lambda (formato_image)
     (if (null? formato_image)
         null
-        (cons (list (son_iguales formato_image (hex (car formato_image)) 0) (hex (car formato_image))) (histograma_hex (filtro_iguales formato_image (hex (car formato_image))))))))
+        (cons (list (hex_iguales formato_image (hex (car formato_image)) 0) (hex (car formato_image))) (histograma_hex (filtro_iguales_hex formato_image (hex (car formato_image))))))))
 
-
-(define listaa (list 1 2 3 4 4 4 5 6 7 7 8))

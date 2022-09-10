@@ -110,4 +110,57 @@
 (define cambiar_d_rgb (lambda (pixrgb-d_pasado d_nuevo)               
       (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (c1_rgb pixrgb-d_pasado) (c2_rgb pixrgb-d_pasado)(c3_rgb pixrgb-d_pasado) d_nuevo)))
 
+;-------------------------------------------------- SELECTORES--------------------------------------------------------------------------
+
+; Descripción: función que recopila los colores en lista
+; Dom: pixrgb-d
+; Rec: lista c1, c2 y c3
+(define color_lista (lambda (pixel)
+         (list (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))))
+
+; Descripción: función que compara si dos pixrgb-d tienen colores iguales
+; Dom: pixrgb-d, lista color
+; Rec: Boleano
+(define color_igual (lambda (pixel_1 color_lista)
+         (if (and
+              (= (c1_rgb pixel_1)(car color_lista))
+              (= (c2_rgb pixel_1) (cadr color_lista))
+              (= (c3_rgb pixel_1) (caddr color_lista))) #t #f)))
+
+; Descripción: función que filtra la lista por los elementos iguales a e
+; Dom: lista x elemento
+; Rec: lista
+; tipo de recursión: Natural
+(define filtro_iguales_rgb (lambda (formato_image e)
+    (if (null? formato_image)
+        null
+        (if (not (color_igual (car formato_image) e))
+            (cons (car formato_image) (filtro_iguales_rgb (cdr formato_image) e))
+            (filtro_iguales_rgb (cdr formato_image) e)))))
+
+
+; Descripción: función que cuenta los elementos iguales a e en una lista
+; Dom: lista (pixeles) x elemento
+; Rec: lista
+; tipo de recursión: cola
+(define rgb_iguales (lambda (formato_image e result)
+       (if (null? formato_image)
+           result
+           (if (color_igual (car formato_image) e)
+               (rgb_iguales (cdr formato_image) e (+ result 1))
+               (rgb_iguales (cdr formato_image) e result)))))
+
+
+; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
+; Dom: lista (pixeles)
+; Rec: lista
+(define histograma_rgb (lambda (formato_image)
+    (if (null? formato_image)
+        null
+        (cons (list (rgb_iguales formato_image (color_lista (car formato_image)) 0) (color_lista (car formato_image))) (histograma_rgb (filtro_iguales_rgb formato_image (color_lista (car formato_image))))))))
+
+
+(define lista1 (list 0 0 21 3 54 4))
+(define lista2 (list 0 1 21 3 54 3))
+
 

@@ -109,12 +109,11 @@
             ))))
 
 
-
 ; Descripción: función histograma que recopila numero de bit
 ; Dom: lista (pixeles)
 ; Rec: lista
 (define histograma_bit (lambda (formato_image)
-    (list (list (cantidad_bit formato_image 0 0) "0") (list (cantidad_bit formato_image 1 0) "1"))))
+    (list (list (cantidad_bit formato_image 0 0) 0) (list (cantidad_bit formato_image 1 0) 0))))
 
 
 (define lista_bit (list (list 0 0 0 0) (list 0 1 1 21) (list 0 0 1 2) (list 1 2 1 543)))

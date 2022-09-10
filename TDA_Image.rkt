@@ -277,6 +277,16 @@
 
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
+; Descripción: Histograma
+; Dom: image
+; Rec: lista
+(define histograma (lambda (image)
+    (cond
+      [(pixmap? image) (histograma_rgb (format_image image))]
+      [(bitmap? image) (histograma_bit (format_image image))]
+      [(hexmap? image) (histograma_hex (format_image image))]
+      [else image])))
+
 (define lista_x (flipV-cambio image_2))
 
 

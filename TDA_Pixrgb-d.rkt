@@ -171,13 +171,31 @@
             (rgb_mayor (cdr lista_rgb) result)))))
 
 
+; Descripción: función que crea una lista sin el rgb más repetido
+(define compress-formato-rgb (lambda (lista elemento)
+    (if (null? lista)
+        null
+        (if (color_igual (car lista) elemento)
+            (compress-formato-rgb (cdr lista) elemento)
+            (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
 
 
 
+; Descripción: invertColorRGB
+; Dom: pixrgb-d
+; Rec: pixrgb-d
+(define invertColorRGB (lambda (pixrgb-d_pasado)
+     (define invertir_color (lambda (color)
+           (abs (- color 255))))
+
+     (pixrgb-d (x_rgb pixrgb-d_pasado)
+               (y_rgb pixrgb-d_pasado)
+               (invertir_color (c1_rgb pixrgb-d_pasado))
+               (invertir_color (c2_rgb pixrgb-d_pasado))
+               (invertir_color (c3_rgb pixrgb-d_pasado))
+               (d_rgb pixrgb-d_pasado))))
 
 
-
-
-
+(define rgb (pixrgb-d 0 0 100 12 245 10))
 
 

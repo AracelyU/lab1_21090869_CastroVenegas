@@ -136,8 +136,6 @@
             (cons (car lista) (fila_n n (cdr lista)))
             (fila_n n (cdr lista))))))
 
-
-;----------------------------------------- MODIFICADORES ---------------------------------------------
 ; Descripción: funcion que encuentra un pixel según pos_x e pos_y
 ; Dom: lista
 ; Rec: pixel
@@ -147,6 +145,8 @@
         (if (and (= (car (car lista)) pos_x) (= (cadr (car lista)) pos_y))
             (car lista)
             (encontrar_pixel (cdr lista) pos_x pos_y)))))
+
+;----------------------------------------- MODIFICADORES ---------------------------------------------
 
 
 ; Descripción: funcion que ordena una lista
@@ -169,9 +169,6 @@
             (list (ancho_image image_ingresado) (largo_image image_ingresado) (car (formato_image image_ingresado)))
             image_ingresado)))
 
-;-----------------------------------------------------------------------------------------------
-
-
 ; Descripción: funcion que modifica la posicion en y e x segun pos_y y pox_x
 ; Dom: posicion_y (int) x posicion_x (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
 ; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
@@ -181,7 +178,6 @@
        [(pixbit-d? pixel) (cambiar_x_bit (cambiar_y_bit pixel pos_y) pos_x)]
        [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
        [(pixrgb-d? pixel) (cambiar_x_rgb (cambiar_y_rgb pixel pos_y) pos_x)])))
-
 
 ; Descripción: funcion que te entrega una lista con las posiciones invertidas horizontalmente 
 ; Dom: fila (lista) x image
@@ -308,20 +304,9 @@
       image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
 
 
-
-(define listar (formato_image image_1))
-
-
-; Descripción: función que crea una lista sin el rgb más repetido
-(define compress-formato-rgb (lambda (lista elemento)
-    (if (null? lista)
-        null
-        (if (color_igual (car lista) elemento)
-            (compress-formato-bit (cdr lista) elemento)
-            (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
-
-
 ; Descripción: Compress
+; Dom: image
+; Rec: image
 (define compress (lambda (image_ingresada)
               
     (cond
@@ -329,39 +314,34 @@
        (arreglar_image(image
                        (ancho_image image_ingresada)
                        (largo_image image_ingresada)
-                       (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))
-       ))]
+                       (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))))]
 
       [(hexmap? image_ingresada)
        (arreglar_image (image
                         (ancho_image image_ingresada)
                         (largo_image image_ingresada)
-                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada))))
-       ))]
+                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))]
 
       [(pixmap? image_ingresada)
        (arreglar_image (image
                         (ancho_image image_ingresada)
                         (largo_image image_ingresada)
-                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada))))
-       ))]
-
-      
+                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))])))
 
 
-      )
+; Descripción: edit
+; Dom: image
+; Rec: image
+(define edit (lambda (filtro image_ingresado)
+     (define map_edit (lambda (filtro lista)
+       (if (null? lista)
+           null
+           (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
+               
+       (image (ancho_image image_ingresado) (largo_image image_ingresado) (map_edit filtro (formato_image image_ingresado)))))
 
-
-                   ))
-
-
-
-
-; Descripción: 
-; compress:
-
-
-
+; falta verificar que algunas funcion filtro se pueden o no se pueden hacer con imagenes que no sean del tipo necesario
+;-----------------------------------------------------------------
 
 (define filtro_nulos (lambda (lista)
     (if (null? lista)

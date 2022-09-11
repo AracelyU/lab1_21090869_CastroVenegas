@@ -134,3 +134,16 @@
             (compress-formato-bit (cdr lista) elemento)
             (cons (car lista) (compress-formato-bit (cdr lista) elemento))))))
 
+
+
+; Descripción: Invertir color de bit de un pixbit-d
+; Dom: pixbit-d
+; Rec: pixbit-d
+(define invertColorBit (lambda (pixbit-d_pasado)
+    (if (= (bit pixbit-d_pasado) 0)
+        (cambiar_b_bit pixbit-d_pasado 1)
+        (cambiar_b_bit pixbit-d_pasado 0)
+                         )))
+
+
+(define pix (pixbit-d 0 0 0 12))

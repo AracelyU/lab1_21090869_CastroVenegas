@@ -144,9 +144,33 @@
              )
          )))
 
+(define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
+(define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
+(define pixhex_3 (pixhex-d 1 0 "#00FF00" 30))
+(define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
+
+; definir una image 3
+(define image_3 (list pixhex_1 pixhex_2 pixhex_3 pixhex_4))
 
 
+; Descripción: pixhex->string
+; Dom: formato image x largo image
+; Rec: string
+(define pixhex->string (lambda (formato_image largo)
+                            
+    (define fila_hex (lambda (formato_image fila)
+        (if (null? formato_image)
+            "\n"
+            (if (= (x_hex (car formato_image)) fila)
+                (string-append (hex (car formato_image)) (fila_hex (cdr formato_image) fila))
+                (fila_hex (cdr formato_image) fila)))))
 
+     (define formar_string (lambda (formato_image largo fila)
+          (if (<= fila largo)
+              (string-append (fila_hex formato_image fila) (formar_string formato_image largo (+ fila 1)))
+              "\n")))
+                         
+    (formar_string formato_image largo 0)))
 
 
 

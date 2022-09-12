@@ -179,8 +179,6 @@
             (compress-formato-rgb (cdr lista) elemento)
             (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
 
-
-
 ; Descripción: invertColorRGB
 ; Dom: pixrgb-d
 ; Rec: pixrgb-d
@@ -188,14 +186,52 @@
      (define invertir_color (lambda (color)
            (abs (- color 255))))
 
-     (pixrgb-d (x_rgb pixrgb-d_pasado)
+     (if (pixrgb-d? pixrgb-d_pasado)
+
+         (pixrgb-d (x_rgb pixrgb-d_pasado)
                (y_rgb pixrgb-d_pasado)
                (invertir_color (c1_rgb pixrgb-d_pasado))
                (invertir_color (c2_rgb pixrgb-d_pasado))
                (invertir_color (c3_rgb pixrgb-d_pasado))
-               (d_rgb pixrgb-d_pasado))))
+               (d_rgb pixrgb-d_pasado))
+         
+         pixrgb-d_pasado)))
 
 
-(define rgb (pixrgb-d 0 0 100 12 245 10))
+
+
+; definir 4 pixeles de un pixrgb-d
+(define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
+(define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
+(define pixrgb_3 (pixrgb-d 1 0 30 30 30 30))
+(define pixrgb_4 (pixrgb-d 1 1 40 40 40 40))
+
+; definir una image 1
+(define image_1 (list pixrgb_1 pixrgb_2 pixrgb_3 pixrgb_4))
+
+
+; Descripción: pixrgb->string
+; Dom: formato image x largo image
+; Rec: string
+(define pixrgb->string (lambda (formato_image largo)
+                            
+    (define fila_rgb (lambda (formato_image fila)
+        (if (null? formato_image)
+            "\n"
+            (if (= (x_rgb (car formato_image)) fila)
+                (string-append "(" (number->string (c1_rgb (car formato_image))) " " (number->string (c2_rgb (car formato_image))) " " (number->string (c3_rgb (car formato_image))) ")" (fila_rgb (cdr formato_image) fila))
+                (fila_rgb (cdr formato_image) fila)))))
+
+     (define formar_string (lambda (formato_image largo fila)
+          (if (<= fila largo)
+              (string-append (fila_rgb formato_image fila) (formar_string formato_image largo (+ fila 1)))
+              "\n")))
+                         
+    (formar_string formato_image largo 0)))
+
+
+
+
+
 
 

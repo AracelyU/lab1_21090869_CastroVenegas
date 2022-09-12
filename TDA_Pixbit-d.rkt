@@ -3,7 +3,6 @@
 ; exportar la funcion al exterior
 (provide (all-defined-out))
 
-
 ;-----------------------------------TDA PIXBIT-D -----------------------------------------------------------------
 
 ;----------------------------------REPRESENTACION-------------------------------------------------------------
@@ -140,10 +139,36 @@
 ; Dom: pixbit-d
 ; Rec: pixbit-d
 (define invertColorBit (lambda (pixbit-d_pasado)
-    (if (= (bit pixbit-d_pasado) 0)
-        (cambiar_b_bit pixbit-d_pasado 1)
-        (cambiar_b_bit pixbit-d_pasado 0)
-                         )))
+    (if (pixbit-d? pixbit-d_pasado)
+        (if (= (bit pixbit-d_pasado) 0)
+            (cambiar_b_bit pixbit-d_pasado 1)
+            (cambiar_b_bit pixbit-d_pasado 0))
+        pixbit-d_pasado)))
 
 
-(define pix (pixbit-d 0 0 0 12))
+(define pixbit_1 (pixbit-d 0 0 0 10)) ; lista_2
+(define pixbit_2 (pixbit-d 0 1 1 20))
+(define pixbit_3 (pixbit-d 0 2 0 30))
+(define pixbit_4 (pixbit-d 1 0 1 40))
+
+(define a (list pixbit_1 pixbit_2  pixbit_3  pixbit_4))
+
+; Descripción: pixbit->string
+; Dom: formato image x largo image
+; Rec: string
+(define pixbit->string (lambda (formato_image largo)
+                            
+    (define fila_bit (lambda (formato_image fila)
+        (if (null? formato_image)
+            "\n"
+            (if (= (x_bit (car formato_image)) fila)
+                (string-append (number->string (bit (car formato_image))) (fila_bit (cdr formato_image) fila))
+                (fila_bit (cdr formato_image) fila)))))
+
+     (define formar_string (lambda (formato_image largo fila)
+          (if (<= fila largo)
+              (string-append (fila_bit formato_image fila) (formar_string formato_image largo (+ fila 1)))
+               "\n")))
+                         
+    (formar_string formato_image largo 0)))
+

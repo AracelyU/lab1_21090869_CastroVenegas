@@ -44,7 +44,6 @@
 ; ------------------------------- MODIFICADORES------------------------------------------------------
 
 
-
 ;------------------------------------------ IMAGENES ---------------------------------------------------------
 ; definiendo imagenes para probar las funcionalidades de la image
 
@@ -149,7 +148,7 @@
 ;----------------------------------------- MODIFICADORES ---------------------------------------------
 
 
-; Descripción: funcion que ordena una lista
+; Descripción: funcion que ordena formato de la imagen
 ; Dom: lista x int x image
 ; Rec: lista
 ; tipo de recursión: Natural
@@ -338,9 +337,17 @@
            null
            (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
                
-       (image (ancho_image image_ingresado) (largo_image image_ingresado) (map_edit filtro (formato_image image_ingresado)))))
+       (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (map_edit filtro (formato_image image_ingresado))))))
 
-; falta verificar que algunas funcion filtro se pueden o no se pueden hacer con imagenes que no sean del tipo necesario
+
+
+; Descripción: image->string
+; Dom: image x función
+; Rec: string
+(define image->string (lambda (image funcion_pixel)
+        (funcion_pixel (formato_image image) (largo_pos_y image))))
+
+
 ;-----------------------------------------------------------------
 
 (define filtro_nulos (lambda (lista)

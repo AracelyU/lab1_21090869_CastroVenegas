@@ -55,6 +55,26 @@
 
              ) #t #f)))
 
+; Descripción: función que verifica si el argumento es un pixhex-d esta comprimida
+; Dom: x (int) X y (int) X hex (string) X d (int)
+; Rec: Boleano
+(define pixhex-d_compressed? (lambda (pixhex-d)
+    (if (and (= (length pixhex-d) 4)
+             (number? (x_hex pixhex-d))
+             (number? (y_hex pixhex-d))
+             (string? (hex pixhex-d))
+             (string-ci=? (hex pixhex-d) "       ")
+             (number? (d_hex pixhex-d))
+
+             ) #t #f)))
+
+; Descripción: función que verifica si se comprimio un pixhex-d
+; Dom: pixhex-d
+; Rec: boleano
+(define compress_hex? (lambda (pixhex-d)
+     (if (string-ci=? (hex pixhex-d) "       ") #t #f)))
+
+
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
 ; Descripción: modificar la posicion x de un pixhex-d

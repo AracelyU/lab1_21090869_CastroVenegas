@@ -70,6 +70,38 @@
 
            ) #t #f)))
 
+
+; Descripción: función que verifica si el argumento es un pixrgb-d comprimido
+; Dom: x (int) X y (int) X c1 (int) X c2 (int) X c3 (int)
+; Rec: Boleano
+(define pixrgb-d_compressed? (lambda (pixrgb-d)
+  (if (and (= (length pixrgb-d) 6)
+           (number? (x_rgb pixrgb-d))
+           (number? (y_rgb pixrgb-d))
+           (number? (c1_rgb pixrgb-d))
+           (number? (c2_rgb pixrgb-d))
+           (number? (c3_rgb pixrgb-d))
+           (compress_rgb? pixrgb-d)
+           (number? (d_rgb pixrgb-d))
+
+           ) #t #f)))
+
+; Descripción: función que compara si dos pixrgb-d tienen colores iguales
+; Dom: pixrgb-d, lista color
+; Rec: Boleano
+(define color_igual (lambda (pixel_1 color_lista)
+         (if (and
+              (= (c1_rgb pixel_1) (car color_lista))
+              (= (c2_rgb pixel_1) (cadr color_lista))
+              (= (c3_rgb pixel_1) (caddr color_lista))) #t #f)))
+
+
+; Descripción: función que verifica si se comprimio un pixrgb-d
+; Dom: pixrgb-d
+; Rec: boleano
+(define compress_rgb? (lambda (pixrgb-d)
+     (if (color_igual pixrgb-d (list -1 -1 -1)) #t #f)))
+
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
 ; Descripción: modificar la posicion x de un pixrgb-d
@@ -117,15 +149,6 @@
 ; Rec: lista c1, c2 y c3
 (define color_lista (lambda (pixel)
          (list (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))))
-
-; Descripción: función que compara si dos pixrgb-d tienen colores iguales
-; Dom: pixrgb-d, lista color
-; Rec: Boleano
-(define color_igual (lambda (pixel_1 color_lista)
-         (if (and
-              (= (c1_rgb pixel_1) (car color_lista))
-              (= (c2_rgb pixel_1) (cadr color_lista))
-              (= (c3_rgb pixel_1) (caddr color_lista))) #t #f)))
 
 ; Descripción: función que filtra la lista por los elementos iguales a e
 ; Dom: lista x elemento
@@ -216,12 +239,30 @@
 ; Dom: formato image x largo image
 ; Rec: string
 (define pixrgb->string (lambda (formato_image largo)
+
+
+    ; función auxiliar para convertir un numero a hex
+    (define valor_hex (lambda (a)
+       (cond
+          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+    ; función auxiliar que transforma un c1 a hex
+    (define rgb->hex (lambda (a)
+       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
+
+    ; función auxiliar que tranforma un color rgb->hex
+    (define convertir_rgb (lambda (c1 c2 c3)
+        (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
+                         
                             
     (define fila_rgb (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
             (if (= (x_rgb (car formato_image)) fila)
-                (string-append "(" (number->string (c1_rgb (car formato_image))) " " (number->string (c2_rgb (car formato_image))) " " (number->string (c3_rgb (car formato_image))) ") " (fila_rgb (cdr formato_image) fila))
+                (string-append (convertir_rgb (c1_rgb (car formato_image)) (c2_rgb (car formato_image)) (c3_rgb (car formato_image))) " " (fila_rgb (cdr formato_image) fila))
                 (fila_rgb (cdr formato_image) fila)))))
 
      (define formar_string (lambda (formato_image largo fila)

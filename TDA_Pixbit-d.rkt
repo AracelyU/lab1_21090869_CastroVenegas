@@ -60,8 +60,26 @@
 ; Dom: int
 ; Rec: Boleano
 (define bit? (lambda (bit)
-     (if (or (= bit 0) (= bit 1)) #t #f)
-                   ))
+     (if (or (= bit 0) (= bit 1)) #t #f)))
+
+
+
+(define pixbit-d_compressed? (lambda (pixbit-d)
+   (if (and (= (length pixbit-d) 4)
+            (number? (x_bit pixbit-d))
+            (number? (y_bit pixbit-d))
+            (number? (bit pixbit-d)) (compressed_bit? (bit pixbit-d))
+            (number? (d_bit pixbit-d))
+       
+            ) #t #f)))
+
+
+; Descripción: función que verifica si se comprimio un pixbit-d
+; Dom: pixbit-d
+; Rec: boleano
+(define compressed_bit? (lambda (bit)
+     (if (= bit -1) #t #f)))
+
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
@@ -106,6 +124,9 @@
             (cantidad_bit (cdr formato_image) bit_ingresado result)
             
             ))))
+    
+
+
 
 ;-------------------------------------------- OTROS --------------------------------------------------
 
@@ -125,6 +146,7 @@
         1
         )))
 
+
 ; Descripción: función que crea una lista sin el bit más repetido
 (define compress-formato-bit (lambda (lista elemento)
     (if (null? lista)
@@ -140,10 +162,7 @@
         null
         (if (= (bit (car lista)) -1)
             (cons (cambiar_b_bit (car lista) elemento) (descompress-formato-bit (cdr lista) elemento))
-            (cons (car lista) (descompress-formato-bit (cdr lista) elemento))
-
-
-            ))))
+            (cons (car lista) (descompress-formato-bit (cdr lista) elemento))))))
 
 
 

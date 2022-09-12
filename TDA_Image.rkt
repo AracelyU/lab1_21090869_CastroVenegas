@@ -71,7 +71,7 @@
 (define pixbit_9 (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 3 2 pixbit_1 pixbit_2 pixbit_3 pixbit_4 pixbit_5 pixbit_6))
+(define image_2 (image 2 2 pixbit_1 pixbit_2 pixbit_3 pixbit_4))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
@@ -84,7 +84,6 @@
 
 ; definir una image 3
 (define image_3 (image 3 2 pixhex_1 pixhex_2 pixhex_3 pixhex_4 pixhex_5 pixhex_6))
-
 
 ;----------------------------- PERTENENCIA --------------------------------------------------------------------
 
@@ -121,9 +120,14 @@
 ; Descripción: función que permite determinar si la imagen sufrio una compresión o no
 ; Pertenencia
 (define compressed? (lambda (image)
-  (if (= (length (formato_image image)) (* (ancho_image image) (largo_image image)))
-      #f
-      #t)))
+
+      (if (ormap pixbit-d_compressed? (formato_image image))
+          #t
+          (if (ormap pixrgb-d_compressed? (formato_image image))
+              #t
+              (if (ormap pixhex-d_compressed? (formato_image image))
+                  #t
+                  #f)))))
 
 ;----------------------------------------- SELECTORES ----------------------------------------------
 
@@ -244,13 +248,10 @@
                 
     (modificar_formato_image image_ingresado (ordenar_formato (flipVC (largo_pos_y image_ingresado) 0 0 image_ingresado) 0 0 image_ingresado 0))))
 
-(define c (formato_image image_1))
-(define d (largo_pos_y image_1))
 
-; fila-> valor largo x
-; contador -> 0 - valor largo y
-; pos_x -> 0 +- 2
-
+; Descripción: función rotate90
+; Dom: image
+; Rec: image
 (define rotate90 (lambda (image_ingresada)
                    
     (define rotate (lambda (formato_pixeles fila contador image)
@@ -268,42 +269,6 @@
     (modificar_formato_image (intercambiar_dimensiones image_ingresada) (ordenar_formato (rotate (formato_image image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
 
 
-
-
-#|
-
-; Descripción: funcion que te entrega una lista de las posiciones invertidas pixeles
-; Dom: fila (lista) x image
-; Rec: pixeles (lista)
-; tipo de recursión: Natural
-; Modificador
-(define rotate90-formato (lambda (formato_fila pos_y image)
-                           
-     (define rotate (lambda (formato_fila pos_y pos_x)
-         (cond
-         [(null? formato_fila) null]
-         [(> pos_x (largo_pos_x image)) null]
-         [else (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (rotate (cdr formato_fila) pos_y (- pos_x 1)))
-               ])))
-                           
-      (rotate formato_fila pos_y (largo_pos_x image))))
-
-
-; Descripción: rotate90, apoyada por funciones donde algunas utilizan recursión natural 
-; Dom: image
-; Rec: image
-; tipo de recursión: Natural
-(define rotate90 (lambda (image_ingresado)
-                   
-    (define rotateC (lambda (fila pos_y image)
-        (if (> fila (largo_pos_y image))
-            null
-            (append (rotate90-formato (fila_n fila (formato_image image)) pos_y image) (rotateC (+ fila 1) (- pos_y 1) image))
-                   )))
-                   
-   (modificar_formato_image image_ingresado (ordenar_formato (rotateC 0 (largo_pos_x image_ingresado) image_ingresado) 0 0 image_ingresado 0))))
-
-|#
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
 ; Descripción: Histograma
@@ -312,8 +277,11 @@
 (define histograma (lambda (image)
     (cond
       [(pixmap? image) (histograma_rgb (formato_image image))]
+      [(ormap pixrgb-d_compressed? (formato_image image)) (histograma_rgb (formato_image image))]
       [(bitmap? image) (histograma_bit (formato_image image))]
+      [(ormap pixbit-d_compressed? (formato_image image)) (histograma_bit (formato_image image))]
       [(hexmap? image) (histograma_hex (formato_image image))]
+      [(ormap pixhex-d_compressed? (formato_image image)) (histograma_hex (formato_image image))]
       [else image])))
 
 
@@ -338,7 +306,7 @@
     (define convertir_rgb (lambda (c1 c2 c3)
         (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
-   (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel)))))
+   (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))))
 
 
 ; Dom: Image
@@ -350,31 +318,73 @@
       image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
 
 
+
+; Descripción: Crop_formato
+; Dom: image X x1 X y1 X x2 X y2
+; Rec: image
+(define crop (lambda (image_ingresada x1 y1 x2 y2)               
+    (define crop_formato (lambda (formato_pixeles x1 y1 x2 y2)
+        (if (null? formato_pixeles)
+            null
+            (if (and
+                 (>= (x_rgb (car formato_pixeles)) x1)
+                 (<= (x_rgb (car formato_pixeles)) x2)
+                 (>= (y_rgb (car formato_pixeles)) y1)
+                 (<= (y_rgb (car formato_pixeles)) y2)
+                 )
+                
+                 (cons (car formato_pixeles) (crop_formato (cdr formato_pixeles) x1 y1 x2 y2))
+                 (crop_formato (cdr formato_pixeles) x1 y1 x2 y2)))))
+
+     (modificar_formato_image image_ingresada (crop_formato (formato_image image_ingresada) (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)))))
+
+
 ; Descripción: Compress
 ; Dom: image
 ; Rec: image
-(define compress (lambda (image_ingresada)
-              
+(define compress (lambda (image_ingresada . vacio)
+    
     (cond
       [(bitmap? image_ingresada)
-       (modificar_formato_image image_ingresada 
-                       (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada))))]
-
+       
+       (let
+        [(x (bit_mayor (histograma image_ingresada)))]
+         (let
+             [(y (modificar_formato_image image_ingresada
+                        (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))))]
+            (if (null? vacio)
+                y
+                x)))]
+         
+         
       [(hexmap? image_ingresada)
        (modificar_formato_image image_ingresada
                         (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
 
       [(pixmap? image_ingresada)
        (modificar_formato_image image_ingresada
-                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))])))
+                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
 
+)))
+      
 ; Descripción: Descompress
 ; Dom: image
 ; Rec: image
+
 (define descompress (lambda (image_ingresada)
+
+                      
     (cond
-      [(bitmap? image_ingresada) (modificar_formato_image (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada))))]
-      [(hexmap? image_ingresada) (modificar_formato_image (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
+      [(ormap pixbit-d_compressed? (formato_image image))
+       (modificar_formato_image
+        (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada))))]
+      
+
+      [(ormap pixhex-d_compressed? (formato_image image)) (modificar_formato_image (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
+
+
+
+      [(ormap pixrgb-d_compressed? (formato_image image)) (modificar_formato_image image)]
       [else image_ingresada]
       )))
 
@@ -410,13 +420,35 @@
             (cons (car lista) (filtro_nulos (cdr lista)))))
                        ))
 
-(define lista_1 (formato_image image_1))
-(define lista_2 (formato_image image_2))
-(define lista_3 (formato_image image_3))
+; IMAGENES DEL DOCUMENTO
 
+;Creación de una imagen de 2 x 2 del tipo pixmap
+(define img1 (image 2 2
+                  (pixrgb-d 0 0 255 0 0 10)
+                  (pixrgb-d 0 1 0 255 0 20)
+                  (pixrgb-d 1 0 0 0 255 10)
+                  (pixrgb-d 1 1 255 255 255 1)))
 
-(define lista (formato_image image_1))
-(define lista_n (fila_n 0 lista))
-(define lista_2n (fila_n 1 lista))
+;Creación de una imagen de 2 x 2 del tipo bitmap
+(define img2 (image 2 2
+                  (pixbit-d 0 0 0 10)
+                  (pixbit-d 0 1 1 20)
+                  (pixbit-d 1 0 1 10)
+                  (pixbit-d 1 1 0 255)))
+
+(define img3 (imgRGB->imgHex img1))
+
+(define img4 (crop img1 0 0 0 0)) ; debería retornar una imágen con un pixel
+(define img5 (crop img2 0 0 0 1)) ; debería retornar una imágen con dos pixeles
+(define img6 (crop img1 0 1 1 1)) ; debería retornar una imágen con dos pixeles
+(define img7 (crop img2 0 0 1 1)) ; debería retornar la misma imagen
+
+(define img18 (rotate90 img1))
+(define img19 (rotate90 img2))
+(define img20 (rotate90 img3))
+(define img21 (rotate90 img4))
+(define img22 (rotate90 img5))
+(define img23 (rotate90 img6))
+(define img24 (rotate90 img7))
 
 

@@ -63,9 +63,9 @@
   (if (and (= (length pixrgb-d) 6)
            (number? (x_rgb pixrgb-d))
            (number? (y_rgb pixrgb-d))
-           (number? (c1_rgb pixrgb-d)) (>= (c1_rgb pixrgb-d) -1) (<= (c1_rgb pixrgb-d) 255) 
-           (number? (c2_rgb pixrgb-d)) (>= (c2_rgb pixrgb-d) -1) (<= (c2_rgb pixrgb-d) 255)
-           (number? (c3_rgb pixrgb-d)) (>= (c3_rgb pixrgb-d) -1) (<= (c3_rgb pixrgb-d) 255)
+           (number? (c1_rgb pixrgb-d)) (>= (c1_rgb pixrgb-d) 0) (<= (c1_rgb pixrgb-d) 255) 
+           (number? (c2_rgb pixrgb-d)) (>= (c2_rgb pixrgb-d) 0) (<= (c2_rgb pixrgb-d) 255)
+           (number? (c3_rgb pixrgb-d)) (>= (c3_rgb pixrgb-d) 0) (<= (c3_rgb pixrgb-d) 255)
            (number? (d_rgb pixrgb-d))
 
            ) #t #f)))

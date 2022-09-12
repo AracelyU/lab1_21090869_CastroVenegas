@@ -60,7 +60,7 @@
 ; Dom: int
 ; Rec: Boleano
 (define bit? (lambda (bit)
-     (if (or (= bit 0) (= bit 1) (= bit -1)) #t #f)
+     (if (or (= bit 0) (= bit 1)) #t #f)
                    ))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------

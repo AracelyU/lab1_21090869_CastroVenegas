@@ -50,11 +50,13 @@
 ; definir 4 pixeles de un pixrgb-d
 (define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
 (define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
-(define pixrgb_3 (pixrgb-d 1 0 30 30 30 30))
-(define pixrgb_4 (pixrgb-d 1 1 40 40 40 40))
+(define pixrgb_3 (pixrgb-d 0 2 30 30 30 30))
+(define pixrgb_4 (pixrgb-d 1 0 40 40 40 40))
+(define pixrgb_5 (pixrgb-d 1 1 50 50 50 50))
+(define pixrgb_6 (pixrgb-d 1 2 60 60 60 60))
 
 ; definir una image 1
-(define image_1 (image 2 2 pixrgb_1 pixrgb_2 pixrgb_3 pixrgb_4))
+(define image_1 (image 3 2 pixrgb_1 pixrgb_2 pixrgb_3 pixrgb_4 pixrgb_5 pixrgb_6))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; definir 4 pixeles de un pixbit-d
@@ -69,17 +71,19 @@
 (define pixbit_9 (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 3 3 pixbit_1 pixbit_2 pixbit_3 pixbit_4 pixbit_5 pixbit_6 pixbit_7 pixbit_8 pixbit_9))
+(define image_2 (image 3 2 pixbit_1 pixbit_2 pixbit_3 pixbit_4 pixbit_5 pixbit_6))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
 (define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
 (define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
-(define pixhex_3 (pixhex-d 1 0 "#00FF00" 30))
-(define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
+(define pixhex_3 (pixhex-d 0 2 "#00FF00" 30))
+(define pixhex_4 (pixhex-d 1 0 "#FFAOFF" 40))
+(define pixhex_5 (pixhex-d 1 1 "#FF12FF" 50))
+(define pixhex_6 (pixhex-d 1 2 "#F32FFF" 60))
 
 ; definir una image 3
-(define image_3 (image 2 2 pixhex_1 pixhex_2 pixhex_3 pixhex_4))
+(define image_3 (image 3 2 pixhex_1 pixhex_2 pixhex_3 pixhex_4 pixhex_5 pixhex_6))
 
 
 ;----------------------------- PERTENENCIA --------------------------------------------------------------------
@@ -156,7 +160,7 @@
       (if (= contador (* (ancho_image image) (largo_image image)))
           null
           (cond
-            [(<= pos_y (largo_pos_y image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
+            [(<= pos_y (largo_pos_x image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
             [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
 
@@ -168,6 +172,11 @@
             (list (ancho_image image_ingresado) (largo_image image_ingresado) (car (formato_image image_ingresado)))
             image_ingresado)))
 
+; Descripción: función que modifica el formato de la image
+(define modificar_formato_image (lambda (image_ingresada formato)
+        (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) formato))))
+
+
 ; Descripción: funcion que modifica la posicion en y e x segun pos_y y pox_x
 ; Dom: posicion_y (int) x posicion_x (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
 ; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
@@ -178,31 +187,38 @@
        [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
        [(pixrgb-d? pixel) (cambiar_x_rgb (cambiar_y_rgb pixel pos_y) pos_x)])))
 
+
+
+(define a (fila_n 0 (formato_image image_1)))
+(define b (fila_n 1 (formato_image image_1)))
+
 ; Descripción: funcion que te entrega una lista con las posiciones invertidas horizontalmente 
 ; Dom: fila (lista) x image
 ; Rec: pixeles (lista)
 ; tipo de recursión: Natural
 ; Modificador
-(define flipH-formato (lambda (formato_fila pos_x image)
-     (define flipHN (lambda (formato_fila pos_y pos_x)
+(define flipH-formato (lambda (formato_fila fila image)
+                        
+     (define flipHN (lambda (formato_fila pos_y fila)
          (cond
          [(null? formato_fila) null]
          [(< pos_y 0) null]
-         [else (reverse (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (flipHN (cdr formato_fila) (- pos_y 1) pos_x)))])))
+         [else (reverse (cons (modificar_posicion_pixel pos_y fila (car formato_fila)) (flipHN (cdr formato_fila) (- pos_y 1) fila)))])))
 
-      (flipHN formato_fila (largo_pos_y image) pos_x)))
+      (flipHN formato_fila (largo_pos_x image) fila)))
 
 ; Descripción: función flipH
 ; Dom: image
 ; Rec: image
 ; tipo de recursión: Natural
 (define flipH (lambda (image_ingresado)
-     (define flipHC (lambda (pos_y fila image)   
-        (if (> pos_y (largo_pos_y image))
-             null
-             (append (flipH-formato (fila_n fila (formato_image image)) fila image) (flipHC (+ pos_y 1) (+ fila 1) image)))))
                 
-     (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (ordenar_formato (flipHC 0 0 image_ingresado) 0 0 image_ingresado 0)))))
+     (define flipHC (lambda (fila image)   
+        (if (> fila (largo_pos_y image))
+             null
+             (append (flipH-formato (fila_n fila (formato_image image)) fila image) (flipHC (+ fila 1) image)))))
+                
+     (modificar_formato_image image_ingresado (ordenar_formato (flipHC 0 image_ingresado) 0 0 image_ingresado 0))))
 
 
 ; Descripción: funcion que te entrega una lista con las posiciones invertidas verticalmente 
@@ -219,28 +235,58 @@
 ; Dom: image
 ; Rec: image
 ; tipo de recursión: natural
-(define flipV (lambda (image_ingresado)   
+(define flipV (lambda (image_ingresado)
+                
     (define flipVC (lambda (pos_x fila pos_y image)
         (if (< pos_x 0)
             null
             (append (flipV-formato (fila_n fila (formato_image image)) pos_x pos_y) (flipVC (- pos_x 1) (+ fila 1) pos_y image)))))
                 
-    (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (ordenar_formato (flipVC (largo_pos_x image_ingresado) 0 0 image_ingresado) 0 0 image_ingresado 0)))))
+    (modificar_formato_image image_ingresado (ordenar_formato (flipVC (largo_pos_y image_ingresado) 0 0 image_ingresado) 0 0 image_ingresado 0))))
 
+(define c (formato_image image_1))
+(define d (largo_pos_y image_1))
+
+; fila-> valor largo x
+; contador -> 0 - valor largo y
+; pos_x -> 0 +- 2
+
+(define rotate90 (lambda (image_ingresada)
+                   
+    (define rotate (lambda (formato_pixeles fila contador image)
+        (if (null? formato_pixeles)
+            null
+            (if (and (>= fila 0) (<= contador (largo_pos_x image)))
+                    (cons (modificar_posicion_pixel fila contador (car formato_pixeles)) (rotate (cdr formato_pixeles) fila (+ contador 1) image))
+                    (if (>= fila 0)
+                        (rotate formato_pixeles (- fila 1) 0 image)
+                        null)))))
+
+    (define intercambiar_dimensiones (lambda (image_ingresada)
+          (image (largo_image image_ingresada) (ancho_image image_ingresada) (formato_image image_ingresada))))
+
+    (modificar_formato_image (intercambiar_dimensiones image_ingresada) (ordenar_formato (rotate (formato_image image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
+
+
+
+
+#|
 
 ; Descripción: funcion que te entrega una lista de las posiciones invertidas pixeles
 ; Dom: fila (lista) x image
 ; Rec: pixeles (lista)
 ; tipo de recursión: Natural
 ; Modificador
-(define rotate90-formato (lambda (formato_fila image pos_y)
+(define rotate90-formato (lambda (formato_fila pos_y image)
+                           
      (define rotate (lambda (formato_fila pos_y pos_x)
          (cond
          [(null? formato_fila) null]
          [(> pos_x (largo_pos_x image)) null]
-         [else (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (rotate (cdr formato_fila) pos_y (+ pos_x 1)))
+         [else (cons (modificar_posicion_pixel pos_y pos_x (car formato_fila)) (rotate (cdr formato_fila) pos_y (- pos_x 1)))
                ])))
-      (rotate formato_fila pos_y 0)))
+                           
+      (rotate formato_fila pos_y (largo_pos_x image))))
 
 
 ; Descripción: rotate90, apoyada por funciones donde algunas utilizan recursión natural 
@@ -248,15 +294,16 @@
 ; Rec: image
 ; tipo de recursión: Natural
 (define rotate90 (lambda (image_ingresado)
-    (define rotateC (lambda (pos_x fila pos_y image)
-        (if (< pos_y 0)
+                   
+    (define rotateC (lambda (fila pos_y image)
+        (if (> fila (largo_pos_y image))
             null
-            (append (rotate90-formato (fila_n fila (formato_image image)) image pos_y) (rotateC pos_x (+ fila 1) (- pos_y 1) image))
+            (append (rotate90-formato (fila_n fila (formato_image image)) pos_y image) (rotateC (+ fila 1) (- pos_y 1) image))
                    )))
                    
-   (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (ordenar_formato (rotateC 0 0 (largo_pos_y image_ingresado) image_ingresado) 0 0 image_ingresado 0)))))
+   (modificar_formato_image image_ingresado (ordenar_formato (rotateC 0 (largo_pos_x image_ingresado) image_ingresado) 0 0 image_ingresado 0))))
 
-
+|#
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
 ; Descripción: Histograma
@@ -299,7 +346,7 @@
 ; funcion que pasa de rgb a hexa, en caso de que no sea rgb retorna f
 (define imgRGB->imgHex (lambda (image_rgb)
   (if (pixmap? image_rgb)
-      (arreglar_image (image (ancho_image image_rgb) (largo_image image_rgb) (map convertir_rgb_hex (formato_image image_rgb))))    
+      (modificar_formato_image image_rgb (map convertir_rgb_hex (formato_image image_rgb)))    
       image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
 
 
@@ -310,30 +357,24 @@
               
     (cond
       [(bitmap? image_ingresada)
-       (arreglar_image(image
-                       (ancho_image image_ingresada)
-                       (largo_image image_ingresada)
-                       (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))))]
+       (modificar_formato_image image_ingresada 
+                       (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada))))]
 
       [(hexmap? image_ingresada)
-       (arreglar_image (image
-                        (ancho_image image_ingresada)
-                        (largo_image image_ingresada)
-                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))]
+       (modificar_formato_image image_ingresada
+                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
 
       [(pixmap? image_ingresada)
-       (arreglar_image (image
-                        (ancho_image image_ingresada)
-                        (largo_image image_ingresada)
-                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))])))
+       (modificar_formato_image image_ingresada
+                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))])))
 
 ; Descripción: Descompress
 ; Dom: image
 ; Rec: image
 (define descompress (lambda (image_ingresada)
     (cond
-      [(bitmap? image_ingresada) (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))))]
-      [(hexmap? image_ingresada) (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))]
+      [(bitmap? image_ingresada) (modificar_formato_image (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada))))]
+      [(hexmap? image_ingresada) (modificar_formato_image (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
       [else image_ingresada]
       )))
 
@@ -348,7 +389,7 @@
            null
            (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
                
-       (arreglar_image (image (ancho_image image_ingresado) (largo_image image_ingresado) (map_edit filtro (formato_image image_ingresado))))))
+       (modificar_formato_image image_ingresado (map_edit filtro (formato_image image_ingresado)))))
 
 
 

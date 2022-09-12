@@ -1,7 +1,5 @@
 #lang racket
 
-; exportar la funcion al exterior
-(provide (all-defined-out))
 
 ;-----------------------------------TDA PIXHEX-D -----------------------------------------------------------------
 
@@ -176,16 +174,6 @@
             (cons (car lista) (descompress-formato-hex (cdr lista) elemento))))))
 
 
-
-(define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
-(define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
-(define pixhex_3 (pixhex-d 1 0 "#00FF00" 30))
-(define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
-
-; definir una image 3
-(define image_3 (list pixhex_1 pixhex_2 pixhex_3 pixhex_4))
-
-
 ; Descripción: pixhex->string
 ; Dom: formato image x largo image
 ; Rec: string
@@ -210,5 +198,7 @@
 
 
 
+; exportar la funcion al exterior
+(provide (all-defined-out))
 
 

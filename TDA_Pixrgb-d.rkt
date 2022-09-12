@@ -1,8 +1,6 @@
 #lang racket
 
 
-; exportar la funcion al exterior
-(provide (all-defined-out))
 
 ;-----------------------------------TDA PIXRGB-D -----------------------------------------------------------------
 
@@ -224,17 +222,6 @@
 
 
 
-
-; definir 4 pixeles de un pixrgb-d
-(define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
-(define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
-(define pixrgb_3 (pixrgb-d 1 0 30 30 30 30))
-(define pixrgb_4 (pixrgb-d 1 1 40 40 40 40))
-
-; definir una image 1
-(define image_1 (list pixrgb_1 pixrgb_2 pixrgb_3 pixrgb_4))
-
-
 ; Descripción: pixrgb->string
 ; Dom: formato image x largo image
 ; Rec: string
@@ -274,6 +261,8 @@
 
 
 
+; exportar la funcion al exterior
+(provide (all-defined-out))
 
 
 

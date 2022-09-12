@@ -5,6 +5,8 @@
 (require "TDA_Pixbit-d.rkt")
 (require "TDA_Pixhex-d.rkt")
 
+
+
 ;-----------------------------------TDA IMAGEN-----------------------------------------------------------------
 
 ;----------------------------------REPRESENTACION-------------------------------------------------------------
@@ -48,42 +50,42 @@
 ; definiendo imagenes para probar las funcionalidades de la image
 
 ; definir 4 pixeles de un pixrgb-d
-(define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
-(define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
-(define pixrgb_3 (pixrgb-d 0 2 30 30 30 30))
-(define pixrgb_4 (pixrgb-d 1 0 40 40 40 40))
-(define pixrgb_5 (pixrgb-d 1 1 50 50 50 50))
-(define pixrgb_6 (pixrgb-d 1 2 60 60 60 60))
+(define pixrgb_a (pixrgb-d 0 0 10 10 10 10)) ; lista_1
+(define pixrgb_b (pixrgb-d 0 1 20 20 20 20))
+(define pixrgb_c (pixrgb-d 0 2 30 30 30 30))
+(define pixrgb_d (pixrgb-d 1 0 40 40 40 40))
+(define pixrgb_e (pixrgb-d 1 1 50 50 50 50))
+(define pixrgb_f (pixrgb-d 1 2 60 60 60 60))
 
 ; definir una image 1
-(define image_1 (image 3 2 pixrgb_1 pixrgb_2 pixrgb_3 pixrgb_4 pixrgb_5 pixrgb_6))
+(define image_1 (image 3 2 pixrgb_a pixrgb_b pixrgb_c pixrgb_d pixrgb_e pixrgb_f))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; definir 4 pixeles de un pixbit-d
-(define pixbit_1 (pixbit-d 0 0 0 10)) ; lista_2
-(define pixbit_2 (pixbit-d 0 1 1 20))
-(define pixbit_3 (pixbit-d 0 2 0 30))
-(define pixbit_4 (pixbit-d 1 0 1 40))
-(define pixbit_5 (pixbit-d 1 1 0 50))
-(define pixbit_6 (pixbit-d 1 2 0 60))
-(define pixbit_7 (pixbit-d 2 0 0 70))
-(define pixbit_8 (pixbit-d 2 1 0 80))
-(define pixbit_9 (pixbit-d 2 2 0 90))
+(define pixbit_a (pixbit-d 0 0 0 10)) ; lista_2
+(define pixbit_b (pixbit-d 0 1 1 20))
+(define pixbit_c (pixbit-d 0 2 0 30))
+(define pixbit_d (pixbit-d 1 0 1 40))
+(define pixbit_e (pixbit-d 1 1 0 50))
+(define pixbit_f (pixbit-d 1 2 0 60))
+(define pixbit_g (pixbit-d 2 0 0 70))
+(define pixbit_h (pixbit-d 2 1 0 80))
+(define pixbit_i (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 2 2 pixbit_1 pixbit_2 pixbit_3 pixbit_4))
+(define image_2 (image 2 2 pixbit_a pixbit_b pixbit_c pixbit_d))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
-(define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
-(define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
-(define pixhex_3 (pixhex-d 0 2 "#00FF00" 30))
-(define pixhex_4 (pixhex-d 1 0 "#FFAOFF" 40))
-(define pixhex_5 (pixhex-d 1 1 "#FF12FF" 50))
-(define pixhex_6 (pixhex-d 1 2 "#F32FFF" 60))
+(define pixhex_a (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
+(define pixhex_b (pixhex-d 0 1 "#0000FF" 20))
+(define pixhex_c (pixhex-d 0 2 "#00FF00" 30))
+(define pixhex_d (pixhex-d 1 0 "#FFAOFF" 40))
+(define pixhex_e (pixhex-d 1 1 "#FF12FF" 50))
+(define pixhex_f (pixhex-d 1 2 "#F32FFF" 60))
 
 ; definir una image 3
-(define image_3 (image 3 2 pixhex_1 pixhex_2 pixhex_3 pixhex_4 pixhex_5 pixhex_6))
+(define image_3 (image 3 2 pixhex_a pixhex_b pixhex_c pixhex_d pixhex_e pixhex_f))
 
 ;----------------------------- PERTENENCIA --------------------------------------------------------------------
 
@@ -139,9 +141,9 @@
 (define fila_n (lambda (n lista)
     (if (null? lista)
         null
-        (if (= (car(car lista)) n)
-            (cons (car lista) (fila_n n (cdr lista)))
-            (fila_n n (cdr lista))))))
+        (if (= (actual(actual lista)) n)
+            (cons (actual lista) (fila_n n (siguiente lista)))
+            (fila_n n (siguiente lista))))))
 
 ; Descripción: funcion que encuentra un pixel según pos_x e pos_y
 ; Dom: lista
@@ -274,7 +276,7 @@
 ; Descripción: Histograma
 ; Dom: image
 ; Rec: lista
-(define histograma (lambda (image)
+(define histogram (lambda (image)
     (cond
       [(pixmap? image) (histograma_rgb (formato_image image))]
       [(ormap pixrgb-d_compressed? (formato_image image)) (histograma_rgb (formato_image image))]
@@ -348,10 +350,10 @@
       [(bitmap? image_ingresada)
        
        (let
-        [(x (bit_mayor (histograma image_ingresada)))]
+        [(x (bit_mayor (histogram image_ingresada)))]
          (let
              [(y (modificar_formato_image image_ingresada
-                        (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))))]
+                        (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histogram image_ingresada)))))]
             (if (null? vacio)
                 y
                 x)))]
@@ -359,11 +361,11 @@
          
       [(hexmap? image_ingresada)
        (modificar_formato_image image_ingresada
-                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
+                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
 
       [(pixmap? image_ingresada)
        (modificar_formato_image image_ingresada
-                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
+                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
 
 )))
       
@@ -377,10 +379,10 @@
     (cond
       [(ormap pixbit-d_compressed? (formato_image image))
        (modificar_formato_image
-        (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada))))]
+        (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histogram image_ingresada))))]
       
 
-      [(ormap pixhex-d_compressed? (formato_image image)) (modificar_formato_image (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada)))))]
+      [(ormap pixhex-d_compressed? (formato_image image)) (modificar_formato_image (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
 
 
 
@@ -420,35 +422,6 @@
             (cons (car lista) (filtro_nulos (cdr lista)))))
                        ))
 
-; IMAGENES DEL DOCUMENTO
 
-;Creación de una imagen de 2 x 2 del tipo pixmap
-(define img1 (image 2 2
-                  (pixrgb-d 0 0 255 0 0 10)
-                  (pixrgb-d 0 1 0 255 0 20)
-                  (pixrgb-d 1 0 0 0 255 10)
-                  (pixrgb-d 1 1 255 255 255 1)))
-
-;Creación de una imagen de 2 x 2 del tipo bitmap
-(define img2 (image 2 2
-                  (pixbit-d 0 0 0 10)
-                  (pixbit-d 0 1 1 20)
-                  (pixbit-d 1 0 1 10)
-                  (pixbit-d 1 1 0 255)))
-
-(define img3 (imgRGB->imgHex img1))
-
-(define img4 (crop img1 0 0 0 0)) ; debería retornar una imágen con un pixel
-(define img5 (crop img2 0 0 0 1)) ; debería retornar una imágen con dos pixeles
-(define img6 (crop img1 0 1 1 1)) ; debería retornar una imágen con dos pixeles
-(define img7 (crop img2 0 0 1 1)) ; debería retornar la misma imagen
-
-(define img18 (rotate90 img1))
-(define img19 (rotate90 img2))
-(define img20 (rotate90 img3))
-(define img21 (rotate90 img4))
-(define img22 (rotate90 img5))
-(define img23 (rotate90 img6))
-(define img24 (rotate90 img7))
-
-
+; exportar la funcion al exterior
+(provide (all-defined-out))

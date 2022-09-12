@@ -1,7 +1,6 @@
 #lang racket
 
-; exportar la funcion al exterior
-(provide (all-defined-out))
+
 
 ;-----------------------------------TDA PIXBIT-D -----------------------------------------------------------------
 
@@ -136,12 +135,17 @@
 (define histograma_bit (lambda (formato_image)
     (list (list (cantidad_bit formato_image 0 0) 0) (list (cantidad_bit formato_image 1 0) 1))))
 
+(define actual (lambda (lista)
+          (car lista))) 
+
+(define siguiente (lambda (lista)
+          (cdr lista)))
 
 ; Descripción: función que obtiene el bit más repetido del histograma
 ; Dom: lista de histograma
 ; Rec: entero
 (define bit_mayor (lambda (lista_bit)
-    (if (> (car (car lista_bit)) (car (car (cdr lista_bit))))
+    (if (> (actual (actual lista_bit)) (actual (actual (siguiente lista_bit))))
         0
         1
         )))
@@ -176,14 +180,6 @@
             (cambiar_b_bit pixbit-d_pasado 0))
         pixbit-d_pasado)))
 
-
-(define pixbit_1 (pixbit-d 0 0 0 10)) ; lista_2
-(define pixbit_2 (pixbit-d 0 1 1 20))
-(define pixbit_3 (pixbit-d 0 2 0 30))
-(define pixbit_4 (pixbit-d 1 0 1 40))
-
-(define a (list pixbit_1 pixbit_2  pixbit_3  pixbit_4))
-
 ; Descripción: pixbit->string
 ; Dom: formato image x largo image
 ; Rec: string
@@ -203,3 +199,5 @@
                          
     (formar_string formato_image largo 0)))
 
+; exportar la funcion al exterior
+(provide (all-defined-out))

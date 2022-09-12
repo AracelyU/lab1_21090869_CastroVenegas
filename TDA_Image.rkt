@@ -79,7 +79,7 @@
 (define pixhex_4 (pixhex-d 1 1 "#FFFFFF" 40))
 
 ; definir una image 3
-(define image_3 (image 2 2 pixhex_1 pixhex_2 pixhex_3 pixhex_1))
+(define image_3 (image 2 2 pixhex_1 pixhex_2 pixhex_3 pixhex_4))
 
 
 ;----------------------------- PERTENENCIA --------------------------------------------------------------------
@@ -326,6 +326,17 @@
                         (ancho_image image_ingresada)
                         (largo_image image_ingresada)
                         (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))])))
+
+; Descripción: Descompress
+; Dom: image
+; Rec: image
+(define descompress (lambda (image_ingresada)
+    (cond
+      [(bitmap? image_ingresada) (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histograma image_ingresada)))))]
+      [(hexmap? image_ingresada) (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histograma image_ingresada) (car (histograma image_ingresada))))))]
+      [else image_ingresada]
+      )))
+
 
 
 ; Descripción: edit

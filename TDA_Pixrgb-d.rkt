@@ -63,9 +63,9 @@
   (if (and (= (length pixrgb-d) 6)
            (number? (x_rgb pixrgb-d))
            (number? (y_rgb pixrgb-d))
-           (number? (c1_rgb pixrgb-d)) (>= (c1_rgb pixrgb-d) 0) (<= (c1_rgb pixrgb-d) 255) 
-           (number? (c2_rgb pixrgb-d)) (>= (c2_rgb pixrgb-d) 0) (<= (c2_rgb pixrgb-d) 255)
-           (number? (c3_rgb pixrgb-d)) (>= (c3_rgb pixrgb-d) 0) (<= (c3_rgb pixrgb-d) 255)
+           (number? (c1_rgb pixrgb-d)) (>= (c1_rgb pixrgb-d) -1) (<= (c1_rgb pixrgb-d) 255) 
+           (number? (c2_rgb pixrgb-d)) (>= (c2_rgb pixrgb-d) -1) (<= (c2_rgb pixrgb-d) 255)
+           (number? (c3_rgb pixrgb-d)) (>= (c3_rgb pixrgb-d) -1) (<= (c3_rgb pixrgb-d) 255)
            (number? (d_rgb pixrgb-d))
 
            ) #t #f)))
@@ -158,7 +158,9 @@
 (define histograma_rgb (lambda (formato_image)
     (if (null? formato_image)
         null
-        (cons (list (rgb_iguales formato_image (color_lista (car formato_image)) 0) (color_lista (car formato_image))) (histograma_rgb (filtro_iguales_rgb formato_image (color_lista (car formato_image))))))))
+        (if (color_igual (car formato_image) (list -1 -1 -1))
+            (histograma_rgb (filtro_iguales_rgb formato_image (color_lista (car formato_image))))
+            (cons (list (rgb_iguales formato_image (color_lista (car formato_image)) 0) (color_lista (car formato_image))) (histograma_rgb (filtro_iguales_rgb formato_image (color_lista (car formato_image)))))))))
 
 ; Descripción: función que obtiene el rgb más repetido del histograma
 ; Dom: lista del histograma
@@ -176,7 +178,7 @@
     (if (null? lista)
         null
         (if (color_igual (car lista) elemento)
-            (compress-formato-rgb (cdr lista) elemento)
+            (cons (cambiar_c3_rgb (cambiar_c2_rgb (cambiar_c1_rgb (car lista) -1) -1) -1)(compress-formato-rgb (cdr lista) elemento))
             (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
 
 ; Descripción: invertColorRGB
@@ -219,7 +221,7 @@
         (if (null? formato_image)
             "\n"
             (if (= (x_rgb (car formato_image)) fila)
-                (string-append "(" (number->string (c1_rgb (car formato_image))) " " (number->string (c2_rgb (car formato_image))) " " (number->string (c3_rgb (car formato_image))) ")" (fila_rgb (cdr formato_image) fila))
+                (string-append "(" (number->string (c1_rgb (car formato_image))) " " (number->string (c2_rgb (car formato_image))) " " (number->string (c3_rgb (car formato_image))) ") " (fila_rgb (cdr formato_image) fila))
                 (fila_rgb (cdr formato_image) fila)))))
 
      (define formar_string (lambda (formato_image largo fila)

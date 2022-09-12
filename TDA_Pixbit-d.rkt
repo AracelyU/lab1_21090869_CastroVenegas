@@ -60,7 +60,7 @@
 ; Dom: int
 ; Rec: Boleano
 (define bit? (lambda (bit)
-     (if (or (= bit 0) (= bit 1)) #t #f)
+     (if (or (= bit 0) (= bit 1) (= bit -1)) #t #f)
                    ))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
@@ -130,8 +130,20 @@
     (if (null? lista)
         null
         (if (= elemento (bit (car lista)))
-            (compress-formato-bit (cdr lista) elemento)
+            (cons (cambiar_b_bit (car lista) -1) (compress-formato-bit (cdr lista) elemento))
             (cons (car lista) (compress-formato-bit (cdr lista) elemento))))))
+
+
+; Descripción: función que devuelve los valores perdidos tras compress
+(define descompress-formato-bit (lambda (lista elemento)
+    (if (null? lista)
+        null
+        (if (= (bit (car lista)) -1)
+            (cons (cambiar_b_bit (car lista) elemento) (descompress-formato-bit (cdr lista) elemento))
+            (cons (car lista) (descompress-formato-bit (cdr lista) elemento))
+
+
+            ))))
 
 
 
@@ -162,7 +174,7 @@
         (if (null? formato_image)
             "\n"
             (if (= (x_bit (car formato_image)) fila)
-                (string-append (number->string (bit (car formato_image))) (fila_bit (cdr formato_image) fila))
+                (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
                 (fila_bit (cdr formato_image) fila)))))
 
      (define formar_string (lambda (formato_image largo fila)

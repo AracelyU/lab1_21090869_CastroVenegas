@@ -73,7 +73,7 @@
 (define pixbit_i (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 2 2 pixbit_a pixbit_b pixbit_c pixbit_d))
+(define image_2 (image 3 2 pixbit_a pixbit_b pixbit_c pixbit_d pixbit_e pixbit_f))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
@@ -122,7 +122,6 @@
 ; Descripción: función que permite determinar si la imagen sufrio una compresión o no
 ; Pertenencia
 (define compressed? (lambda (image)
-
       (if (ormap pixbit-d_compressed? (formato_image image))
           #t
           (if (ormap pixrgb-d_compressed? (formato_image image))
@@ -132,18 +131,6 @@
                   #f)))))
 
 ;----------------------------------------- SELECTORES ----------------------------------------------
-
-; Descripción: funcion que entrega una fila de la matriz según n
-; Dom: n (int) x formato_pixeles (lista)
-; Rec: fila (lista)
-; tipo de recursión: Natural
-; Selector
-(define fila_n (lambda (n lista)
-    (if (null? lista)
-        null
-        (if (= (actual(actual lista)) n)
-            (cons (actual lista) (fila_n n (siguiente lista)))
-            (fila_n n (siguiente lista))))))
 
 ; Descripción: funcion que encuentra un pixel según pos_x e pos_y
 ; Dom: lista
@@ -178,6 +165,7 @@
             (list (ancho_image image_ingresado) (largo_image image_ingresado) (car (formato_image image_ingresado)))
             image_ingresado)))
 
+
 ; Descripción: función que modifica el formato de la image
 (define modificar_formato_image (lambda (image_ingresada formato)
         (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) formato))))
@@ -193,63 +181,38 @@
        [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
        [(pixrgb-d? pixel) (cambiar_x_rgb (cambiar_y_rgb pixel pos_y) pos_x)])))
 
-
-
-(define a (fila_n 0 (formato_image image_1)))
-(define b (fila_n 1 (formato_image image_1)))
-
-; Descripción: funcion que te entrega una lista con las posiciones invertidas horizontalmente 
-; Dom: fila (lista) x image
-; Rec: pixeles (lista)
-; tipo de recursión: Natural
-; Modificador
-(define flipH-formato (lambda (formato_fila fila image)
-                        
-     (define flipHN (lambda (formato_fila pos_y fila)
-         (cond
-         [(null? formato_fila) null]
-         [(< pos_y 0) null]
-         [else (reverse (cons (modificar_posicion_pixel pos_y fila (car formato_fila)) (flipHN (cdr formato_fila) (- pos_y 1) fila)))])))
-
-      (flipHN formato_fila (largo_pos_x image) fila)))
-
 ; Descripción: función flipH
 ; Dom: image
 ; Rec: image
-; tipo de recursión: Natural
-(define flipH (lambda (image_ingresado)
-                
-     (define flipHC (lambda (fila image)   
-        (if (> fila (largo_pos_y image))
-             null
-             (append (flipH-formato (fila_n fila (formato_image image)) fila image) (flipHC (+ fila 1) image)))))
-                
-     (modificar_formato_image image_ingresado (ordenar_formato (flipHC 0 image_ingresado) 0 0 image_ingresado 0))))
+(define flipH (lambda (image_ingresada)
 
-
-; Descripción: funcion que te entrega una lista con las posiciones invertidas verticalmente 
-; Dom: lista de pixeles x posicion n
-; Rec: lista
-; tipo de recursión: Natural
-; Modificador
-(define flipV-formato (lambda (fila_n pos_x pos_y)
-    (if (null? fila_n)
-        null
-        (cons (modificar_posicion_pixel pos_y pos_x (car fila_n)) (flipV-formato (cdr fila_n) pos_x (+ pos_y 1))))))
-
-; Descripción: flipV, apoyada por funciones donde algunas utilizan recursión natural 
-; Dom: image
-; Rec: image
-; tipo de recursión: natural
-(define flipV (lambda (image_ingresado)
-                
-    (define flipVC (lambda (pos_x fila pos_y image)
-        (if (< pos_x 0)
+    (define flipH-formato (lambda (formato_pixeles fila contador image)
+        (if (null? formato_pixeles)
             null
-            (append (flipV-formato (fila_n fila (formato_image image)) pos_x pos_y) (flipVC (- pos_x 1) (+ fila 1) pos_y image)))))
-                
-    (modificar_formato_image image_ingresado (ordenar_formato (flipVC (largo_pos_y image_ingresado) 0 0 image_ingresado) 0 0 image_ingresado 0))))
+            (if (and (<= fila (largo_pos_x image)) (>= contador 0))
+                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles)) (flipH-formato (cdr formato_pixeles) fila (- contador 1) image)) 
+                  (if (<= fila (largo_pos_x image))
+                      (flipH-formato formato_pixeles (+ fila 1) (largo_pos_x image_ingresada) image)
+                       null)))))
 
+   (modificar_formato_image image_ingresada (ordenar_formato (flipH-formato (formato_image image_ingresada) 0 (largo_pos_x image_ingresada)  image_ingresada) 0 0 image_ingresada 0))))
+
+
+; Descripción: función flipV
+; Dom: image
+; Rec:
+(define flipV (lambda (image_ingresada)
+
+    (define flipV-formato (lambda (formato_pixeles fila contador image)
+        (if (null? formato_pixeles)
+            null
+            (if (and (>= fila 0) (<= contador (largo_pos_x image)))
+                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles)) (flipV-formato (cdr formato_pixeles) fila (+ contador 1) image)) 
+                  (if (>= fila 0)
+                      (flipV-formato formato_pixeles (- fila 1) 0 image)
+                       null)))))
+
+     (modificar_formato_image image_ingresada (ordenar_formato (flipV-formato (formato_image image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
 
 ; Descripción: función rotate90
 ; Dom: image
@@ -320,8 +283,7 @@
       image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
 
 
-
-; Descripción: Crop_formato
+; Descripción: crop
 ; Dom: image X x1 X y1 X x2 X y2
 ; Rec: image
 (define crop (lambda (image_ingresada x1 y1 x2 y2)               
@@ -332,8 +294,7 @@
                  (>= (x_rgb (car formato_pixeles)) x1)
                  (<= (x_rgb (car formato_pixeles)) x2)
                  (>= (y_rgb (car formato_pixeles)) y1)
-                 (<= (y_rgb (car formato_pixeles)) y2)
-                 )
+                 (<= (y_rgb (car formato_pixeles)) y2))
                 
                  (cons (car formato_pixeles) (crop_formato (cdr formato_pixeles) x1 y1 x2 y2))
                  (crop_formato (cdr formato_pixeles) x1 y1 x2 y2)))))
@@ -400,7 +361,6 @@
        (if (null? lista)
            null
            (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
-               
        (modificar_formato_image image_ingresado (map_edit filtro (formato_image image_ingresado)))))
 
 
@@ -413,14 +373,6 @@
 
 
 ;-----------------------------------------------------------------
-
-(define filtro_nulos (lambda (lista)
-    (if (null? lista)
-        null
-        (if (null? (car lista))
-            null
-            (cons (car lista) (filtro_nulos (cdr lista)))))
-                       ))
 
 
 ; exportar la funcion al exterior

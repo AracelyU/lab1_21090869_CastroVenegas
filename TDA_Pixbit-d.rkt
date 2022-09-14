@@ -67,7 +67,8 @@
    (if (and (= (length pixbit-d) 4)
             (number? (x_bit pixbit-d))
             (number? (y_bit pixbit-d))
-            (number? (bit pixbit-d)) (compressed_bit? (bit pixbit-d))
+            (number? (bit pixbit-d))
+            (compressed_bit? (bit pixbit-d))
             (number? (d_bit pixbit-d))
        
             ) #t #f)))
@@ -123,10 +124,7 @@
             (cantidad_bit (cdr formato_image) bit_ingresado result)
             
             ))))
-    
-
-
-
+   
 ;-------------------------------------------- OTROS --------------------------------------------------
 
 ; Descripción: función histograma que recopila numero de bit
@@ -150,6 +148,11 @@
         1
         )))
 
+(define bit_menor (lambda (lista_bit)
+    (if (< (actual (actual lista_bit)) (actual (actual (siguiente lista_bit))))
+        0
+        1
+        )))
 
 ; Descripción: función que crea una lista sin el bit más repetido
 (define compress-formato-bit (lambda (lista elemento)
@@ -160,6 +163,7 @@
             (cons (car lista) (compress-formato-bit (cdr lista) elemento))))))
 
 
+
 ; Descripción: función que devuelve los valores perdidos tras compress
 (define descompress-formato-bit (lambda (lista elemento)
     (if (null? lista)
@@ -167,7 +171,6 @@
         (if (= (bit (car lista)) -1)
             (cons (cambiar_b_bit (car lista) elemento) (descompress-formato-bit (cdr lista) elemento))
             (cons (car lista) (descompress-formato-bit (cdr lista) elemento))))))
-
 
 
 ; Descripción: Invertir color de bit de un pixbit-d
@@ -198,6 +201,8 @@
                "\n")))
                          
     (formar_string formato_image largo 0)))
+
+
 
 ; exportar la funcion al exterior
 (provide (all-defined-out))

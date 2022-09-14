@@ -60,17 +60,16 @@
     (if (and (= (length pixhex-d) 4)
              (number? (x_hex pixhex-d))
              (number? (y_hex pixhex-d))
-             (string? (hex pixhex-d))
-             (string-ci=? (hex pixhex-d) "       ")
+             (list? (hex pixhex-d))
              (number? (d_hex pixhex-d))
 
-             ) #t #f)))
+             )#t #f)))
 
 ; Descripción: función que verifica si se comprimio un pixhex-d
 ; Dom: pixhex-d
 ; Rec: boleano
 (define compress_hex? (lambda (pixhex-d)
-     (if (string-ci=? (hex pixhex-d) "       ") #t #f)))
+     (if (string? (hex pixhex-d)) #t #f)))
 
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
@@ -102,7 +101,6 @@
 (define cambiar_d_hex (lambda (pixhex-d_pasado d_nuevo)               
       (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) (hex pixhex-d_pasado) d_nuevo)))
 
-(define lista_hex (pixhex-d 0 0 "FFFF" 10))
 
 
 ;--------------------------------------- SELECTORES ----------------------------------------------
@@ -154,24 +152,91 @@
             (hex_mayor (cdr lista_hex) result)))))
 
 
+; Dom: lista
+; Rec: lista
+; función que cambia un pixel hexa a rgb
+(define convertir_hex_rgb (lambda (string_ingresado)
+
+       ; función auxiliar para convertir un caracter a numero
+     (define valor_entero (lambda (a)
+       (cond
+          [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
+          [(char=? a #\5) 5][(char=? a #\6) 6][(char=? a #\7) 7][(char=? a #\8) 8]
+          [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
+          [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
+
+
+    ; función que recupera los valores de cada string
+    (define obtener_valor (lambda (string_ingresado posicion)
+        (if (> posicion (- (string-length string_ingresado) 1))
+            null
+            (cons (valor_entero (string-ref string_ingresado posicion)) (obtener_valor string_ingresado (+ posicion 1)))
+         )))
+
+    ; función auxiliar que transforma una lista de valores en un entero
+    (define hex->rgb (lambda (lista largo result)
+         (if (< largo 0)
+             result
+             (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
+
+    (list
+        (hex->rgb (obtener_valor (substring string_ingresado 0 2) 0) (- (string-length (substring string_ingresado 0 2)) 1) 0)
+        (hex->rgb (obtener_valor (substring string_ingresado 2 4) 0) (- (string-length (substring string_ingresado 0 2)) 1) 0)
+        (hex->rgb (obtener_valor (substring string_ingresado 4 6) 0) (- (string-length (substring string_ingresado 0 2)) 1) 0)
+        )))
+
+
+
+
 ; Descripción: función que crea una lista sin el hex más repetido
 (define compress-formato-hex (lambda (lista elemento)
      (if (null? lista)
          null
          (if (string-ci=? (hex (car lista)) elemento)
-             (cons (cambiar_h_hex (car lista) "       ") (compress-formato-hex (cdr lista) elemento))
+             (cons (cambiar_h_hex (car lista) (convertir_hex_rgb (hex (car lista)))) (compress-formato-hex (cdr lista) elemento))
              (cons (car lista) (compress-formato-hex (cdr lista) elemento))
              )
          )))
 
 
+
+; Dom: Lista
+; Rec: Lista
+; función que cambia un pixel rgb a hexa
+(define convertir_rgb_hex_lista (lambda (lista)
+                            
+    ; función auxiliar para convertir un numero a hex
+    (define valor_hex (lambda (a)
+       (cond
+          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+    ; función auxiliar que transforma un c1 a hex
+    (define rgb->hex (lambda (a)
+       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
+
+
+   (string-append (rgb->hex (car lista)) (rgb->hex (cadr lista)) (rgb->hex (caddr lista)))))
+
+
+(define a (list (list 0 0 (list 15 240 0) 10)
+   (list 0 1 "#0000FF" 20)
+   (list 0 2 "#00FF00" 30)
+   (list 1 0 "#FFAOFF" 40)
+   (list 1 1 "#FF12FF" 50)
+   (list 1 2 "#F32FFF" 60)))
+
 ; Descripción: función que devuelve los valores perdidos tras compress
-(define descompress-formato-hex (lambda (lista elemento)
+(define descompress-formato-hex (lambda (lista)
     (if (null? lista)
         null
-        (if (string-ci=? (hex (car lista)) "       ")
-            (cons (cambiar_h_hex (car lista) elemento) (descompress-formato-hex (cdr lista) elemento))
-            (cons (car lista) (descompress-formato-hex (cdr lista) elemento))))))
+        (if (string? (hex (car lista)))
+            (cons (car lista) (descompress-formato-hex (cdr lista)))
+            (cons (cambiar_h_hex (car lista) (string-append "#" (convertir_rgb_hex_lista (hex (car lista))))) (descompress-formato-hex (cdr lista)))
+
+            ))))
 
 
 ; Descripción: pixhex->string

@@ -73,7 +73,7 @@
 (define pixbit_i (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 3 2 pixbit_a pixbit_b pixbit_c pixbit_d pixbit_e pixbit_f))
+(define image_2 (image 3 3 pixbit_a pixbit_b pixbit_c pixbit_d pixbit_e pixbit_f pixbit_g pixbit_h pixbit_i))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
@@ -81,8 +81,8 @@
 (define pixhex_b (pixhex-d 0 1 "#0000FF" 20))
 (define pixhex_c (pixhex-d 0 2 "#00FF00" 30))
 (define pixhex_d (pixhex-d 1 0 "#FFAOFF" 40))
-(define pixhex_e (pixhex-d 1 1 "#FF12FF" 50))
-(define pixhex_f (pixhex-d 1 2 "#F32FFF" 60))
+(define pixhex_e (pixhex-d 1 1 "#00FF00" 50))
+(define pixhex_f (pixhex-d 1 2 "#00FF00()" 60))
 
 ; definir una image 3
 (define image_3 (image 3 2 pixhex_a pixhex_b pixhex_c pixhex_d pixhex_e pixhex_f))
@@ -128,7 +128,9 @@
               #t
               (if (ormap pixhex-d_compressed? (formato_image image))
                   #t
-                  #f)))))
+                  (if (or (bitmap? image) (pixmap? image) (hexmap? image))
+                      #f
+                      #t))))))
 
 ;----------------------------------------- SELECTORES ----------------------------------------------
 
@@ -242,19 +244,25 @@
 (define histogram (lambda (image)
     (cond
       [(pixmap? image) (histograma_rgb (formato_image image))]
+      
       [(ormap pixrgb-d_compressed? (formato_image image)) (histograma_rgb (formato_image image))]
+      
       [(bitmap? image) (histograma_bit (formato_image image))]
+      
       [(ormap pixbit-d_compressed? (formato_image image)) (histograma_bit (formato_image image))]
+      
       [(hexmap? image) (histograma_hex (formato_image image))]
+      
       [(ormap pixhex-d_compressed? (formato_image image)) (histograma_hex (formato_image image))]
+      
       [else image])))
 
 
 ; Dom: Lista
 ; Rec: Lista
 ; función que cambia un pixel rgb a hexa
-(define convertir_rgb_hex (lambda (pixel)
-
+(define convertir_rgb_hex (lambda (pixel . valor)
+                            
     ; función auxiliar para convertir un numero a hex
     (define valor_hex (lambda (a)
        (cond
@@ -271,8 +279,13 @@
     (define convertir_rgb (lambda (c1 c2 c3)
         (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
-   (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))))
+   (if (null? valor)
+       (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))
+       (string-append (rgb->hex (car pixel)) (rgb->hex (cadr pixel)) (rgb->hex (caddr pixel)))
+       )))
+ 
 
+     
 
 ; Dom: Image
 ; Rec: Image
@@ -305,20 +318,12 @@
 ; Descripción: Compress
 ; Dom: image
 ; Rec: image
-(define compress (lambda (image_ingresada . vacio)
+(define compress (lambda (image_ingresada)
     
     (cond
       [(bitmap? image_ingresada)
-       
-       (let
-        [(x (bit_mayor (histogram image_ingresada)))]
-         (let
-             [(y (modificar_formato_image image_ingresada
-                        (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histogram image_ingresada)))))]
-            (if (null? vacio)
-                y
-                x)))]
-         
+       (modificar_formato_image image_ingresada
+                        (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histogram image_ingresada))))]
          
       [(hexmap? image_ingresada)
        (modificar_formato_image image_ingresada
@@ -338,16 +343,19 @@
 
                       
     (cond
-      [(ormap pixbit-d_compressed? (formato_image image))
-       (modificar_formato_image
-        (descompress-formato-bit (formato_image image_ingresada) (bit_mayor (histogram image_ingresada))))]
+      
+      [(ormap pixbit-d_compressed? (formato_image image_ingresada))
+
+       (modificar_formato_image image_ingresada
+                       (descompress-formato-bit (formato_image image_ingresada) (bit_menor (histogram image_ingresada))))]
       
 
-      [(ormap pixhex-d_compressed? (formato_image image)) (modificar_formato_image (descompress-formato-hex (formato_image image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
+      [(ormap pixhex-d_compressed? (formato_image image_ingresada))
+       (modificar_formato_image image_ingresada
+                       (descompress-formato-hex (formato_image image_ingresada)))]
 
 
-
-      [(ormap pixrgb-d_compressed? (formato_image image)) (modificar_formato_image image)]
+      [(ormap pixrgb-d_compressed? (formato_image image_ingresada))]
       [else image_ingresada]
       )))
 

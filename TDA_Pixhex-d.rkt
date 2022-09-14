@@ -157,7 +157,7 @@
 ; función que cambia un pixel hexa a rgb
 (define convertir_hex_rgb (lambda (string_ingresado)
 
-       ; función auxiliar para convertir un caracter a numero
+      ; función auxiliar para convertir un caracter a numero
      (define valor_entero (lambda (a)
        (cond
           [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
@@ -180,9 +180,9 @@
              (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
 
     (list
-        (hex->rgb (obtener_valor (substring string_ingresado 0 2) 0) (- (string-length (substring string_ingresado 0 2)) 1) 0)
-        (hex->rgb (obtener_valor (substring string_ingresado 2 4) 0) (- (string-length (substring string_ingresado 0 2)) 1) 0)
-        (hex->rgb (obtener_valor (substring string_ingresado 4 6) 0) (- (string-length (substring string_ingresado 0 2)) 1) 0)
+        (hex->rgb (obtener_valor (substring string_ingresado 0 2) 0) 1 0)
+        (hex->rgb (obtener_valor (substring string_ingresado 2 4) 0) 1 0)
+        (hex->rgb (obtener_valor (substring string_ingresado 4 6) 0) 1 0)
         )))
 
 
@@ -220,19 +220,21 @@
 
    (string-append (rgb->hex (car lista)) (rgb->hex (cadr lista)) (rgb->hex (caddr lista)))))
 
+;(list 0 0 (list 15 240 0) 10)
 
-(define a (list (list 0 0 (list 15 240 0) 10)
+(define a (list
+   (list 0 0 "#00FF00" 10)
    (list 0 1 "#0000FF" 20)
    (list 0 2 "#00FF00" 30)
    (list 1 0 "#FFAOFF" 40)
-   (list 1 1 "#FF12FF" 50)
+   (list 1 1 "#00FF00" 50)
    (list 1 2 "#F32FFF" 60)))
 
 ; Descripción: función que devuelve los valores perdidos tras compress
 (define descompress-formato-hex (lambda (lista)
     (if (null? lista)
         null
-        (if (string? (hex (car lista)))
+        (if (compress_hex? (car lista))
             (cons (car lista) (descompress-formato-hex (cdr lista)))
             (cons (cambiar_h_hex (car lista) (string-append "#" (convertir_rgb_hex_lista (hex (car lista))))) (descompress-formato-hex (cdr lista)))
 

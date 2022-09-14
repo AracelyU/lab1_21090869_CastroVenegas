@@ -54,7 +54,7 @@
 (define pixrgb_b (pixrgb-d 0 1 20 20 20 20))
 (define pixrgb_c (pixrgb-d 0 2 30 30 30 30))
 (define pixrgb_d (pixrgb-d 1 0 40 40 40 40))
-(define pixrgb_e (pixrgb-d 1 1 50 50 50 50))
+(define pixrgb_e (pixrgb-d 1 1 10 10 10 50))
 (define pixrgb_f (pixrgb-d 1 2 60 60 60 60))
 
 ; definir una image 1
@@ -82,7 +82,7 @@
 (define pixhex_c (pixhex-d 0 2 "#00FF00" 30))
 (define pixhex_d (pixhex-d 1 0 "#FFAOFF" 40))
 (define pixhex_e (pixhex-d 1 1 "#00FF00" 50))
-(define pixhex_f (pixhex-d 1 2 "#00FF00()" 60))
+(define pixhex_f (pixhex-d 1 2 "#00FF00" 60))
 
 ; definir una image 3
 (define image_3 (image 3 2 pixhex_a pixhex_b pixhex_c pixhex_d pixhex_e pixhex_f))
@@ -261,7 +261,7 @@
 ; Dom: Lista
 ; Rec: Lista
 ; función que cambia un pixel rgb a hexa
-(define convertir_rgb_hex (lambda (pixel . valor)
+(define convertir_rgb_hex (lambda (pixel)
                             
     ; función auxiliar para convertir un numero a hex
     (define valor_hex (lambda (a)
@@ -279,10 +279,9 @@
     (define convertir_rgb (lambda (c1 c2 c3)
         (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
-   (if (null? valor)
-       (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))
-       (string-append (rgb->hex (car pixel)) (rgb->hex (cadr pixel)) (rgb->hex (caddr pixel)))
-       )))
+    (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))
+
+       ))
  
 
      
@@ -355,7 +354,10 @@
                        (descompress-formato-hex (formato_image image_ingresada)))]
 
 
-      [(ormap pixrgb-d_compressed? (formato_image image_ingresada))]
+      [(ormap pixrgb-d_compressed? (formato_image image_ingresada))
+       (modificar_formato_image image_ingresada
+                       (descompress-formato-rgb (formato_image image_ingresada)))]
+      
       [else image_ingresada]
       )))
 

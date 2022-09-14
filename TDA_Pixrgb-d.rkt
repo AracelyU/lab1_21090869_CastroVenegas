@@ -76,9 +76,6 @@
   (if (and (= (length pixrgb-d) 6)
            (number? (x_rgb pixrgb-d))
            (number? (y_rgb pixrgb-d))
-           (number? (c1_rgb pixrgb-d))
-           (number? (c2_rgb pixrgb-d))
-           (number? (c3_rgb pixrgb-d))
            (compress_rgb? pixrgb-d)
            (number? (d_rgb pixrgb-d))
 
@@ -98,7 +95,9 @@
 ; Dom: pixrgb-d
 ; Rec: boleano
 (define compress_rgb? (lambda (pixrgb-d)
-     (if (color_igual pixrgb-d (list -1 -1 -1)) #t #f)))
+     (if (and (string? (c1_rgb pixrgb-d))
+              (string? (c2_rgb pixrgb-d))
+              (string? (c3_rgb pixrgb-d))) #t #f)))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
@@ -194,13 +193,84 @@
             (rgb_mayor (cdr lista_rgb) result)))))
 
 
+(define convertir_rgb_hex_pixel (lambda (pixel)
+
+      ; función auxiliar para convertir un numero a hex
+    (define valor_hex (lambda (a)
+       (cond
+          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+     ; función auxiliar que transforma un c1 a hex
+    (define rgb->hex (lambda (a)
+       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
+
+     (cambiar_c3_rgb (cambiar_c2_rgb (cambiar_c1_rgb pixel (rgb->hex (c1_rgb pixel))) (rgb->hex (c2_rgb pixel))) (rgb->hex (c3_rgb pixel)))
+
+                                  ))
+
+
 ; Descripción: función que crea una lista sin el rgb más repetido
 (define compress-formato-rgb (lambda (lista elemento)
     (if (null? lista)
         null
         (if (color_igual (car lista) elemento)
-            (cons (cambiar_c3_rgb (cambiar_c2_rgb (cambiar_c1_rgb (car lista) -1) -1) -1)(compress-formato-rgb (cdr lista) elemento))
+            (cons (convertir_rgb_hex_pixel (car lista))(compress-formato-rgb (cdr lista) elemento))
             (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
+
+
+(define convertir_valor_hex_rgb (lambda (pixel)
+
+    ; función auxiliar para convertir un caracter a numero
+     (define valor_entero (lambda (a)
+       (cond
+          [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
+          [(char=? a #\5) 5][(char=? a #\6) 6][(char=? a #\7) 7][(char=? a #\8) 8]
+          [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
+          [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
+
+
+    ; función que recupera los valores de cada string
+    (define obtener_valor (lambda (string_ingresado posicion)
+        (if (> posicion (- (string-length string_ingresado) 1))
+            null
+            (cons (valor_entero (string-ref string_ingresado posicion)) (obtener_valor string_ingresado (+ posicion 1)))
+         )))
+
+    ; función auxiliar que transforma una lista de valores en un entero
+    (define hex->rgb (lambda (lista largo result)
+         (if (< largo 0)
+             result
+             (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
+
+
+     (cambiar_c3_rgb
+      (cambiar_c2_rgb
+       (cambiar_c1_rgb pixel
+          (hex->rgb (obtener_valor (c1_rgb pixel) 0) 1 0))
+            (hex->rgb (obtener_valor (c2_rgb pixel) 0) 1 0))
+              (hex->rgb (obtener_valor (c3_rgb pixel) 0) 1 0))
+
+             ))
+
+
+(define descompress-formato-rgb (lambda (lista)
+     (if (null? lista)
+         null
+         (if (compress_rgb? (car lista))
+             (cons (convertir_valor_hex_rgb (car lista)) (descompress-formato-rgb (cdr lista)))
+             (cons (car lista) (descompress-formato-rgb (cdr lista))))
+
+                                  )))
+
+(define ola (list (list 0 0 "0A" "0A" "0A" 10)
+   (list 0 1 20 20 20 20)
+   (list 0 2 30 30 30 30)
+   (list 1 0 40 40 40 40)
+   (list 1 1 50 50 50 50)
+   (list 1 2 60 60 60 60)))
 
 ; Descripción: invertColorRGB
 ; Dom: pixrgb-d

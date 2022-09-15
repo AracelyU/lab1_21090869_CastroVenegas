@@ -7,136 +7,55 @@
 
 
 
-;-----------------------------------TDA IMAGEN-----------------------------------------------------------------
+#|
+-------------------------------- TDA IMAGEN --------------------------------------------------------------
+ 
+-------------------------------- REPRESENTACION ----------------------------------------------------------
 
-;----------------------------------REPRESENTACION-------------------------------------------------------------
+ El TDA representa una imagen como una lista de tres parametros, uno que contiene el ancho, otro el
+ largo y un formato de pixeles que pueden ser variable y del tipo pixrgb-d, pixbit-d o pixhex-d
+(int X int X list)
 
-; El TDA representa una imagen del tipo rgb con diferentes formatos (bit, pixel, hexa).
-; Se guarda una imagen como una lista de tres parametros
-; (Width (int) X Height (int) X [pixbit-d* | pixrgb-d* | pixhex-d*]) que representan el ancho, largo
-;  y el formato de la imagen respectivamente
+|#
 
-;-----------------------------------CONSTRUCTOR -------------------------------------------------------------
+;------------------------------- CONSTRUCTOR -------------------------------------------------------------
 
-; Dominio: entero X entero X [pixbit-d* | pixrgb-d* | pixhex-d*]
-; Rec: Una representacion "image"
-; Descripción: Función constructora de imágenes con bitmaps
-; o pixmaps que incluye información de profundidad en cada pixel.
-(define image (lambda (ancho largo . formato)
-     (list ancho largo formato)))
+; Dominio: ancho (int) x largo (int) x formato de pixeles (list) 
+; Recorrido: image
+; Descripción: Función constructora de imágenes
+(define image (lambda (ancho largo . formato) (list ancho largo formato)))
 
-;---------------------------------- SELECTORES--------------------------------------------------------------
+;------------------------------- SELECTORES --------------------------------------------------------------
 
+; Dominio: image
+; Recorrido: ancho (int)
+; Descripción: Función que recupera el ancho de la imagen
+(define width-image (lambda (L) (car L)))
 
-; funciones para recorrer los 3 elementos de la entrada de la image
-(define ancho_image (lambda (L) (car L))) ; primera posición
-(define largo_image (lambda (L) (cadr L))) ; segunda posición
-(define formato_image (lambda (L) (caddr L))) ; tercera posición (lista)
+; Dominio: image
+; Recorrido: largo (int)
+; Descripción: Función que recupera el largo de la imagen
+(define height-image (lambda (L) (cadr L)))
 
-; Descripción: funcion que te entrega la posicion final en x
-; Dom: image
-; Rec: entero
-(define largo_pos_x (lambda (image) (- (ancho_image image) 1)))
+; Dominio: image
+; Recorrido: formato de pixeles (list)
+; Descripción: Función que recupera el formato de pixeles de la imagen
+(define pixel-format (lambda (L) (caddr L))) ; tercera posición (lista)
 
-; Descripción: funcion que te entrega la posicion final en y
-; Dom: image
-; Rec: entero
-(define largo_pos_y (lambda (image) (- (largo_image image) 1)))
+; Dominio: image
+; Recorrido: int
+; Descripción: Función que recupera la posición final en x
+(define largo_pos_x (lambda (image) (- (width-image image) 1)))
 
-; ------------------------------- MODIFICADORES------------------------------------------------------
-
-
-;------------------------------------------ IMAGENES ---------------------------------------------------------
-; definiendo imagenes para probar las funcionalidades de la image
-
-; definir 4 pixeles de un pixrgb-d
-(define pixrgb_a (pixrgb-d 0 0 10 10 10 10)) ; lista_1
-(define pixrgb_b (pixrgb-d 0 1 20 20 20 20))
-(define pixrgb_c (pixrgb-d 0 2 30 30 30 30))
-(define pixrgb_d (pixrgb-d 1 0 40 40 40 40))
-(define pixrgb_e (pixrgb-d 1 1 10 10 10 50))
-(define pixrgb_f (pixrgb-d 1 2 60 60 60 60))
-
-; definir una image 1
-(define image_1 (image 3 2 pixrgb_a pixrgb_b pixrgb_c pixrgb_d pixrgb_e pixrgb_f))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; definir 4 pixeles de un pixbit-d
-(define pixbit_a (pixbit-d 0 0 0 10)) ; lista_2
-(define pixbit_b (pixbit-d 0 1 1 20))
-(define pixbit_c (pixbit-d 0 2 0 30))
-(define pixbit_d (pixbit-d 1 0 1 40))
-(define pixbit_e (pixbit-d 1 1 0 50))
-(define pixbit_f (pixbit-d 1 2 0 60))
-(define pixbit_g (pixbit-d 2 0 0 70))
-(define pixbit_h (pixbit-d 2 1 0 80))
-(define pixbit_i (pixbit-d 2 2 0 90))
-
-; definir una image 2
-(define image_2 (image 3 3 pixbit_a pixbit_b pixbit_c pixbit_d pixbit_e pixbit_f pixbit_g pixbit_h pixbit_i))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
-; definir 4 pixeles de un pixhex-d
-(define pixhex_a (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
-(define pixhex_b (pixhex-d 0 1 "#0000FF" 20))
-(define pixhex_c (pixhex-d 0 2 "#00FF00" 30))
-(define pixhex_d (pixhex-d 1 0 "#FFAOFF" 40))
-(define pixhex_e (pixhex-d 1 1 "#00FF00" 50))
-(define pixhex_f (pixhex-d 1 2 "#00FF00" 60))
-
-; definir una image 3
-(define image_3 (image 3 2 pixhex_a pixhex_b pixhex_c pixhex_d pixhex_e pixhex_f))
-
-;----------------------------- PERTENENCIA --------------------------------------------------------------------
+; Dominio: image
+; Recorrido: entero
+; Descripción: Función que recupera la posición final en y
+(define largo_pos_y (lambda (image) (- (height-image image) 1)))
 
 
-; definir pixmap?
-; Dom: image
-; Rec: boleano
-; Descripción: función que permite determinar si la imagen corresponde a un pixmap-d.
-; Constructor
-(define pixmap? (lambda (image)
-        (andmap pixrgb-d? (formato_image image))))
-
-
-; definir bitmap?
-; Dom: image
-; Rec: boleano
-; Descripción: función que permite determinar si la imagen corresponde a un bitmap-d.
-; Pertencencia
-(define bitmap? (lambda (image)
-         (andmap pixbit-d? (formato_image image))))
-
-
-; definir hexmap?
-; Dom: Image
-; Rec: Boleano
-; Descripción: función que permite determinar si la imagen corresponde a un hexmap-d.
-; Pertenencia
-(define hexmap? (lambda (image)
-          (andmap pixhex-d? (formato_image image))))
-
-; definir compressed?
-; Dom: Image
-; Rec: Boleano
-; Descripción: función que permite determinar si la imagen sufrio una compresión o no
-; Pertenencia
-(define compressed? (lambda (image)
-      (if (ormap pixbit-d_compressed? (formato_image image))
-          #t
-          (if (ormap pixrgb-d_compressed? (formato_image image))
-              #t
-              (if (ormap pixhex-d_compressed? (formato_image image))
-                  #t
-                  (if (or (bitmap? image) (pixmap? image) (hexmap? image))
-                      #f
-                      #t))))))
-
-;----------------------------------------- SELECTORES ----------------------------------------------
-
-; Descripción: funcion que encuentra un pixel según pos_x e pos_y
-; Dom: lista
-; Rec: pixel
+; Dominio: formato de pixeles (list), posicion_x (int), posicion_y (int)
+; Recorrido: pixel
+; Descripción: Función que recupera un pixel del formato pixeles según coordenadas (x, y)
 (define encontrar_pixel (lambda (lista pos_x pos_y)
     (if (null? lista)
         null
@@ -144,50 +63,81 @@
             (car lista)
             (encontrar_pixel (cdr lista) pos_x pos_y)))))
 
+
+;----------------------------- PERTENENCIA --------------------------------------------------------------------
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen corresponde a un pixmap-d.
+(define pixmap? (lambda (image) (andmap pixrgb-d? (pixel-format image))))
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen corresponde a un bitmap-d.
+(define bitmap? (lambda (image) (andmap pixbit-d? (pixel-format image))))
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen corresponde a un hexmap-d.
+(define hexmap? (lambda (image) (andmap pixhex-d? (pixel-format image))))
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen sufrio una compresión
+(define compressed? (lambda (image)
+      (if (ormap pixbit-d_compressed? (pixel-format image))
+          #t
+          (if (ormap pixrgb-d_compressed? (pixel-format image))
+              #t
+              (if (ormap pixhex-d_compressed? (pixel-format image))
+                  #t
+                  (if (or (bitmap? image) (pixmap? image) (hexmap? image))
+                      #f
+                      #t))))))
+
 ;----------------------------------------- MODIFICADORES ---------------------------------------------
 
-
-; Descripción: funcion que ordena formato de la imagen
-; Dom: lista x int x image
-; Rec: lista
-; tipo de recursión: Natural
+; Dominio: formato de pixeles (list) X posición_x (int) X posición_y (int) X image_ingresada (image) X contador (int)
+; Recorrido: formato de pixeles (list)
+; Descripción: Función que ordena un formato de pixeles
+; Tipo de recursión: Natural
 (define ordenar_formato (lambda (lista pos_x pos_y image contador)
-      (if (= contador (* (ancho_image image) (largo_image image)))
+      (if (= contador (* (width-image image) (height-image image)))
           null
           (cond
             [(<= pos_y (largo_pos_x image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
             [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que arregla el formato de la imagen
+(define arreglar_image (lambda (image_ingresada)
+        (if (= (length (pixel-format image_ingresada)) 1)
+            (list (width-image image_ingresada) (height-image image_ingresada) (car (pixel-format image_ingresada)))
+            image_ingresada)))
 
-; Dom: imagen
-; Rec: image
-; Descripción: función que arregla el formato de la imagen
-(define arreglar_image (lambda (image_ingresado)
-        (if (= (length (formato_image image_ingresado)) 1)
-            (list (ancho_image image_ingresado) (largo_image image_ingresado) (car (formato_image image_ingresado)))
-            image_ingresado)))
-
-
-; Descripción: función que modifica el formato de la image
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que modifica el formato de la image
 (define modificar_formato_image (lambda (image_ingresada formato)
-        (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) formato))))
+        (arreglar_image (image (width-image image_ingresada) (height-image image_ingresada) formato))))
 
-
-; Descripción: funcion que modifica la posicion en y e x segun pos_y y pox_x
-; Dom: posicion_y (int) x posicion_x (int) x pixel [pixrgb-d / pixhex-d / pixbit-d]
-; Rec: pixel [pixrgb-d / pixhex-d / pixbit-d]
-; Modificador
+; Dominio: posición_y (int) X posición_x (int) X pixel [pixrgb-d / pixhex-d / pixbit-d]
+; Recorrido: pixel
+; Descripción: Función que modifica la posicion en y e x según coordenadas (x, y)
 (define modificar_posicion_pixel (lambda (pos_y pos_x pixel)
      (cond
        [(pixbit-d? pixel) (cambiar_x_bit (cambiar_y_bit pixel pos_y) pos_x)]
        [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
        [(pixrgb-d? pixel) (cambiar_x_rgb (cambiar_y_rgb pixel pos_y) pos_x)])))
 
-; Descripción: función flipH
-; Dom: image
-; Rec: image
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que invierte la imagen horizontalmente, flipH
+; Tipo de recursión: Natural
 (define flipH (lambda (image_ingresada)
 
+    ; Función que cambia el formato de pixeles de forma que se invierta horizontalmente
     (define flipH-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
@@ -197,14 +147,15 @@
                       (flipH-formato formato_pixeles (+ fila 1) (largo_pos_x image_ingresada) image)
                        null)))))
 
-   (modificar_formato_image image_ingresada (ordenar_formato (flipH-formato (formato_image image_ingresada) 0 (largo_pos_x image_ingresada)  image_ingresada) 0 0 image_ingresada 0))))
+   (modificar_formato_image image_ingresada (ordenar_formato (flipH-formato (pixel-format image_ingresada) 0 (largo_pos_x image_ingresada)  image_ingresada) 0 0 image_ingresada 0))))
 
-
-; Descripción: función flipV
-; Dom: image
-; Rec:
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que invierte la imagen verticalmente, flipV
+; Tipo de recursión: Natural
 (define flipV (lambda (image_ingresada)
 
+    ; Función que cambia el formato de pixeles de forma que se invierta verticalmente
     (define flipV-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
@@ -214,13 +165,15 @@
                       (flipV-formato formato_pixeles (- fila 1) 0 image)
                        null)))))
 
-     (modificar_formato_image image_ingresada (ordenar_formato (flipV-formato (formato_image image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
+     (modificar_formato_image image_ingresada (ordenar_formato (flipV-formato (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
 
-; Descripción: función rotate90
-; Dom: image
-; Rec: image
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que rota la imagen 90° a la derecha, rotate90
+; Tipo de recursión: Natural
 (define rotate90 (lambda (image_ingresada)
-                   
+
+    ; Función que cambia el formato de pixeles de forma que rote 90° a la derecha
     (define rotate (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
@@ -230,160 +183,118 @@
                         (rotate formato_pixeles (- fila 1) 0 image)
                         null)))))
 
-    (define intercambiar_dimensiones (lambda (image_ingresada)
-          (image (largo_image image_ingresada) (ancho_image image_ingresada) (formato_image image_ingresada))))
+    ; Función que intercambia el ancho con el largo para cuando rotas la imagen
+    (define intercambiar_dimensiones (lambda (image_ingresada) (image (height-image image_ingresada) (width-image image_ingresada) (pixel-format image_ingresada))))
 
-    (modificar_formato_image (intercambiar_dimensiones image_ingresada) (ordenar_formato (rotate (formato_image image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
-
+    (modificar_formato_image (intercambiar_dimensiones image_ingresada)
+                             (ordenar_formato (rotate (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
 
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
-; Descripción: Histograma
-; Dom: image
-; Rec: lista
+; Dominio: image
+; Recorrido: formato de pixeles (list)
+; Descripción: Función que retorna un histograma de frecuencias a partir de los colores de una imagen, histogram
+; Comentario: Se agrega el histograma para una imagen comprimida bitmap-d para la función descompress más adelante
 (define histogram (lambda (image)
     (cond
-      [(pixmap? image) (histograma_rgb (formato_image image))]
-      
-      [(ormap pixrgb-d_compressed? (formato_image image)) (histograma_rgb (formato_image image))]
-      
-      [(bitmap? image) (histograma_bit (formato_image image))]
-      
-      [(ormap pixbit-d_compressed? (formato_image image)) (histograma_bit (formato_image image))]
-      
-      [(hexmap? image) (histograma_hex (formato_image image))]
-      
-      [(ormap pixhex-d_compressed? (formato_image image)) (histograma_hex (formato_image image))]
-      
+      [(pixmap? image) (histograma_rgb (pixel-format image))]
+      [(bitmap? image) (histogram_bit (pixel-format image))]
+      [(hexmap? image) (histograma_hex (pixel-format image))]
+      [(ormap pixbit-d_compressed? (pixel-format image)) (histogram_bit (pixel-format image))]
       [else image])))
 
 
-; Dom: Lista
-; Rec: Lista
-; función que cambia un pixel rgb a hexa
+; Dominio: pixel
+; Recorrido: string
+; Descripción: Función que cambia un pixmap a hexmap
 (define convertir_rgb_hex (lambda (pixel)
                             
-    ; función auxiliar para convertir un numero a hex
+    ; Función para convertir un número a hexadecimal
     (define valor_hex (lambda (a)
-       (cond
-          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
-          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
-          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
-          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+       (cond   [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+               [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+               [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+               [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
 
-    ; función auxiliar que transforma un c1 a hex
-    (define rgb->hex (lambda (a)
-       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
+    ; Función que transforma un color a hexadecimal
+    (define rgb->hex (lambda (a) (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
 
-    ; función auxiliar que tranforma un color rgb->hex
-    (define convertir_rgb (lambda (c1 c2 c3)
-        (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
+    ; Función que tranforma los colores de pixmap a hexmap
+    (define convertir_rgb (lambda (c1 c2 c3) (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
-    (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))
+    (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))))
 
-       ))
- 
-
-     
-
-; Dom: Image
-; Rec: Image
-; funcion que pasa de rgb a hexa, en caso de que no sea rgb retorna f
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que convierte una imagen pixmap-d a hexmap-d
 (define imgRGB->imgHex (lambda (image_rgb)
   (if (pixmap? image_rgb)
-      (modificar_formato_image image_rgb (map convertir_rgb_hex (formato_image image_rgb)))    
-      image_rgb))) ;si se ingresa una imagen distinta a rgb se retorna la imagen sin cambios
+      (modificar_formato_image image_rgb (map convertir_rgb_hex (pixel-format image_rgb)))    
+      image_rgb)))
 
+; Dominio: image X x1 (int) X y1 (int) X x2 (int) X y2 (int)
+; Recorrido: image
+; Descripción: Función que recorta una imagen a partir de un cuadrante, crop
+; Tipo de recursión: Natural
+(define crop (lambda (image_ingresada x1 y1 x2 y2)
 
-; Descripción: crop
-; Dom: image X x1 X y1 X x2 X y2
-; Rec: image
-(define crop (lambda (image_ingresada x1 y1 x2 y2)               
+    ; Función que crea el formato con pixeles cuyas coordenadas están dentro del cuadrante
     (define crop_formato (lambda (formato_pixeles x1 y1 x2 y2)
         (if (null? formato_pixeles)
             null
-            (if (and
-                 (>= (x_rgb (car formato_pixeles)) x1)
-                 (<= (x_rgb (car formato_pixeles)) x2)
-                 (>= (y_rgb (car formato_pixeles)) y1)
-                 (<= (y_rgb (car formato_pixeles)) y2))
-                
+            (if (and (>= (x_rgb (car formato_pixeles)) x1) (<= (x_rgb (car formato_pixeles)) x2) (>= (y_rgb (car formato_pixeles)) y1) (<= (y_rgb (car formato_pixeles)) y2))
                  (cons (car formato_pixeles) (crop_formato (cdr formato_pixeles) x1 y1 x2 y2))
                  (crop_formato (cdr formato_pixeles) x1 y1 x2 y2)))))
 
-     (modificar_formato_image image_ingresada (crop_formato (formato_image image_ingresada) (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)))))
+     (modificar_formato_image image_ingresada (crop_formato (pixel-format image_ingresada) (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)))))
 
 
-; Descripción: Compress
-; Dom: image
-; Rec: image
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que comprime una imagen eliminando aquellos pixeles con el color más frecuente, compress
 (define compress (lambda (image_ingresada)
     
-    (cond
-      [(bitmap? image_ingresada)
-       (modificar_formato_image image_ingresada
-                        (compress-formato-bit (formato_image image_ingresada) (bit_mayor (histogram image_ingresada))))]
+    (cond     [(bitmap? image_ingresada) (modificar_formato_image image_ingresada
+                        (compress-formato-bit (pixel-format image_ingresada) (bit_mayor (histogram image_ingresada))))]
          
-      [(hexmap? image_ingresada)
-       (modificar_formato_image image_ingresada
-                        (compress-formato-hex (formato_image image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
+              [(hexmap? image_ingresada) (modificar_formato_image image_ingresada
+                        (compress-formato-hex (pixel-format image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
 
-      [(pixmap? image_ingresada)
-       (modificar_formato_image image_ingresada
-                        (compress-formato-rgb (formato_image image_ingresada) (rgb_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
+              [(pixmap? image_ingresada) (modificar_formato_image image_ingresada
+                        (compress-formato-rgb (pixel-format image_ingresada) (rgb_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))])))
 
-)))
-      
-; Descripción: Descompress
-; Dom: image
-; Rec: image
-
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que permite descomprimir una imagen comprimida, descompress
 (define descompress (lambda (image_ingresada)
-
                       
-    (cond
-      
-      [(ormap pixbit-d_compressed? (formato_image image_ingresada))
+    (cond  [(ormap pixbit-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
+                       (descompress-formato-bit (pixel-format image_ingresada) (bit_menor (histogram image_ingresada))))]
+           
+           [(ormap pixhex-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
+                       (descompress-formato-hex (pixel-format image_ingresada)))]
+           
+           [(ormap pixrgb-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
+                       (descompress-formato-rgb (pixel-format image_ingresada)))]
+           
+           [else image_ingresada])))
 
-       (modificar_formato_image image_ingresada
-                       (descompress-formato-bit (formato_image image_ingresada) (bit_menor (histogram image_ingresada))))]
-      
-
-      [(ormap pixhex-d_compressed? (formato_image image_ingresada))
-       (modificar_formato_image image_ingresada
-                       (descompress-formato-hex (formato_image image_ingresada)))]
-
-
-      [(ormap pixrgb-d_compressed? (formato_image image_ingresada))
-       (modificar_formato_image image_ingresada
-                       (descompress-formato-rgb (formato_image image_ingresada)))]
-      
-      [else image_ingresada]
-      )))
-
-
-
-; Descripción: edit
-; Dom: image
-; Rec: image
+; Dominio: image
+; Recorrido: image
+; Descripción: Función que permite aplicar funciones especiales a las imágenes, edit
+; Tipo de recursión: Natural
 (define edit (lambda (filtro image_ingresado)
      (define map_edit (lambda (filtro lista)
        (if (null? lista)
            null
            (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
-       (modificar_formato_image image_ingresado (map_edit filtro (formato_image image_ingresado)))))
+       (modificar_formato_image image_ingresado (map_edit filtro (pixel-format image_ingresado)))))
 
-
-
-; Descripción: image->string
-; Dom: image x función
-; Rec: string
+; Dominio: image X función
+; Recorrido: string
+; Descripción: Función que transforma una imagen a una representación string, image->string
 (define image->string (lambda (image funcion_pixel)
-        (funcion_pixel (formato_image image) (largo_pos_y image))))
-
-
-;-----------------------------------------------------------------
-
+        (funcion_pixel (pixel-format image) (largo_pos_y image))))
 
 ; exportar la funcion al exterior
 (provide (all-defined-out))

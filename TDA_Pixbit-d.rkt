@@ -1,160 +1,134 @@
 #lang racket
 
 
+#|
+-----------------------------------TDA PIXBIT-D -----------------------------------------------------------------
 
-;-----------------------------------TDA PIXBIT-D -----------------------------------------------------------------
+----------------------------------REPRESENTACION-------------------------------------------------------------
 
-;----------------------------------REPRESENTACION-------------------------------------------------------------
+ El TDA representa pixel tipo bitmap como una lista de 4 parametros, uno que contiene la coordenada x, otro
+ para la coordenada y, uno que contenga el valor del bit y el último para la profundidad
+ (int, int, bit([0, 1]), int)
 
-; El TDA representa pixel tipo rgb con parametros (posicion_x, posicion_y, binario [0/1], profundidad).
-; Se representa un pixel como una lista de custro parametros
-; (posicionX, posicionY, Binario, profundidad)
-
+|#
 ;-----------------------------------CONSTRUCTOR-------------------------------------------------------------
 
-; Descripción: formato de un pixbit-d
-; Dom: x int X y int X bit int X d int
-; Rec: pixbit-d
-(define pixbit-d (lambda (x y bit d)
-               (list x y bit d)))
-
+; Dominio: x (int) X y (int) X bit ([0, 1]) X d (int)
+; Recorrido: pixbit-d
+; Descripción: Función constructora de un pixbit-d
+(define pixbit-d (lambda (x y bit d) (list x y bit d)))
 
 ;----------------------------------- SELECTORES--------------------------------------------------------------
 
-; Descripción: obtener la posición x de un pixbit-d
-; Dom: pixbit-d
-; Rec: posición x (int)
+; Dominio: pixbit-d
+; Recorrido: posición x (int)
+; Descripción: Función para recuperar la posición x de un pixbit-d
 (define x_bit (lambda (pixbit-d) (car pixbit-d)))
 
-; Descripción: obtener la posicion y de un pixbit-d
-; Dom: pixbit-d
-; Rec: posición y (int)
+; Dominio: pixbit-d
+; Recorrido: posición y (int)
+; Descripción: Función para recuperar la posicion y de un pixbit-d
 (define y_bit (lambda (pixbit-d) (cadr pixbit-d)))
 
-; Descripción: obtener el bit de un pixrgb-d
-; Dom: pixbit-d
-; Rec: bit (int)
+; Dominio: pixbit-d
+; Recorrido: bit (int)
+; Descripción: Función para recuperar el bit de un pixrgb-d
 (define bit (lambda (pixbit-d) (caddr pixbit-d)))
 
-; Descripción: obtener la profundidad de un pixbit-d
-; Dom: pixbit-d
-; Rec: d (int)
+; Dominio: pixbit-d
+; Recorrido: profundidad (int)
+; Descripción: Función para recuperar la profundidad de un pixbit-d
 (define d_bit (lambda (pixbit-d) (cadddr pixbit-d)))
+
+; Verificar si es selector
+; Dominio: image
+; Recorrido: bit (int)
+; Descripción: Función que recopila la cantidad de bit 0 del formato de pixeles
+; Tipo de recursión: Cola
+(define cantidad_bit (lambda (formato_pixeles bit_ingresado result)
+    (if (null? formato_pixeles)
+        result
+        (if (= (bit (car formato_pixeles)) bit_ingresado)
+            (cantidad_bit (cdr formato_pixeles) bit_ingresado (+ result 1))
+            (cantidad_bit (cdr formato_pixeles) bit_ingresado result)))))
 
 ; ---------------------------------- PERTENENCIA------------------------------------------------------------
 
-; Descripción: función que verifica si el argumento es un pixrgb-d
-; Dom: x (int) X y (int) X bit (int) X d (int)
-; Rec: Boleano
+; Dominio: x (int) X y (int) X bit (int) X d (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el argumento es un pixrgb-d
 (define pixbit-d? (lambda (pixbit-d)
-   (if (and (= (length pixbit-d) 4)
-            (number? (x_bit pixbit-d))
-            (number? (y_bit pixbit-d))
-            (number? (bit pixbit-d)) (bit? (bit pixbit-d))
-            (number? (d_bit pixbit-d))
-       
-            ) #t #f)))
+   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
+       #t #f)))
 
-; Descripción: función que verifica si el bit es un bit
-; Dom: int
-; Rec: Boleano
-(define bit? (lambda (bit)
-     (if (or (= bit 0) (= bit 1)) #t #f)))
+; Dominio: bit (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el bit es un bit ([0, 1])
+(define bit? (lambda (bit) (if (and (number? bit) (or (= bit 0) (= bit 1))) #t #f)))
 
-
-
+; Dominio: pixbit-d
+; Recorrido: boleano
+; Descripción: Función que verifica si un bitmap fue comprimido
 (define pixbit-d_compressed? (lambda (pixbit-d)
-   (if (and (= (length pixbit-d) 4)
-            (number? (x_bit pixbit-d))
-            (number? (y_bit pixbit-d))
-            (number? (bit pixbit-d))
-            (compressed_bit? (bit pixbit-d))
-            (number? (d_bit pixbit-d))
-       
-            ) #t #f)))
+   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (compressed_bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
+       #t #f)))
 
-
-; Descripción: función que verifica si se comprimio un pixbit-d
-; Dom: pixbit-d
-; Rec: boleano
-(define compressed_bit? (lambda (bit)
-     (if (= bit -1) #t #f)))
-
+; Dominio: pixbit-d
+; Recorrido: boleano
+; Descripción: Función que verifica si se comprimio un pixbit-d
+(define compressed_bit? (lambda (bit) (if (and (number? bit) (= bit -1)) #t #f)))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
-; Descripción: modificar la posicion x de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que modifica la posicion x de un pixbit-d
 (define cambiar_x_bit (lambda (pixbit-d_pasado x_nuevo)               
       (pixbit-d x_nuevo (y_bit pixbit-d_pasado) (bit pixbit-d_pasado) (d_bit pixbit-d_pasado))))
 
-
-; Descripción: modificar la posicion y de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que modifica la posicion y de un pixbit-d
 (define cambiar_y_bit (lambda (pixbit-d_pasado y_nuevo)               
       (pixbit-d (x_bit pixbit-d_pasado) y_nuevo (bit pixbit-d_pasado) (d_bit pixbit-d_pasado))))
 
-
-; Descripción: modificar el bit de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que modifica el bit de un pixbit-d
 (define cambiar_b_bit (lambda (pixbit-d_pasado b_nuevo)               
       (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) b_nuevo (d_bit pixbit-d_pasado))))
 
-
-; Descripción: modificar la profundidad de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que modifica la profundidad de un pixbit-d
 (define cambiar_d_bit (lambda (pixbit-d_pasado d_nuevo)               
       (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) (bit pixbit-d_pasado) d_nuevo)))
 
-;------------------------------------------- SELECTORES----------------------------------------------
-
-; Descripción: función que recopila número de bit 0
-; Dom: image
-; Rec: entero
-; tipo de recursión: cola
-(define cantidad_bit (lambda (formato_image bit_ingresado result)
-    (if (null? formato_image)
-        result
-        (if (= (bit (car formato_image)) bit_ingresado)
-            (cantidad_bit (cdr formato_image) bit_ingresado (+ result 1))
-            (cantidad_bit (cdr formato_image) bit_ingresado result)
-            
-            ))))
    
 ;-------------------------------------------- OTROS --------------------------------------------------
 
-; Descripción: función histograma que recopila numero de bit
-; Dom: lista (pixeles)
-; Rec: lista
-(define histograma_bit (lambda (formato_image)
+; Dominio: formato de pixeles (list)
+; Recorrido: list
+; Descripción: Función histograma que recopila numero de bit
+(define histogram_bit (lambda (formato_image)
     (list (list (cantidad_bit formato_image 0 0) 0) (list (cantidad_bit formato_image 1 0) 1))))
 
-(define actual (lambda (lista)
-          (car lista))) 
-
-(define siguiente (lambda (lista)
-          (cdr lista)))
-
+; Dominio: histogram de bit
+; Rec: int
 ; Descripción: función que obtiene el bit más repetido del histograma
-; Dom: lista de histograma
-; Rec: entero
 (define bit_mayor (lambda (lista_bit)
-    (if (> (actual (actual lista_bit)) (actual (actual (siguiente lista_bit))))
-        0
-        1
-        )))
+    (if (> (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
+; Dominio: histogram de bit
+; Recorrido: int
+; Descripción: Función que obtiene el bit menos repetido del histograma
 (define bit_menor (lambda (lista_bit)
-    (if (< (actual (actual lista_bit)) (actual (actual (siguiente lista_bit))))
-        0
-        1
-        )))
+    (if (< (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
-; Descripción: función que crea una lista sin el bit más repetido
+; Dominio: formato de pixeles (list) X elemento (int)
+; Recorrido: formato de pixeles (list)
+; Descripción: Función que crea una lista sin el bit más repetido
+; Tipo de recursión: Natural
 (define compress-formato-bit (lambda (lista elemento)
     (if (null? lista)
         null
@@ -162,9 +136,10 @@
             (cons (cambiar_b_bit (car lista) -1) (compress-formato-bit (cdr lista) elemento))
             (cons (car lista) (compress-formato-bit (cdr lista) elemento))))))
 
-
-
+; Dominio: formato de pixeles (list) X elemento (int)
+; Recorrido: formato de pixeles (list)
 ; Descripción: función que devuelve los valores perdidos tras compress
+; Tipo de recursión: Natural
 (define descompress-formato-bit (lambda (lista elemento)
     (if (null? lista)
         null
@@ -172,10 +147,9 @@
             (cons (cambiar_b_bit (car lista) elemento) (descompress-formato-bit (cdr lista) elemento))
             (cons (car lista) (descompress-formato-bit (cdr lista) elemento))))))
 
-
-; Descripción: Invertir color de bit de un pixbit-d
-; Dom: pixbit-d
-; Rec: pixbit-d
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que invierte el color de bit de un pixbit-d
 (define invertColorBit (lambda (pixbit-d_pasado)
     (if (pixbit-d? pixbit-d_pasado)
         (if (= (bit pixbit-d_pasado) 0)
@@ -183,9 +157,9 @@
             (cambiar_b_bit pixbit-d_pasado 0))
         pixbit-d_pasado)))
 
-; Descripción: pixbit->string
-; Dom: formato image x largo image
-; Rec: string
+; Dominio: formato de pixeles (list) X largo (int)
+; Recorrido: string
+; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixbit->string
 (define pixbit->string (lambda (formato_image largo)
                             
     (define fila_bit (lambda (formato_image fila)
@@ -195,7 +169,7 @@
                 (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
                 (fila_bit (cdr formato_image) fila)))))
 
-     (define formar_string (lambda (formato_image largo fila)
+    (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)
               (string-append (fila_bit formato_image fila) (formar_string formato_image largo (+ fila 1)))
                "\n")))

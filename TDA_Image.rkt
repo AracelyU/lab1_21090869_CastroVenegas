@@ -222,7 +222,7 @@
     ; Función que tranforma los colores de pixmap a hexmap
     (define convertir_rgb (lambda (c1 c2 c3) (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
-    (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (c1_rgb pixel) (c2_rgb pixel) (c3_rgb pixel))) (d_rgb pixel))))
+    (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (getR pixel) (getG pixel) (getB pixel))) (getD pixel))))
 
 ; Dominio: image
 ; Recorrido: image
@@ -295,6 +295,11 @@
 ; Descripción: Función que transforma una imagen a una representación string, image->string
 (define image->string (lambda (image funcion_pixel)
         (funcion_pixel (pixel-format image) (largo_pos_y image))))
+
+
+
+
+
 
 ; exportar la funcion al exterior
 (provide (all-defined-out))

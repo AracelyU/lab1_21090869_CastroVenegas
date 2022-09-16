@@ -105,7 +105,8 @@
       (if (= contador (* (width-image image) (height-image image)))
           null
           (cond
-            [(<= pos_y (largo_pos_x image)) (cons (encontrar_pixel lista pos_x pos_y) (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
+            [(<= pos_y (largo_pos_x image)) (cons (encontrar_pixel lista pos_x pos_y)
+                 (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
             [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
 ; Dominio: image
@@ -142,12 +143,14 @@
         (if (null? formato_pixeles)
             null
             (if (and (<= fila (largo_pos_x image)) (>= contador 0))
-                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles)) (flipH-formato (cdr formato_pixeles) fila (- contador 1) image)) 
+                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles))
+                       (flipH-formato (cdr formato_pixeles) fila (- contador 1) image)) 
                   (if (<= fila (largo_pos_x image))
                       (flipH-formato formato_pixeles (+ fila 1) (largo_pos_x image_ingresada) image)
                        null)))))
 
-   (modificar_formato_image image_ingresada (ordenar_formato (flipH-formato (pixel-format image_ingresada) 0 (largo_pos_x image_ingresada)  image_ingresada) 0 0 image_ingresada 0))))
+   (modificar_formato_image image_ingresada (ordenar_formato
+         (flipH-formato (pixel-format image_ingresada) 0 (largo_pos_x image_ingresada)  image_ingresada) 0 0 image_ingresada 0))))
 
 ; Dominio: image
 ; Recorrido: image
@@ -160,12 +163,14 @@
         (if (null? formato_pixeles)
             null
             (if (and (>= fila 0) (<= contador (largo_pos_x image)))
-                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles)) (flipV-formato (cdr formato_pixeles) fila (+ contador 1) image)) 
+                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles))
+                       (flipV-formato (cdr formato_pixeles) fila (+ contador 1) image)) 
                   (if (>= fila 0)
                       (flipV-formato formato_pixeles (- fila 1) 0 image)
                        null)))))
 
-     (modificar_formato_image image_ingresada (ordenar_formato (flipV-formato (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
+     (modificar_formato_image image_ingresada (ordenar_formato
+         (flipV-formato (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
 
 ; Dominio: image
 ; Recorrido: image
@@ -178,16 +183,18 @@
         (if (null? formato_pixeles)
             null
             (if (and (>= fila 0) (<= contador (largo_pos_x image)))
-                    (cons (modificar_posicion_pixel fila contador (car formato_pixeles)) (rotate (cdr formato_pixeles) fila (+ contador 1) image))
+                    (cons (modificar_posicion_pixel fila contador (car formato_pixeles))
+                          (rotate (cdr formato_pixeles) fila (+ contador 1) image))
                     (if (>= fila 0)
                         (rotate formato_pixeles (- fila 1) 0 image)
                         null)))))
 
     ; Función que intercambia el ancho con el largo para cuando rotas la imagen
-    (define intercambiar_dimensiones (lambda (image_ingresada) (image (height-image image_ingresada) (width-image image_ingresada) (pixel-format image_ingresada))))
+    (define intercambiar_dimensiones (lambda (image_ingresada)
+            (image (height-image image_ingresada) (width-image image_ingresada) (pixel-format image_ingresada))))
 
     (modificar_formato_image (intercambiar_dimensiones image_ingresada)
-                             (ordenar_formato (rotate (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
+            (ordenar_formato (rotate (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
 
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
@@ -266,7 +273,7 @@
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que permite descomprimir una imagen comprimida, descompress
-(define descompress (lambda (image_ingresada)
+(define decompress (lambda (image_ingresada)
                       
     (cond  [(ormap pixbit-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
                        (descompress-formato-bit (pixel-format image_ingresada) (bit_menor (histogram image_ingresada))))]
@@ -297,9 +304,46 @@
         (funcion_pixel (pixel-format image) (largo_pos_y image))))
 
 
+; Dominio: image
+; Recorrido: image (list)
+; Descripción: Función que permite crear una imágen de una profundidad rellenandolo con blanco
 
+
+
+; Dominio: profundidad (list) X posición_x (int) X posición_y (int) X image_ingresada (image) X contador (int)
+; Recorrido: image (list)
+; Descripción: Función que ordena un formato de pixeles
+; Tipo de recursión: Natural
+(define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
+      (if (= contador (* (width-image image) (height-image image)))
+          null
+         (cond
+
+            [(<= pos_y (largo_pos_x image))
+               (if (= (d_bit (encontrar_pixel lista pos_x pos_y)) elemento)
+                    (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento))
+                    (cons (cambiar_b_bit (encontrar_pixel lista pos_x pos_y) 0) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento)))]
+
+            [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento)]))))
 
 
 
 ; exportar la funcion al exterior
+#|
+(provide image)
+(provide bitmap?)
+(provide hexmap?)
+(provide pixmap?)
+(provide compressed?)
+(provide flipH)
+(provide flipV)
+(provide crop)
+(provide imgRGB->imgHex)
+(provide histogram)
+(provide rotate90)
+(provide compress)
+(provide edit)
+(provide image->string)
+(provide decompress)
+|#
 (provide (all-defined-out))

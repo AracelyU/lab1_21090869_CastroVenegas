@@ -126,6 +126,7 @@
         (cons (list (hex_iguales formato_pixeles (hex (car formato_pixeles)) 0)(hex (car formato_pixeles)))
               (histograma_hex (filtro_iguales_hex formato_pixeles (hex (car formato_pixeles))))))))
 
+
 ; Dominio: histograma de hex
 ; Recorrido: string
 ; Descripción: Función que obtiene el hex más repetido del histograma de hex

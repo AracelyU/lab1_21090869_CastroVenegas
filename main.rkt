@@ -23,8 +23,8 @@
 ; definir 4 pixeles de un pixbit-d
 (define pixbit_1 (pixbit-d 0 0 0 10)) ; lista_2
 (define pixbit_2 (pixbit-d 0 1 1 20))
-(define pixbit_3 (pixbit-d 0 2 0 30))
-(define pixbit_4 (pixbit-d 1 0 1 40))
+(define pixbit_3 (pixbit-d 0 2 0 20))
+(define pixbit_4 (pixbit-d 1 0 1 20))
 (define pixbit_5 (pixbit-d 1 1 0 50))
 (define pixbit_6 (pixbit-d 1 2 0 60))
 (define pixbit_7 (pixbit-d 2 0 0 70))
@@ -32,7 +32,7 @@
 (define pixbit_9 (pixbit-d 2 2 0 90))
 
 ; definir una image 2
-(define image_2 (image 2 2 pixbit_1 pixbit_2 pixbit_3 pixbit_4))
+(define image_2 (image 3 3 pixbit_1 pixbit_2 pixbit_3 pixbit_4 pixbit_5 pixbit_6 pixbit_7 pixbit_8 pixbit_9))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
 ; definir 4 pixeles de un pixhex-d
@@ -64,9 +64,12 @@
                   (pixbit-d 1 0 1 10)
                   (pixbit-d 1 1 0 255)))
 
+(define a (profundidad_lista (pixel-format image_2)))
+(define b (car (car a)))
+(define c (rellenar_profundidad (pixel-format image_2) 0 0 image_2 0 1))
+#|
 (define img3 (imgRGB->imgHex img1))
-
-
+(define img3 (imgRGB->imgHex img1))
 (define img4 (crop img1 0 0 0 0)) ; debería retornar una imágen con un pixel
 (define img5 (crop img2 0 0 0 1)) ; debería retornar una imágen con dos pixeles
 (define img6 (crop img1 0 1 1 1)) ; debería retornar una imágen con dos pixeles
@@ -81,7 +84,7 @@
 (define img22 (rotate90 img5))
 (define img23 (rotate90 img6))
 (define img24 (rotate90 img7))
-
+|#
 
 
 

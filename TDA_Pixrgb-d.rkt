@@ -302,9 +302,7 @@
 ; Recorrido: pixrgb-d
 ; Descripción: Función que modifica un canal de colores o profundidad
 (define adjustChannel (lambda (funcion_get funcion_set funcion_operacion)
-                      (lambda (pixrgb-d_pasado)
-              
-       (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
+                      (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
 
 ; exportar la funcion al exterior
 (provide (all-defined-out))

@@ -5,8 +5,6 @@
 (require "TDA_Pixbit-d.rkt")
 (require "TDA_Pixhex-d.rkt")
 
-
-
 #|
 -------------------------------- TDA IMAGEN --------------------------------------------------------------
  
@@ -262,7 +260,7 @@
 (define compress (lambda (image_ingresada)
     
     (cond     [(bitmap? image_ingresada) (modificar_formato_image image_ingresada
-                        (compress-formato-bit (pixel-format image_ingresada) (bit_mayor (histogram image_ingresada))))]
+                        (compress-formato-bit (pixel-format image_ingresada) (bit_mayor_menor > (histogram image_ingresada))))]
          
               [(hexmap? image_ingresada) (modificar_formato_image image_ingresada
                         (compress-formato-hex (pixel-format image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
@@ -276,7 +274,7 @@
 (define decompress (lambda (image_ingresada)
                       
     (cond  [(ormap pixbit-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
-                       (descompress-formato-bit (pixel-format image_ingresada) (bit_menor (histogram image_ingresada))))]
+                       (descompress-formato-bit (pixel-format image_ingresada) (bit_mayor_menor < (histogram image_ingresada))))]
            
            [(ormap pixhex-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
                        (descompress-formato-hex (pixel-format image_ingresada)))]
@@ -291,10 +289,11 @@
 ; Descripción: Función que permite aplicar funciones especiales a las imágenes, edit
 ; Tipo de recursión: Natural
 (define edit (lambda (filtro image_ingresado)
-     (define map_edit (lambda (filtro lista)
-       (if (null? lista)
+       ; Función map para edit
+       (define map_edit (lambda (filtro lista)
+         (if (null? lista)
            null
-           (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
+          (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
        (modificar_formato_image image_ingresado (map_edit filtro (pixel-format image_ingresado)))))
 
 ; Dominio: image X función
@@ -303,29 +302,84 @@
 (define image->string (lambda (image funcion_pixel)
         (funcion_pixel (pixel-format image) (largo_pos_y image))))
 
-
 ; Dominio: image
 ; Recorrido: image (list)
 ; Descripción: Función que permite crear una imágen de una profundidad rellenandolo con blanco
+(define depthLayers (lambda (image_ingresada)
+     (cond
+       [(bitmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel-format image_ingresada) 0)]
+       [(hexmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel-format image_ingresada) "#000000")]
+       [(pixmap? image_ingresada) (profundidad_rgb image_ingresada (pixel-format image_ingresada))]
+       [else image_ingresada])))
 
-
-
-; Dominio: profundidad (list) X posición_x (int) X posición_y (int) X image_ingresada (image) X contador (int)
+; Dominio: image X formato de pixeles (list)
 ; Recorrido: image (list)
-; Descripción: Función que ordena un formato de pixeles
+; Descripción:  Función que permite separar una imágen en capas en base a la profundidad
+; en que se sitúan los pixeles donde en las imágenes resultantes se sustituyen los píxeles
+; que se encuentran en otro nivel de profundidad por píxeles blancos, para bitmap y hexmap
 ; Tipo de recursión: Natural
-(define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
-      (if (= contador (* (width-image image) (height-image image)))
-          null
-         (cond
+(define profundidad_bit_hex (lambda (image_ingresada lista reemplazo)
 
-            [(<= pos_y (largo_pos_x image))
-               (if (= (d_bit (encontrar_pixel lista pos_x pos_y)) elemento)
-                    (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento))
-                    (cons (cambiar_b_bit (encontrar_pixel lista pos_x pos_y) 0) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento)))]
+     ; Función que rellena el resto de pixeles en blanco (0 - "#000000")
+     (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento reemplazo)
+          (if (= contador (* (width-image image) (height-image image)))
+              null
+             (cond
 
-            [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento)]))))
+                [(<= pos_y (largo_pos_x image))
+                   (if (= (d_bit (encontrar_pixel lista pos_x pos_y)) elemento)
+                        (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo))
+                        (cons (cambiar_b_bit (encontrar_pixel lista pos_x pos_y) reemplazo) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo)))]
 
+                [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento reemplazo)]))))
+
+      ; Función que filtra los elementos que tienen la misma profundidad e
+      (define filtro_profundidad (lambda (formato_pixeles e)
+         (if (null? formato_pixeles)
+              null
+              (if (= (d_bit (car formato_pixeles)) e)
+                  (filtro_profundidad (cdr formato_pixeles) e)
+                  (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
+
+      (if (null? lista)
+         null
+        (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (d_bit (car lista)) reemplazo))
+              (profundidad_bit_hex image_ingresada (filtro_profundidad lista (d_bit (car lista))) reemplazo)))))
+
+
+; Dominio: image X formato de pixeles (list)
+; Recorrido: image (list)
+; Descripción:  Función que permite separar una imágen en capas en base a la profundidad
+; en que se sitúan los pixeles donde en las imágenes resultantes se sustituyen los píxeles
+; que se encuentran en otro nivel de profundidad por píxeles blancos, para pixmap
+; Tipo de recursión: Natural
+(define profundidad_rgb (lambda (image_ingresada lista)
+
+     ; Función que rellenar pixeles restantes en blanco (255, 255, 255)
+     (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
+          (if (= contador (* (width-image image) (height-image image)))
+              null
+             (cond
+
+                [(<= pos_y (largo_pos_x image))
+                   (if (= (getD (encontrar_pixel lista pos_x pos_y)) elemento)
+                        (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento))
+                        (cons (setB (setG (setR (encontrar_pixel lista pos_x pos_y) 255) 255) 255) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento)))]
+
+                [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento)]))))
+
+      ; Función filtra los elementos que tienen la misma profundidad e
+      (define filtro_profundidad (lambda (formato_pixeles e)
+         (if (null? formato_pixeles)
+              null
+              (if (= (getD (car formato_pixeles)) e)
+                  (filtro_profundidad (cdr formato_pixeles) e)
+                  (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
+
+      (if (null? lista)
+         null
+        (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (getD (car lista))))
+              (profundidad_rgb image_ingresada (filtro_profundidad lista (getD (car lista))))))))
 
 
 ; exportar la funcion al exterior

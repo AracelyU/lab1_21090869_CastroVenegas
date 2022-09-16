@@ -1,6 +1,5 @@
 #lang racket
 
-
 #|
 -----------------------------------TDA PIXBIT-D -----------------------------------------------------------------
 
@@ -98,13 +97,7 @@
 (define cambiar_b_bit (lambda (pixbit-d_pasado b_nuevo)               
       (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) b_nuevo (d_bit pixbit-d_pasado))))
 
-; Dominio: pixbit-d
-; Recorrido: pixbit-d
-; Descripción: Función que modifica la profundidad de un pixbit-d
-(define cambiar_d_bit (lambda (pixbit-d_pasado d_nuevo)               
-      (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) (bit pixbit-d_pasado) d_nuevo)))
 
-   
 ;-------------------------------------------- OTROS --------------------------------------------------
 
 ; Dominio: formato de pixeles (list)
@@ -115,15 +108,10 @@
 
 ; Dominio: histogram de bit
 ; Rec: int
-; Descripción: función que obtiene el bit más repetido del histograma
-(define bit_mayor (lambda (lista_bit)
-    (if (> (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
+; Descripción: función que obtiene el bit más o menos repetido del histograma
+(define bit_mayor_menor (lambda (signo lista_bit)
+    (if (signo (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
-; Dominio: histogram de bit
-; Recorrido: int
-; Descripción: Función que obtiene el bit menos repetido del histograma
-(define bit_menor (lambda (lista_bit)
-    (if (< (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
 ; Dominio: formato de pixeles (list) X elemento (int)
 ; Recorrido: formato de pixeles (list)
@@ -175,40 +163,6 @@
                "\n")))
                          
     (formar_string formato_image largo 0)))
-
-
-; Dominio: formato de pixeles (list)
-; Recorrido: list
-; Descripción: Función que obtiene pixeles con distintas profundidades
-; Tipo de recursión: Natural
-
-(define profundidad_lista (lambda (formato_pixeles)
-                            
-     (define igual_profundidad (lambda (formato_pixeles e)
-             (if (null? formato_pixeles)
-                 null
-                 (if (= (d_bit (car formato_pixeles)) e)
-                     (cons (car formato_pixeles) (igual_profundidad (cdr formato_pixeles) e))
-                     (igual_profundidad (cdr formato_pixeles) e)))))
-
-
-     (define filtro_profundidad (lambda (formato_pixeles e)
-         (if (null? formato_pixeles)
-              null
-              (if (= (d_bit (car formato_pixeles)) e)
-                  (filtro_profundidad (cdr formato_pixeles) e)
-                  (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
-
-     (if (null? formato_pixeles)
-          null
-         (cons (igual_profundidad formato_pixeles (d_bit (car formato_pixeles)))
-               (profundidad_lista (filtro_profundidad formato_pixeles (d_bit (car formato_pixeles))))))))
-
-
-; Dominio: formato de pixeles (list)
-; Recorrido: list
-; Descripción: Función que recopila la cantidad de elemento de cada tipo de una lista
-
 
 
 ; exportar la funcion al exterior

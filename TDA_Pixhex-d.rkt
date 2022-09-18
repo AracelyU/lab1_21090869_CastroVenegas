@@ -89,38 +89,31 @@
       (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) (hex pixhex-d_pasado) d_nuevo)))
 
 
-
-;--------------------------------------- SELECTORES ----------------------------------------------
-
-; Dominio: formato de pixeles (list) x elemento (string)
-; Rec: list
-; Descripción: Función que recupera los elementos iguales a e
-; Tipo de recursión: Natural
-(define filtro_iguales_hex (lambda (formato_pixeles e)
-    (if (null? formato_pixeles)
-        null
-        (if (not (string-ci=? (hex (car formato_pixeles)) e))
-            (cons (car formato_pixeles) (filtro_iguales_hex (cdr formato_pixeles) e))
-            (filtro_iguales_hex (cdr formato_pixeles) e)))))
-
-; Dominio: formato de pixeles (list) x elemento (string)
-; Recorrido: int
-; Descripción: Función que cuenta los elementos iguales a e en una lista
-; Tipo de recursión: Cola
-(define hex_iguales (lambda (formato_pixeles e result)
-       (if (null? formato_pixeles)
-           result
-           (if (and (string-ci=? (hex (car formato_pixeles)) e) )
-               (hex_iguales (cdr formato_pixeles) e (+ result 1))
-               (hex_iguales (cdr formato_pixeles) e result)))))
-
-
 ;---------------------------------------------------- OTROS -----------------------------------------------------------------------------------
 
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
 ; Descripción: Función que recopila la cantidad de elemento de cada tipo de una lista
 (define histograma_hex (lambda (formato_pixeles)
+
+   ; Descripción: Función que cuenta los elementos iguales a e en una lista
+   ; Tipo de recursión: Cola
+   (define hex_iguales (lambda (formato_pixeles e result)
+       (if (null? formato_pixeles)
+           result
+           (if (and (string-ci=? (hex (car formato_pixeles)) e) )
+               (hex_iguales (cdr formato_pixeles) e (+ result 1))
+               (hex_iguales (cdr formato_pixeles) e result)))))
+
+   ; Descripción: Función que recupera los elementos iguales a e
+   ; Tipo de recursión: Natural
+   (define filtro_iguales_hex (lambda (formato_pixeles e)
+    (if (null? formato_pixeles)
+        null
+        (if (not (string-ci=? (hex (car formato_pixeles)) e))
+            (cons (car formato_pixeles) (filtro_iguales_hex (cdr formato_pixeles) e))
+            (filtro_iguales_hex (cdr formato_pixeles) e)))))
+                         
     (if (null? formato_pixeles)
         null
         (cons (list (hex_iguales formato_pixeles (hex (car formato_pixeles)) 0)(hex (car formato_pixeles)))
@@ -138,73 +131,74 @@
             (hex_mayor (cdr lista_hex) (car lista_hex))
             (hex_mayor (cdr lista_hex) result)))))
 
-; Dominio: string
-; Recorrido: list
-; Descripción: Función que cambia un hexmap a pixmap
-(define convertir_hex_rgb (lambda (string_ingresado)
-
-      ; Función para convertir un caracter a numero
-     (define valor_entero (lambda (a)
-       (cond
-          [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
-          [(char=? a #\5) 5][(char=? a #\6) 6][(char=? a #\7) 7][(char=? a #\8) 8]
-          [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
-          [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
-
-
-    ; Función que recupera los valores de cada string
-    (define obtener_valor (lambda (string_ingresado posicion)
-        (if (> posicion (- (string-length string_ingresado) 1))
-            null
-            (cons (valor_entero (string-ref string_ingresado posicion)) (obtener_valor string_ingresado (+ posicion 1))))))
-
-    ; Función que transforma una lista de valores en un entero
-    (define hex->rgb (lambda (lista largo result)
-         (if (< largo 0)
-             result
-             (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
-
-    (list
-        (hex->rgb (obtener_valor (substring string_ingresado 0 2) 0) 1 0)
-        (hex->rgb (obtener_valor (substring string_ingresado 2 4) 0) 1 0)
-        (hex->rgb (obtener_valor (substring string_ingresado 4 6) 0) 1 0))))
-
 
 ; Dominio: formato de pixeles (list) X elemento (string)
 ; Recorrido: list
 ; Descripción: función que crea una lista sin el hex más repetido
 ; Tipo de recursión: Natural
 (define compress-formato-hex (lambda (lista elemento)
+
+
+    ; Descripción: Función que cambia un hexmap a pixmap
+   (define convertir_hex_rgb (lambda (string_ingresado)
+
+         ; Función para convertir un caracter a numero
+        (define valor_entero (lambda (a)
+          (cond
+             [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
+             [(char=? a #\5) 5][(char=? a #\6) 6][(char=? a #\7) 7][(char=? a #\8) 8]
+             [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
+             [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
+
+
+       ; Función que recupera los valores de cada string
+       (define obtener_valor (lambda (string_ingresado posicion)
+           (if (> posicion (- (string-length string_ingresado) 1))
+               null
+               (cons (valor_entero (string-ref string_ingresado posicion)) (obtener_valor string_ingresado (+ posicion 1))))))
+
+       ; Función que transforma una lista de valores en un entero
+       (define hex->rgb (lambda (lista largo result)
+            (if (< largo 0)
+                result
+                (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
+
+       (list
+           (hex->rgb (obtener_valor (substring string_ingresado 0 2) 0) 1 0)
+           (hex->rgb (obtener_valor (substring string_ingresado 2 4) 0) 1 0)
+           (hex->rgb (obtener_valor (substring string_ingresado 4 6) 0) 1 0))))
+
+                               
      (if (null? lista)
          null
          (if (string-ci=? (hex (car lista)) elemento)
              (cons (cambiar_h_hex (car lista) (convertir_hex_rgb (hex (car lista)))) (compress-formato-hex (cdr lista) elemento))
              (cons (car lista) (compress-formato-hex (cdr lista) elemento))))))
 
-; Dominio: list
-; Recorrido: string
-; Descripción: Función que cambia una lista de colores pixmap a un string hexmap, para descompress
-(define convertir_rgb_hex_lista (lambda (lista)
-                            
-    ; Función para convertir un numero a hex
-    (define valor_hex (lambda (a)
-       (cond
-          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
-          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
-          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
-          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
-
-    ; Función que transforma un color pixmap a hexmap
-    (define rgb->hex (lambda (a)
-       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
-
-   (string-append (rgb->hex (car lista)) (rgb->hex (cadr lista)) (rgb->hex (caddr lista)))))
 
 ; Dominio: formato de pixeles (list)
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que devuelve los valores perdidos tras compress
 ; Tipo de recursión: Natural
 (define descompress-formato-hex (lambda (lista)
+
+   ; Descripción: Función que cambia una lista de colores pixmap a un string hexmap, para descompress
+   (define convertir_rgb_hex_lista (lambda (lista)
+                            
+       ; Función para convertir un numero a hex
+       (define valor_hex (lambda (a)
+          (cond
+             [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+             [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+             [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+             [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+       ; Función que transforma un color pixmap a hexmap
+       (define rgb->hex (lambda (a)
+          (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
+
+      (string-append (rgb->hex (car lista)) (rgb->hex (cadr lista)) (rgb->hex (caddr lista)))))
+                          
     (if (null? lista)
         null
         (if (compress_hex? (car lista))

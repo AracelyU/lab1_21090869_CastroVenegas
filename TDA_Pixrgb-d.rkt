@@ -51,6 +51,10 @@
 ; Descripción: Función para recuperar la profundidad de un pixrgb-d
 (define getD (lambda (pixrgb-d) (list-ref pixrgb-d 5)))
 
+; Dominio: pixrgb-d
+; Recorrido: colores RGB (list)
+; Descripción: función que recopila los colores en lista
+(define color_lista (lambda (pixel) (list (getR pixel) (getG pixel) (getB pixel))))
 
 ; ---------------------------------- PERTENENCIA------------------------------------------------------------
 
@@ -123,35 +127,16 @@
 (define setD (lambda (pixrgb-d_pasado d_nuevo)               
       (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (getR pixrgb-d_pasado) (getG pixrgb-d_pasado)(getB pixrgb-d_pasado) d_nuevo)))
 
-;-------------------------------------------------- SELECTORES--------------------------------------------------------------------------
+; Dominio: int
+; Recorrido: int
+; Descripción: Función que aumenta el canal en uno
+(define incCh (lambda (entero) (+ entero 1)))
 
-; Dominio: pixrgb-d
-; Recorrido: colores RGB (list)
-; Descripción: función que recopila los colores en lista
-(define color_lista (lambda (pixel) (list (getR pixel) (getG pixel) (getB pixel))))
-
-
-; Dominio: formato de pixeles (list) x elemento (list)
-; Recorrido: list
-; Descripción: Función que recupera la lista por los elementos iguales a e
-; Tipo de recursión: Natural
-(define filtro_iguales_rgb (lambda (formato_pixeles e)
-    (if (null? formato_pixeles)
-        null
-        (if (not (color_igual (car formato_pixeles) e))
-            (cons (car formato_pixeles) (filtro_iguales_rgb (cdr formato_pixeles) e))
-            (filtro_iguales_rgb (cdr formato_pixeles) e)))))
-
-; Dominio: formato de pixeles (list) x elemento (list)
-; Recorrido: list
-; Descripción: Función que cuenta los elementos iguales a e
-; Tipo de recursión: Cola
-(define rgb_iguales (lambda (formato_pixeles e result)
-       (if (null? formato_pixeles)
-           result
-           (if (color_igual (car formato_pixeles) e)
-               (rgb_iguales (cdr formato_pixeles) e (+ result 1))
-               (rgb_iguales (cdr formato_pixeles) e result)))))
+; Dominio: función_selectora X función_modificadora X función_operación X pixrgb-d
+; Recorrido: pixrgb-d
+; Descripción: Función que modifica un canal de colores o profundidad
+(define adjustChannel (lambda (funcion_get funcion_set funcion_operacion)
+                      (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
 
 ;--------------------------------------------------- OTROS ----------------------------------------------
 
@@ -160,6 +145,26 @@
 ; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
 ; Tipo de recursión: Natural
 (define histograma_rgb (lambda (formato_pixeles)
+
+    ; Descripción: Función que recupera la lista por los elementos iguales a e
+    ; Tipo de recursión: Natural
+    (define filtro_iguales_rgb (lambda (formato_pixeles e)
+        (if (null? formato_pixeles)
+            null
+            (if (not (color_igual (car formato_pixeles) e))
+                (cons (car formato_pixeles) (filtro_iguales_rgb (cdr formato_pixeles) e))
+                (filtro_iguales_rgb (cdr formato_pixeles) e)))))
+  
+    ; Descripción: Función que cuenta los elementos iguales a e
+    ; Tipo de recursión: Cola
+    (define rgb_iguales (lambda (formato_pixeles e result)
+        (if (null? formato_pixeles)
+           result
+           (if (color_igual (car formato_pixeles) e)
+               (rgb_iguales (cdr formato_pixeles) e (+ result 1))
+               (rgb_iguales (cdr formato_pixeles) e result)))))
+
+                         
     (if (null? formato_pixeles)
         null
         (if (color_igual (car formato_pixeles) (list -1 -1 -1))
@@ -169,7 +174,7 @@
 ; Dominio: histograma de rgb
 ; Rec: list
 ; Descripción: Función que obtiene el rgb más repetido del histograma
-; Tipo de recursión: Natural
+; Tipo de recursión: Cola
 (define rgb_mayor (lambda (lista_rgb result)
     (if (null? lista_rgb)
         (car (cdr result))
@@ -177,50 +182,55 @@
             (rgb_mayor (cdr lista_rgb) (car lista_rgb))
             (rgb_mayor (cdr lista_rgb) result)))))
 
-; Dominio: pixrgb-d
-; Recorrido: string
-; Descripción: Función que convierte los colores de rgb de enteros a string
-(define convertir_rgb_hex_pixel (lambda (pixel)
-
-      ; Función para convertir un numero a hex
-    (define valor_hex (lambda (a)
-       (cond
-          [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
-          [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
-          [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
-          [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
-
-     ; Función que transforma un color a string
-    (define rgb->hex (lambda (a)
-       (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
-
-    (setB (setG (setR pixel (rgb->hex (getR pixel))) (rgb->hex (getG pixel))) (rgb->hex (getB pixel)))))
 
 ; Dominio: formato de pixeles (list) X elemento (list)
 ; Recorrido: list
 ; Descripción: Función que crea una lista sin el rgb más repetido
 ; Tipo de recursión: Natural
 (define compress-formato-rgb (lambda (lista elemento)
+
+    ; Descripción: Función que convierte los colores de rgb de enteros a string
+    (define convertir_rgb_hex_pixel (lambda (pixel)
+
+        ; Función para convertir un numero a hex
+        (define valor_hex (lambda (a)
+           (cond
+              [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
+              [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
+              [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
+              [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
+
+         ; Función que transforma un color a string
+        (define rgb->hex (lambda (a)
+           (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
+
+       (setB (setG (setR pixel (rgb->hex (getR pixel))) (rgb->hex (getG pixel))) (rgb->hex (getB pixel)))))
+                               
     (if (null? lista)
         null
         (if (color_igual (car lista) elemento)
             (cons (convertir_rgb_hex_pixel (car lista))(compress-formato-rgb (cdr lista) elemento))
             (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
 
-; Dominio: pixrgb-d
-; Recorrido: pixrgb-d
-; Descripción: Función que convierte una pixrgb-d comprimido a su forma original
-(define convertir_valor_hex_rgb (lambda (pixel)
 
-    ; Función para convertir un caracter a numero
-     (define valor_entero (lambda (a)
-       (cond
-          [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
-          [(char=? a #\5) 5][(char=? a #\6) 6][(char=? a #\7) 7][(char=? a #\8) 8]
-          [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
-          [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
+; Dominio: formaro de pixeles (list)
+; Recorrido: list
+; Descripción: Función que descomprime cada pixrgb-d comprimido
+; Tipo de recursión: Natural
+(define descompress-formato-rgb (lambda (lista)
 
-    ; Función que recupera los valores de cada string
+     ; Descripción: Función que convierte una pixrgb-d comprimido a su forma original
+    (define convertir_valor_hex_rgb (lambda (pixel)
+
+        ; Función para convertir un caracter a numero
+        (define valor_entero (lambda (a)
+          (cond
+             [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
+             [(char=? a #\5) 5][(char=? a #\6) 6][(char=? a #\7) 7][(char=? a #\8) 8]
+             [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
+             [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
+                                      
+     ; Función que recupera los valores de cada string
     (define obtener_valor (lambda (string_ingresado posicion)
         (if (> posicion (- (string-length string_ingresado) 1))
             null
@@ -232,13 +242,9 @@
              result
              (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
 
-     (setB (setG (setR pixel (hex->rgb (obtener_valor (getR pixel) 0) 1 0)) (hex->rgb (obtener_valor (getG pixel) 0) 1 0)) (hex->rgb (obtener_valor (getB pixel) 0) 1 0))))
+    (setB (setG (setR pixel (hex->rgb (obtener_valor (getR pixel) 0) 1 0)) (hex->rgb (obtener_valor (getG pixel) 0) 1 0)) (hex->rgb (obtener_valor (getB pixel) 0) 1 0))))
 
-; Dominio: formaro de pixeles (list)
-; Recorrido: list
-; Descripción: Función que descomprime cada pixrgb-d comprimido
-; Tipo de recursión: Natural
-(define descompress-formato-rgb (lambda (lista)
+                                  
      (if (null? lista)
          null
          (if (compress_rgb? (car lista))
@@ -291,18 +297,6 @@
               "\n")))
                          
     (formar_string formato_image largo 0)))
-
-
-; Dominio: int
-; Recorrido: int
-; Descripción: Función que aumenta el canal en uno
-(define incCh (lambda (entero) (+ entero 1)))
-
-; Dominio: función_selectora X función_modificadora X función_operación X pixrgb-d
-; Recorrido: pixrgb-d
-; Descripción: Función que modifica un canal de colores o profundidad
-(define adjustChannel (lambda (funcion_get funcion_set funcion_operacion)
-                      (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
 
 ; exportar la funcion al exterior
 (provide (all-defined-out))

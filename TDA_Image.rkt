@@ -23,6 +23,37 @@
 ; Descripción: Función constructora de imágenes
 (define image (lambda (ancho largo . formato) (list ancho largo formato)))
 
+;----------------------------- PERTENENCIA --------------------------------------------------------------------
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen corresponde a un pixmap-d.
+(define pixmap? (lambda (image) (andmap pixrgb-d? (pixel-format image))))
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen corresponde a un bitmap-d.
+(define bitmap? (lambda (image) (andmap pixbit-d? (pixel-format image))))
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen corresponde a un hexmap-d.
+(define hexmap? (lambda (image) (andmap pixhex-d? (pixel-format image))))
+
+; Dominio: image
+; Recorrido: boleano
+; Descripción: Función que permite determinar si la imagen sufrio una compresión
+(define compressed? (lambda (image)
+      (if (ormap pixbit-d_compressed? (pixel-format image))
+          #t
+          (if (ormap pixrgb-d_compressed? (pixel-format image))
+              #t
+              (if (ormap pixhex-d_compressed? (pixel-format image))
+                  #t
+                  (if (or (bitmap? image) (pixmap? image) (hexmap? image))
+                      #f
+                      #t))))))
+
 ;------------------------------- SELECTORES --------------------------------------------------------------
 
 ; Dominio: image
@@ -62,37 +93,6 @@
             (encontrar_pixel (cdr lista) pos_x pos_y)))))
 
 
-;----------------------------- PERTENENCIA --------------------------------------------------------------------
-
-; Dominio: image
-; Recorrido: boleano
-; Descripción: Función que permite determinar si la imagen corresponde a un pixmap-d.
-(define pixmap? (lambda (image) (andmap pixrgb-d? (pixel-format image))))
-
-; Dominio: image
-; Recorrido: boleano
-; Descripción: Función que permite determinar si la imagen corresponde a un bitmap-d.
-(define bitmap? (lambda (image) (andmap pixbit-d? (pixel-format image))))
-
-; Dominio: image
-; Recorrido: boleano
-; Descripción: Función que permite determinar si la imagen corresponde a un hexmap-d.
-(define hexmap? (lambda (image) (andmap pixhex-d? (pixel-format image))))
-
-; Dominio: image
-; Recorrido: boleano
-; Descripción: Función que permite determinar si la imagen sufrio una compresión
-(define compressed? (lambda (image)
-      (if (ormap pixbit-d_compressed? (pixel-format image))
-          #t
-          (if (ormap pixrgb-d_compressed? (pixel-format image))
-              #t
-              (if (ormap pixhex-d_compressed? (pixel-format image))
-                  #t
-                  (if (or (bitmap? image) (pixmap? image) (hexmap? image))
-                      #f
-                      #t))))))
-
 ;----------------------------------------- MODIFICADORES ---------------------------------------------
 
 ; Dominio: formato de pixeles (list) X posición_x (int) X posición_y (int) X image_ingresada (image) X contador (int)
@@ -116,7 +116,7 @@
         ; Función que arregla el formato de una imagen
         (define arreglar_image (lambda (image_ingresada)
         (if (= (length (pixel-format image_ingresada)) 1)
-            (list (width-image image_ingresada) (height-image image_ingresada) (car (pixel-format image_ingresada)))
+            (list (width-image image_ingresada) (height-image image_ingresada) (car (pixel-format image_ingresada))) 
             image_ingresada)))
                      
         (arreglar_image (image (width-image image_ingresada) (height-image image_ingresada) formato))))
@@ -300,7 +300,9 @@
 ; Recorrido: string
 ; Descripción: Función que transforma una imagen a una representación string, image->string
 (define image->string (lambda (image funcion_pixel)
-        (funcion_pixel (pixel-format image) (largo_pos_y image))))
+        (if (compressed? image)
+            (funcion_pixel (pixel-format (decompress image)) (largo_pos_y image))
+            (funcion_pixel (pixel-format image) (largo_pos_y image)))))
 
 ; Dominio: image
 ; Recorrido: image (list)
@@ -329,10 +331,12 @@
                   (filtro_profundidad (cdr formato_pixeles) e)
                   (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
 
-      (if (null? lista)
+     (if (null? lista)
          null
-        (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (d_bit (car lista)) reemplazo))
-              (profundidad_bit_hex image_ingresada (filtro_profundidad lista (d_bit (car lista))) reemplazo)))))
+         (if (= (length (pixel-format image_ingresada)) 1)
+             (cons image_ingresada null)
+             (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (d_bit (car lista)) reemplazo))
+             (profundidad_bit_hex image_ingresada (filtro_profundidad lista (d_bit (car lista))) reemplazo))))))
 
 
 
@@ -360,8 +364,10 @@
 
       (if (null? lista)
          null
-        (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (getD (car lista))))
-              (profundidad_rgb image_ingresada (filtro_profundidad lista (getD (car lista))))))))
+        (if (= (length (pixel-format image_ingresada)) 1)
+            (cons image_ingresada null)
+            (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (getD (car lista))))
+              (profundidad_rgb image_ingresada (filtro_profundidad lista (getD (car lista)))))))))
 
                       
      (cond

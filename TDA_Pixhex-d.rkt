@@ -17,28 +17,6 @@
 ; Descripción: Función constructora de un pixhex-d
 (define pixhex-d (lambda (x y hex d) (list x y hex d)))
 
-;----------------------------------- SELECTORES--------------------------------------------------------------
-
-; Dominio: pixhex-d
-; Recorrido: posición x (int)
-; Descripción: Función para recuperar la posición x de un pixhex-d
-(define x_hex (lambda (pixhex-d) (car pixhex-d)))
-
-; Dominio: pixhex-d
-; Recorrido: posición y (int)
-; Descripción: Función para recuperar la posición y de un pixhex-d
-(define y_hex (lambda (pixhex-d) (cadr pixhex-d)))
-
-; Dominio: pixhex-d
-; Recorrido: hex (string)
-; Descripción: Función para recuperar el string un pixhex-d
-(define hex (lambda (pixhex-d) (caddr pixhex-d)))
-
-; Dominio: pixhex-d
-; Recorrido: profundidad (int)
-; Descripción: Función para recuperar la profundidad de un pixhex-d
-(define d_hex (lambda (pixhex-d) (cadddr pixhex-d)))
-
 ; ---------------------------------- PERTENENCIA------------------------------------------------------------
 
 ; Dominio: x (int) X y (int) X hex (string) X d (int)
@@ -60,6 +38,28 @@
 ; Descripción: Función que verifica si se comprimio un pixhex-d
 (define compress_hex? (lambda (pixhex-d)
      (if (string? (hex pixhex-d)) #t #f)))
+
+;----------------------------------- SELECTORES--------------------------------------------------------------
+
+; Dominio: pixhex-d
+; Recorrido: posición x (int)
+; Descripción: Función para recuperar la posición x de un pixhex-d
+(define x_hex (lambda (pixhex-d) (car pixhex-d)))
+
+; Dominio: pixhex-d
+; Recorrido: posición y (int)
+; Descripción: Función para recuperar la posición y de un pixhex-d
+(define y_hex (lambda (pixhex-d) (cadr pixhex-d)))
+
+; Dominio: pixhex-d
+; Recorrido: hex (string)
+; Descripción: Función para recuperar el string un pixhex-d
+(define hex (lambda (pixhex-d) (caddr pixhex-d)))
+
+; Dominio: pixhex-d
+; Recorrido: profundidad (int)
+; Descripción: Función para recuperar la profundidad de un pixhex-d
+(define d_hex (lambda (pixhex-d) (cadddr pixhex-d)))
 
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
@@ -89,7 +89,7 @@
       (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) (hex pixhex-d_pasado) d_nuevo)))
 
 
-;---------------------------------------------------- OTROS -----------------------------------------------------------------------------------
+;--------------------------------------- OTRAS FUNCIONES -----------------------------------------------------------------------------------
 
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
@@ -213,9 +213,11 @@
     (define fila_hex (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
-            (if (= (x_hex (car formato_image)) fila)
-                (string-append (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila))
-                (fila_hex (cdr formato_image) fila)))))
+            (if (null? (car formato_image))
+                (string-append "        " (fila_hex (cdr formato_image) fila))
+                (if (= (x_hex (car formato_image)) fila)
+                    (string-append "#" (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila))
+                    (fila_hex (cdr formato_image) fila))))))
 
      (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)

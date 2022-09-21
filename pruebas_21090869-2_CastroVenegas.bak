@@ -1,4 +1,5 @@
 #lang racket
+#lang racket
 
 (require "TDA_Image.rkt")
 (require "TDA_Pixrgb-d.rkt")
@@ -79,8 +80,3 @@
 (define img22 (rotate90 img5))
 (define img23 (rotate90 img6))
 (define img24 (rotate90 img7))
-
-
-
-
-

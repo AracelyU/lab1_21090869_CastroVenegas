@@ -18,6 +18,40 @@
 ; Descripción: Función constructora de un un pixel pixmap
 (define pixrgb-d (lambda (x y c1 c2 c3 d) (list x y c1 c2 c3 d)))
 
+; ---------------------------------- PERTENENCIA------------------------------------------------------------
+
+; Dominio: x (int) X y (int) X c1 (int) X c2 (int) X c3 (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el argumento es un pixrgb-d
+(define pixrgb-d? (lambda (pixrgb-d)
+  (if (and (= (length pixrgb-d) 6) (number? (x_rgb pixrgb-d)) (number? (y_rgb pixrgb-d))
+           (number? (getR pixrgb-d)) (>= (getR pixrgb-d) 0) (<= (getR pixrgb-d) 255) 
+           (number? (getG pixrgb-d)) (>= (getG pixrgb-d) 0) (<= (getG pixrgb-d) 255)
+           (number? (getB pixrgb-d)) (>= (getB pixrgb-d) 0) (<= (getB pixrgb-d) 255)
+           (number? (getD pixrgb-d)))
+      #t #f)))
+
+; Dominio: x (int) X y (int) X c1 (int) X c2 (int) X c3 (int)
+; Recorrido: Boleano
+; Descripción: Función que verifica si el argumento es un pixrgb-d comprimido
+(define pixrgb-d_compressed? (lambda (pixrgb-d)
+  (if (and (= (length pixrgb-d) 6) (number? (x_rgb pixrgb-d)) (number? (y_rgb pixrgb-d)) (compress_rgb? pixrgb-d) (number? (getD pixrgb-d)))
+      #t #f)))
+
+; Dominio: pixrgb-d, lista de color (list)
+; Recorrido: Boleano
+; Descripción: Función que compara si un pixrgb-d tiene colores iguales a la lista de colores entregado
+(define color_igual (lambda (pixel_1 color_lista)
+         (if (and (= (getR pixel_1) (car color_lista)) (= (getG pixel_1) (cadr color_lista)) (= (getB pixel_1) (caddr color_lista)))
+             #t #f)))
+
+; Dominio: pixrgb-d
+; Recorrido: boleano
+; Descripción: Función que verifica si se comprimio un pixrgb-d
+(define compress_rgb? (lambda (pixrgb-d)
+     (if (and (string? (getR pixrgb-d)) (string? (getG pixrgb-d)) (string? (getB pixrgb-d))) #t #f)))
+
+
 
 ;----------------------------------- SELECTORES--------------------------------------------------------------
 
@@ -56,38 +90,6 @@
 ; Descripción: función que recopila los colores en lista
 (define color_lista (lambda (pixel) (list (getR pixel) (getG pixel) (getB pixel))))
 
-; ---------------------------------- PERTENENCIA------------------------------------------------------------
-
-; Dominio: x (int) X y (int) X c1 (int) X c2 (int) X c3 (int)
-; Recorrido: boleano
-; Descripción: Función que verifica si el argumento es un pixrgb-d
-(define pixrgb-d? (lambda (pixrgb-d)
-  (if (and (= (length pixrgb-d) 6) (number? (x_rgb pixrgb-d)) (number? (y_rgb pixrgb-d))
-           (number? (getR pixrgb-d)) (>= (getR pixrgb-d) 0) (<= (getR pixrgb-d) 255) 
-           (number? (getG pixrgb-d)) (>= (getG pixrgb-d) 0) (<= (getG pixrgb-d) 255)
-           (number? (getB pixrgb-d)) (>= (getB pixrgb-d) 0) (<= (getB pixrgb-d) 255)
-           (number? (getD pixrgb-d)))
-      #t #f)))
-
-; Dominio: x (int) X y (int) X c1 (int) X c2 (int) X c3 (int)
-; Recorrido: Boleano
-; Descripción: Función que verifica si el argumento es un pixrgb-d comprimido
-(define pixrgb-d_compressed? (lambda (pixrgb-d)
-  (if (and (= (length pixrgb-d) 6) (number? (x_rgb pixrgb-d)) (number? (y_rgb pixrgb-d)) (compress_rgb? pixrgb-d) (number? (getD pixrgb-d)))
-      #t #f)))
-
-; Dominio: pixrgb-d, lista de color (list)
-; Recorrido: Boleano
-; Descripción: Función que compara si un pixrgb-d tiene colores iguales a la lista de colores entregado
-(define color_igual (lambda (pixel_1 color_lista)
-         (if (and (= (getR pixel_1) (car color_lista)) (= (getG pixel_1) (cadr color_lista)) (= (getB pixel_1) (caddr color_lista)))
-             #t #f)))
-
-; Dominio: pixrgb-d
-; Recorrido: boleano
-; Descripción: Función que verifica si se comprimio un pixrgb-d
-(define compress_rgb? (lambda (pixrgb-d)
-     (if (and (string? (getR pixrgb-d)) (string? (getG pixrgb-d)) (string? (getB pixrgb-d))) #t #f)))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
@@ -138,7 +140,7 @@
 (define adjustChannel (lambda (funcion_get funcion_set funcion_operacion)
                       (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
 
-;--------------------------------------------------- OTROS ----------------------------------------------
+;------------------------------------------- OTRAS FUNCIONES ----------------------------------------------
 
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
@@ -287,9 +289,11 @@
     (define fila_rgb (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
-            (if (= (x_rgb (car formato_image)) fila)
-                (string-append (convertir_rgb (getR (car formato_image)) (getG (car formato_image)) (getB (car formato_image))) " " (fila_rgb (cdr formato_image) fila))
-                (fila_rgb (cdr formato_image) fila)))))
+            (if (null? (car formato_image))
+                (string-append "       " (fila_rgb (cdr formato_image) fila))
+                (if (= (x_rgb (car formato_image)) fila)
+                      (string-append "#" (convertir_rgb (getR (car formato_image)) (getG (car formato_image)) (getB (car formato_image))) " " (fila_rgb (cdr formato_image) fila))
+                       (fila_rgb (cdr formato_image) fila))))))
 
      (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)

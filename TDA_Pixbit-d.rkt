@@ -17,6 +17,32 @@
 ; Descripción: Función constructora de un pixbit-d
 (define pixbit-d (lambda (x y bit d) (list x y bit d)))
 
+; ---------------------------------- PERTENENCIA------------------------------------------------------------
+
+; Dominio: x (int) X y (int) X bit (int) X d (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el argumento es un pixrgb-d
+(define pixbit-d? (lambda (pixbit-d)
+   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
+       #t #f)))
+
+; Dominio: bit (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el bit es un bit ([0, 1])
+(define bit? (lambda (bit) (if (and (number? bit) (or (= bit 0) (= bit 1))) #t #f)))
+
+; Dominio: pixbit-d
+; Recorrido: boleano
+; Descripción: Función que verifica si un bitmap fue comprimido
+(define pixbit-d_compressed? (lambda (pixbit-d)
+   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (compressed_bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
+       #t #f)))
+
+; Dominio: pixbit-d
+; Recorrido: boleano
+; Descripción: Función que verifica si se comprimio un pixbit-d
+(define compressed_bit? (lambda (bit) (if (and (number? bit) (= bit -1)) #t #f)))
+
 ;----------------------------------- SELECTORES--------------------------------------------------------------
 
 ; Dominio: pixbit-d
@@ -50,32 +76,6 @@
         (if (= (bit (car formato_pixeles)) bit_ingresado)
             (cantidad_bit (cdr formato_pixeles) bit_ingresado (+ result 1))
             (cantidad_bit (cdr formato_pixeles) bit_ingresado result)))))
-
-; ---------------------------------- PERTENENCIA------------------------------------------------------------
-
-; Dominio: x (int) X y (int) X bit (int) X d (int)
-; Recorrido: boleano
-; Descripción: Función que verifica si el argumento es un pixrgb-d
-(define pixbit-d? (lambda (pixbit-d)
-   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
-       #t #f)))
-
-; Dominio: bit (int)
-; Recorrido: boleano
-; Descripción: Función que verifica si el bit es un bit ([0, 1])
-(define bit? (lambda (bit) (if (and (number? bit) (or (= bit 0) (= bit 1))) #t #f)))
-
-; Dominio: pixbit-d
-; Recorrido: boleano
-; Descripción: Función que verifica si un bitmap fue comprimido
-(define pixbit-d_compressed? (lambda (pixbit-d)
-   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (compressed_bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
-       #t #f)))
-
-; Dominio: pixbit-d
-; Recorrido: boleano
-; Descripción: Función que verifica si se comprimio un pixbit-d
-(define compressed_bit? (lambda (bit) (if (and (number? bit) (= bit -1)) #t #f)))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
@@ -153,9 +153,11 @@
     (define fila_bit (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
-            (if (= (x_bit (car formato_image)) fila)
-                (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
-                (fila_bit (cdr formato_image) fila)))))
+            (if (null? (car formato_image))
+                (string-append "  " (fila_bit (cdr formato_image) fila))
+                (if (= (x_bit (car formato_image)) fila)
+                   (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
+                   (fila_bit (cdr formato_image) fila))))))
 
     (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)

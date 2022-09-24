@@ -304,6 +304,16 @@
             (funcion_pixel (pixel-format (decompress image)) (largo_pos_y image))
             (funcion_pixel (pixel-format image) (largo_pos_y image)))))
 
+(define image2 (image 2 2
+                  (pixbit-d 0 0 0 10)
+                  (pixbit-d 0 1 1 20)
+                  (pixbit-d 1 0 1 10)
+                  (pixbit-d 1 1 0 255)))
+
+
+(define a (crop image2 0 0 0 1))
+; (rellenar_profundidad (pixel-format a) 0 0 a 0 (d_bit (car (pixel-format a))) 0)
+
 ; Dominio: image
 ; Recorrido: image (list)
 ; Descripción: Función que permite crear una imágen de una profundidad rellenandolo con blanco
@@ -314,23 +324,32 @@
 
      ; Función que rellena el resto de pixeles en blanco (0 - "#000000")
      (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento reemplazo)
-          (if (= contador (* (width-image image) (height-image image)))
+          (if (or (null? lista) (= contador (* (width-image image) (height-image image))))
               null
-             (cond   [(<= pos_y (largo_pos_x image))
-                       (if (= (d_bit (encontrar_pixel lista pos_x pos_y)) elemento)
-                          (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo))
-                          (cons (cambiar_b_bit (encontrar_pixel lista pos_x pos_y) reemplazo) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo)))]
+             (cond
+                     [(null? (encontrar_pixel lista pos_x pos_y))
+                        (if (<= pos_y (largo_pos_x image))
+                            (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo)
+                            (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento reemplazo))]
+
+                     [(<= pos_y (largo_pos_x image))
+                        (if (null? lista)
+                          null
+                         (if (= (d_bit (encontrar_pixel lista pos_x pos_y)) elemento)
+                            (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo))
+                            (cons (cambiar_b_bit (encontrar_pixel lista pos_x pos_y) reemplazo) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento reemplazo))))]
 
                      [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento reemplazo)]))))
 
+                                 
       ; Función que filtra los elementos que tienen la misma profundidad e
       (define filtro_profundidad (lambda (formato_pixeles e)
          (if (null? formato_pixeles)
               null
-              (if (= (d_bit (car formato_pixeles)) e)
+              (if (or (null? (car formato_pixeles)) (= (d_bit (car formato_pixeles)) e))
                   (filtro_profundidad (cdr formato_pixeles) e)
                   (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
-
+                      
      (if (null? lista)
          null
          (if (= (length (pixel-format image_ingresada)) 1)
@@ -339,15 +358,21 @@
              (profundidad_bit_hex image_ingresada (filtro_profundidad lista (d_bit (car lista))) reemplazo))))))
 
 
-
     ; Función que crea la lista de imagenes de profundidad con pixmap
     (define profundidad_rgb (lambda (image_ingresada lista)
 
      ; Función que rellenar pixeles restantes en blanco (255, 255, 255)
      (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
-          (if (= contador (* (width-image image) (height-image image)))
+          (if (or (null? lista) (= contador (* (width-image image) (height-image image))))
               null
-             (cond  [(<= pos_y (largo_pos_x image))
+             (cond
+
+                   [(null? (encontrar_pixel lista pos_x pos_y))
+                       (if (<= pos_y (largo_pos_x image))
+                         (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento)
+                         (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento))]
+
+                    [(<= pos_y (largo_pos_x image))
                       (if (= (getD (encontrar_pixel lista pos_x pos_y)) elemento)
                         (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento))
                         (cons (setB (setG (setR (encontrar_pixel lista pos_x pos_y) 255) 255) 255) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento)))]
@@ -358,7 +383,7 @@
       (define filtro_profundidad (lambda (formato_pixeles e)
          (if (null? formato_pixeles)
               null
-              (if (= (getD (car formato_pixeles)) e)
+              (if (or (null? (car formato_pixeles)) (= (getD (car formato_pixeles)) e))
                   (filtro_profundidad (cdr formato_pixeles) e)
                   (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
 

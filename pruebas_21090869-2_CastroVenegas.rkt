@@ -30,8 +30,9 @@
 (display (image->string img1 pixrgb->string))
 
 ;output:
-; #FF0000 #0000FF
-; #00FF00 #FFFFFF
+; #FF0000 #00FF00
+; #0000FF #FFFFFF
+
 
 ;imprimir una representación string de la imagen
 (display (image->string img2 pixbit->string))
@@ -39,6 +40,8 @@
 ;output:
 ;0 1
 ;1 0
+
+; El resto de los ejemplos, los puede obtener directamente desde las tablas presentadas en el enunciado. 
 
 (bitmap? img1) ; la respuesta debería ser #f
 (bitmap? img2)  ; la respuesta debería ser #t
@@ -77,6 +80,14 @@
 (histogram img6)
 (histogram img7)
 
+(define img18 (rotate90 img1))
+(define img19 (rotate90 img2))
+(define img20 (rotate90 img3))
+(define img21 (rotate90 img4))
+(define img22 (rotate90 img5))
+(define img23 (rotate90 img6))
+(define img24 (rotate90 img7))
+
 (define img8 (compress img1))
 (define img9 (compress img2))
 (define img10 (compress img3))
@@ -93,23 +104,14 @@
 (compressed? img13)  ; la respuesta debería ser #t
 (compressed? img14)  ; la respuesta debería ser #t
 
-;(define img15 (edit invertColorBit img2))
-;(define img16 (edit invertColorRGB img1))
+(define img15 (edit invertColorBit img2))
+(define img16 (edit invertColorRGB img1))
 
 ;se asume que las funciones de ajuste de canal están implementadas. 
 ;Puede cambiarlas por otras en su script de pruebas si así lo prefiere 
-(define img15 (edit (adjustChannel getR setR incCh) img1))
-(define img16 (edit (adjustChannel getG setG incCh) img1))
-(define img17 (edit (adjustChannel getB setB incCh) img1))
-
-
-(define img18 (rotate90 img1))
-(define img19 (rotate90 img2))
-(define img20 (rotate90 img3))
-(define img21 (rotate90 img4))
-(define img22 (rotate90 img5))
-(define img23 (rotate90 img6))
-(define img24 (rotate90 img7))
+(define img33 (edit (adjustChannel getR setR incCh) img1))
+(define img34 (edit (adjustChannel getG setG incCh) img1))
+(define img35 (edit (adjustChannel getB setB incCh) img1))
 
 ;imágenes no comprimidas
 (display (image->string img1 pixrgb->string))
@@ -129,11 +131,10 @@
 (display (image->string img13 pixrgb->string))
 (display (image->string img14 pixbit->string))
 
-
 ;imágenes no comprimidas
-(display (image->string img15 pixrgb->string))
+(display (image->string img15 pixbit->string))
 (display (image->string img16 pixrgb->string))
-(display (image->string img17 pixrgb->string))
+;(display (image->string img17 pixrgb->string)) # no existe la image 17
 (display (image->string img18 pixrgb->string))
 (display (image->string img19 pixbit->string))
 (display (image->string img20 pixhex->string))
@@ -142,14 +143,34 @@
 (display (image->string img23 pixrgb->string))
 (display (image->string img24 pixbit->string))
 
-
 (depthLayers img1)
 (depthLayers img2)
 (depthLayers img3)
-(depthLayers img4) 
-(depthLayers img5) ;;; PROBLEMAS DESDE AQUÍ!!!!!
-(depthLayers img6)
+(depthLayers img4)
+(depthLayers img5) 
+(depthLayers img6) 
 (depthLayers img7)
+
+(define img25 (decompress img8))
+(define img26 (decompress img9))
+(define img27 (decompress img10))
+(define img28 (decompress img11))
+(define img29 (decompress img12))
+(define img30 (decompress img13))
+(define img31 (decompress img14))
+
+;las siguientes comparaciones deberían arrojar #t
+(equal? img25 img1)
+(equal? img26 img2)
+(equal? img27 img3)
+(equal? img28 img4)
+(equal? img29 img5)
+(equal? img30 img6)
+(equal? img31 img7)
+
+;las siguientes comparaciones deberían arrojar #f
+(equal? img25 img2)
+(equal? img26 img1)
 
 ;----------------------------------------- IMAGENES ADICIONALES ---------------------------------
 

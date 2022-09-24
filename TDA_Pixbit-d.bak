@@ -17,6 +17,32 @@
 ; Descripción: Función constructora de un pixbit-d
 (define pixbit-d (lambda (x y bit d) (list x y bit d)))
 
+; ---------------------------------- PERTENENCIA------------------------------------------------------------
+
+; Dominio: x (int) X y (int) X bit (int) X d (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el argumento es un pixrgb-d
+(define pixbit-d? (lambda (pixbit-d)
+   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
+       #t #f)))
+
+; Dominio: bit (int)
+; Recorrido: boleano
+; Descripción: Función que verifica si el bit es un bit ([0, 1])
+(define bit? (lambda (bit) (if (and (number? bit) (or (= bit 0) (= bit 1))) #t #f)))
+
+; Dominio: pixbit-d
+; Recorrido: boleano
+; Descripción: Función que verifica si un bitmap fue comprimido
+(define pixbit-d_compressed? (lambda (pixbit-d)
+   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (compressed_bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
+       #t #f)))
+
+; Dominio: pixbit-d
+; Recorrido: boleano
+; Descripción: Función que verifica si se comprimio un pixbit-d
+(define compressed_bit? (lambda (bit) (if (and (number? bit) (= bit -1)) #t #f)))
+
 ;----------------------------------- SELECTORES--------------------------------------------------------------
 
 ; Dominio: pixbit-d
@@ -51,32 +77,6 @@
             (cantidad_bit (cdr formato_pixeles) bit_ingresado (+ result 1))
             (cantidad_bit (cdr formato_pixeles) bit_ingresado result)))))
 
-; ---------------------------------- PERTENENCIA------------------------------------------------------------
-
-; Dominio: x (int) X y (int) X bit (int) X d (int)
-; Recorrido: boleano
-; Descripción: Función que verifica si el argumento es un pixrgb-d
-(define pixbit-d? (lambda (pixbit-d)
-   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
-       #t #f)))
-
-; Dominio: bit (int)
-; Recorrido: boleano
-; Descripción: Función que verifica si el bit es un bit ([0, 1])
-(define bit? (lambda (bit) (if (and (number? bit) (or (= bit 0) (= bit 1))) #t #f)))
-
-; Dominio: pixbit-d
-; Recorrido: boleano
-; Descripción: Función que verifica si un bitmap fue comprimido
-(define pixbit-d_compressed? (lambda (pixbit-d)
-   (if (and (= (length pixbit-d) 4) (number? (x_bit pixbit-d)) (number? (y_bit pixbit-d)) (compressed_bit? (bit pixbit-d)) (number? (d_bit pixbit-d)))
-       #t #f)))
-
-; Dominio: pixbit-d
-; Recorrido: boleano
-; Descripción: Función que verifica si se comprimio un pixbit-d
-(define compressed_bit? (lambda (bit) (if (and (number? bit) (= bit -1)) #t #f)))
-
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
 ; Dominio: pixbit-d
@@ -97,13 +97,7 @@
 (define cambiar_b_bit (lambda (pixbit-d_pasado b_nuevo)               
       (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) b_nuevo (d_bit pixbit-d_pasado))))
 
-; Dominio: pixbit-d
-; Recorrido: pixbit-d
-; Descripción: Función que modifica la profundidad de un pixbit-d
-(define cambiar_d_bit (lambda (pixbit-d_pasado d_nuevo)               
-      (pixbit-d (x_bit pixbit-d_pasado) (y_bit pixbit-d_pasado) (bit pixbit-d_pasado) d_nuevo)))
 
-   
 ;-------------------------------------------- OTROS --------------------------------------------------
 
 ; Dominio: formato de pixeles (list)
@@ -114,15 +108,10 @@
 
 ; Dominio: histogram de bit
 ; Rec: int
-; Descripción: función que obtiene el bit más repetido del histograma
-(define bit_mayor (lambda (lista_bit)
-    (if (> (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
+; Descripción: función que obtiene el bit más o menos repetido del histograma
+(define bit_mayor_menor (lambda (signo lista_bit)
+    (if (signo (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
-; Dominio: histogram de bit
-; Recorrido: int
-; Descripción: Función que obtiene el bit menos repetido del histograma
-(define bit_menor (lambda (lista_bit)
-    (if (< (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
 ; Dominio: formato de pixeles (list) X elemento (int)
 ; Recorrido: formato de pixeles (list)
@@ -164,9 +153,11 @@
     (define fila_bit (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
-            (if (= (x_bit (car formato_image)) fila)
-                (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
-                (fila_bit (cdr formato_image) fila)))))
+            (if (null? (car formato_image))
+                (string-append "  " (fila_bit (cdr formato_image) fila))
+                (if (= (x_bit (car formato_image)) fila)
+                   (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
+                   (fila_bit (cdr formato_image) fila))))))
 
     (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)
@@ -174,43 +165,6 @@
                "\n")))
                          
     (formar_string formato_image largo 0)))
-
-; Dominio: image X formato de pixeles (list)
-; Recorrido: image (list)
-; Descripción:  Función que permite separar una imágen en capas en base a la profundidad
-; en que se sitúan los pixeles donde en las imágenes resultantes se sustituyen los píxeles
-; que se encuentran en otro nivel de profundidad por píxeles blancos, para bitmap
-; Tipo de recursión: Natural
-(define profundidad_bit (lambda (image_ingresada lista)
-
-     (define width-image (lambda (L) (car L)))
-     (define height-image (lambda (L) (cadr L)))
-     (define largo_pos_x (lambda (image) (- (width-image image) 1)))
-
-                           
-     (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
-          (if (= contador (* (width-image image) (height-image image)))
-              null
-             (cond
-
-                [(<= pos_y (largo_pos_x image))
-                   (if (= (d_bit (encontrar_pixel lista pos_x pos_y)) elemento)
-                        (cons (encontrar_pixel lista pos_x pos_y) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento))
-                        (cons (cambiar_b_bit (encontrar_pixel lista pos_x pos_y) 0) (rellenar_profundidad lista pos_x (+ pos_y 1) image (+ contador 1) elemento)))]
-
-                [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento)]))))
-
-      (define filtro_profundidad (lambda (formato_pixeles e)
-         (if (null? formato_pixeles)
-              null
-              (if (= (d_bit (car formato_pixeles)) e)
-                  (filtro_profundidad (cdr formato_pixeles) e)
-                  (cons (car formato_pixeles) (filtro_profundidad (cdr formato_pixeles) e))))))
-
-      (if (null? lista)
-         null
-        (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (d_bit (car lista))))
-              (profundidad_bit image_ingresada (filtro_profundidad lista (d_bit (car lista))))))))
 
 
 ; exportar la funcion al exterior

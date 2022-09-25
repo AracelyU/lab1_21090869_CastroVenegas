@@ -1,9 +1,9 @@
 #lang racket
 
 ; Tda externos utilizados
-(require "TDA_Pixrgb-d.rkt")
-(require "TDA_Pixbit-d.rkt")
-(require "TDA_Pixhex-d.rkt")
+(require "TDA_Pixrgb-d_21090869_CastroVenegas.rkt")
+(require "TDA_Pixbit-d_21090869_CastroVenegas.rkt")
+(require "TDA_Pixhex-d_21090869_CastroVenegas.rkt")
 
 #|
 -------------------------------- TDA IMAGEN --------------------------------------------------------------
@@ -94,19 +94,34 @@
 
 
 ;----------------------------------------- MODIFICADORES ---------------------------------------------
-
 ; Dominio: formato de pixeles (list) X posición_x (int) X posición_y (int) X image_ingresada (image) X contador (int)
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que ordena un formato de pixeles
 ; Tipo de recursión: Natural
 (define ordenar_formato (lambda (lista pos_x pos_y image contador)
-      (if (= contador (* (width-image image) (height-image image)))
-          null
-          (cond
-            [(<= pos_y (largo_pos_x image)) (cons (encontrar_pixel lista pos_x pos_y)
-                 (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
-            [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
+   (define mayor_y (lambda (lista result)
+   (if (null? lista)
+       result
+       (if (null? (car lista))
+           (mayor_y (cdr lista) result)
+           (if (> (y_rgb (car lista)) result)
+               (mayor_y (cdr lista) (y_rgb (car lista)))
+               (mayor_y (cdr lista) result))))))
+               
+    (if (= contador (* (width-image image) (height-image image)))
+           null
+           (cond
+              [(null? (encontrar_pixel lista pos_x pos_y))
+                        (if (< pos_y (width-image image))
+                            (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1))
+                            (ordenar_formato lista (+ pos_x 1) 0 image contador))]
+
+              [(<= pos_y (mayor_y (pixel-format image) (y_rgb (car (pixel-format image)))))
+               (cons (encontrar_pixel lista pos_x pos_y)
+                 (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
+
+              [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
 ; Dominio: image
 ; Recorrido: image
@@ -140,15 +155,16 @@
     (define flipH-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
-            (if (and (<= fila (largo_pos_x image)) (>= contador 0))
+            (if (>= contador 0)
                  (cons (modificar_posicion_pixel contador fila (car formato_pixeles))
                        (flipH-formato (cdr formato_pixeles) fila (- contador 1) image)) 
                   (if (<= fila (largo_pos_x image))
-                      (flipH-formato formato_pixeles (+ fila 1) (largo_pos_x image_ingresada) image)
+                      (flipH-formato formato_pixeles (+ fila 1) (largo_pos_y image_ingresada) image)
                        null)))))
 
-   (modificar_formato_image image_ingresada (ordenar_formato
-         (flipH-formato (pixel-format image_ingresada) 0 (largo_pos_x image_ingresada)  image_ingresada) 0 0 image_ingresada 0))))
+   (modificar_formato_image image_ingresada 
+         (ordenar_formato (flipH-formato (pixel-format image_ingresada) 0 (largo_pos_y image_ingresada) image_ingresada) 0 0 image_ingresada 0))))
+
 
 ; Dominio: image
 ; Recorrido: image
@@ -160,15 +176,27 @@
     (define flipV-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
-            (if (and (>= fila 0) (<= contador (largo_pos_x image)))
+            (if (<= contador (largo_pos_y image))
                  (cons (modificar_posicion_pixel contador fila (car formato_pixeles))
                        (flipV-formato (cdr formato_pixeles) fila (+ contador 1) image)) 
                   (if (>= fila 0)
                       (flipV-formato formato_pixeles (- fila 1) 0 image)
                        null)))))
 
-     (modificar_formato_image image_ingresada (ordenar_formato
-         (flipV-formato (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
+     (modificar_formato_image image_ingresada 
+        (ordenar_formato (flipV-formato (pixel-format image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
+
+; definir 4 pixeles de un pixrgb-d
+(define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
+(define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
+(define pixrgb_3 (pixrgb-d 0 2 30 30 30 30))
+(define pixrgb_4 (pixrgb-d 1 0 40 40 40 40))
+(define pixrgb_5 (pixrgb-d 1 1 50 50 50 50))
+(define pixrgb_6 (pixrgb-d 1 2 60 60 60 60))
+
+; definir una image 1
+(define image_1 (image 2 3  pixrgb_1  pixrgb_2  pixrgb_3  pixrgb_4  pixrgb_5  pixrgb_6))
+
 
 ; Dominio: image
 ; Recorrido: image
@@ -180,7 +208,7 @@
     (define rotate (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
-            (if (and (>= fila 0) (<= contador (largo_pos_x image)))
+            (if (and (>= fila 0) (<= contador (largo_pos_y image)))
                     (cons (modificar_posicion_pixel fila contador (car formato_pixeles))
                           (rotate (cdr formato_pixeles) fila (+ contador 1) image))
                     (if (>= fila 0)
@@ -192,7 +220,7 @@
             (image (height-image image_ingresada) (width-image image_ingresada) (pixel-format image_ingresada))))
 
     (modificar_formato_image (intercambiar_dimensiones image_ingresada)
-            (ordenar_formato (rotate (pixel-format image_ingresada) (largo_pos_y image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
+           (ordenar_formato (rotate (pixel-format image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
 
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
@@ -311,7 +339,7 @@
                   (pixbit-d 1 1 0 255)))
 
 
-(define a (crop image2 0 0 0 1))
+(define b (crop image2 0 0 0 1))
 ; (rellenar_profundidad (pixel-format a) 0 0 a 0 (d_bit (car (pixel-format a))) 0)
 
 ; Dominio: image

@@ -1,9 +1,9 @@
 #lang racket
 
-(require "TDA_Image.rkt")
-(require "TDA_Pixrgb-d.rkt")
-(require "TDA_Pixbit-d.rkt")
-(require "TDA_Pixhex-d.rkt")
+(require "TDA_Image_21090869_CastroVenegas.rkt")
+(require "TDA_Pixrgb-d_21090869_CastroVenegas.rkt")
+(require "TDA_Pixbit-d_21090869_CastroVenegas.rkt")
+(require "TDA_Pixhex-d_21090869_CastroVenegas.rkt")
 
 ;------------------------------------------ IMAGENES DE Script básico Pruebas ---------------------------------------------------------
 ; Creación de una imagen de 2 x 2 del tipo pixmap
@@ -175,16 +175,7 @@
 ;----------------------------------------- IMAGENES ADICIONALES ---------------------------------
 
 
-; definir 4 pixeles de un pixrgb-d
-(define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
-(define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
-(define pixrgb_3 (pixrgb-d 0 2 30 30 30 30))
-(define pixrgb_4 (pixrgb-d 1 0 40 40 40 40))
-(define pixrgb_5 (pixrgb-d 1 1 50 50 50 50))
-(define pixrgb_6 (pixrgb-d 1 2 60 60 60 60))
 
-; definir una image 1
-(define image_1 (image 2 3  pixrgb_1  pixrgb_2  pixrgb_3  pixrgb_4  pixrgb_5  pixrgb_6))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; definir 4 pixeles de un pixbit-d

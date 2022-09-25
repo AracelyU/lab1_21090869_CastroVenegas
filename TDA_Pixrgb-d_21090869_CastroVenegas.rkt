@@ -129,18 +129,7 @@
 (define setD (lambda (pixrgb-d_pasado d_nuevo)               
       (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (getR pixrgb-d_pasado) (getG pixrgb-d_pasado)(getB pixrgb-d_pasado) d_nuevo)))
 
-
-; Dominio: función_selectora X función_modificadora X función_operación X pixrgb-d
-; Recorrido: pixrgb-d
-; Descripción: Función que modifica un canal de colores o profundidad
-(define adjustChannel (lambda (funcion_get funcion_set funcion_operacion)
-                      (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
-
 ;------------------------------------------- OTRAS FUNCIONES ----------------------------------------------
-; Dominio: int
-; Recorrido: int
-; Descripción: Función que aumenta el canal en uno
-(define incCh (lambda (entero) (+ entero 1)))
 
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
@@ -148,7 +137,7 @@
 ; Tipo de recursión: Utiliza recursión natural y de cola
 (define histograma_rgb (lambda (formato_pixeles)
 
-    ; Descripción: Función que recupera la lista por los elementos iguales a e, recursión natural
+    ; Descripción: Función que recupera la lista por los elementos nos iguales a e, recursión natural
     (define filtro_iguales_rgb (lambda (formato_pixeles e)
         (if (null? formato_pixeles)
             null
@@ -169,17 +158,6 @@
         (if (color_igual? (car formato_pixeles) (list -1 -1 -1))
             (histograma_rgb (filtro_iguales_rgb formato_pixeles (color_lista (car formato_pixeles))))
             (cons (list (rgb_iguales formato_pixeles (color_lista (car formato_pixeles)) 0) (color_lista (car formato_pixeles))) (histograma_rgb (filtro_iguales_rgb formato_pixeles (color_lista (car formato_pixeles)))))))))
-
-; Dominio: histograma de rgb
-; Rec: list
-; Descripción: Función que obtiene el rgb más repetido del histograma
-; Tipo de recursión: Cola
-(define rgb_mayor (lambda (lista_rgb result)
-    (if (null? lista_rgb)
-        (car (cdr result))
-        (if (> (car(car lista_rgb)) (car result))
-            (rgb_mayor (cdr lista_rgb) (car lista_rgb))
-            (rgb_mayor (cdr lista_rgb) result)))))
 
 
 ; Dominio: formato de pixeles (list) X elemento (list)
@@ -255,6 +233,14 @@
 ; Tipo de recursión: Natural
 (define pixrgb->string (lambda (formato_image largo)
 
+    ; Función que verifica si una coordenada existe en una imagen que sufrio un crop
+    (define encontrar_pixel? (lambda (lista pos_x pos_y)
+    (if (null? lista)
+        #f
+        (if (and (not (null? (car lista))) (= (x_rgb (car lista)) pos_x) (= (y_rgb (car lista)) pos_y))
+            #t
+            (encontrar_pixel? (cdr lista) pos_x pos_y)))))                 
+
     ; Función para convertir un numero a hex
     (define valor_hex (lambda (a)
        (cond
@@ -275,7 +261,7 @@
     (define fila_rgb (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
-            (if (null? (car formato_image))
+            (if (or (null? (car formato_image)) )
                 (string-append "       " (fila_rgb (cdr formato_image) fila))
                 (if (= (x_rgb (car formato_image)) fila)
                       (string-append "#" (convertir_rgb (getR (car formato_image)) (getG (car formato_image)) (getB (car formato_image))) " " (fila_rgb (cdr formato_image) fila))

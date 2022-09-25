@@ -293,9 +293,29 @@
 ; Recorrido: image
 ; Descripción: Función que comprime una imagen eliminando aquellos pixeles con el color más frecuente, compress
 (define compress (lambda (image_ingresada) ; requerimiento funcional
+
+    (define bit_mayor (lambda (lista_bit)
+        (if (> (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
+
+    (define rgb_mayor (lambda (lista_rgb result)
+    (if (null? lista_rgb)
+        (car (cdr result))
+        (if (> (car(car lista_rgb)) (car result))
+            (rgb_mayor (cdr lista_rgb) (car lista_rgb))
+            (rgb_mayor (cdr lista_rgb) result)))))
+
+
+     (define hex_mayor (lambda (lista_hex result)
+    (if (null? lista_hex)
+        (car (cdr result))
+        (if (> (car(car lista_hex)) (car result))
+            (hex_mayor (cdr lista_hex) (car lista_hex))
+            (hex_mayor (cdr lista_hex) result)))))
+                   
+                   
     
     (cond     [(bitmap? image_ingresada) (modificar_formato_image image_ingresada
-                        (compress-formato-bit (pixel_formato image_ingresada) (bit_mayor_menor > (histogram image_ingresada))))]
+                        (compress-formato-bit (pixel_formato image_ingresada) (bit_mayor (histogram image_ingresada))))]
          
               [(hexmap? image_ingresada) (modificar_formato_image image_ingresada
                         (compress-formato-hex (pixel_formato image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
@@ -307,9 +327,19 @@
 ; Recorrido: image
 ; Descripción: Función que permite descomprimir una imagen comprimida, descompress
 (define decompress (lambda (image_ingresada) ; requerimiento funcional
+
+    (define bit_faltante (lambda (formato_pixeles result)
+            (if (null? formato_pixeles)
+                result
+                (if (= (bit (car formato_pixeles)) -1)
+                    (bit_faltante (cdr formato_pixeles) result)
+                    (if (= (bit (car formato_pixeles)) 0)
+                        (bit_faltante (cdr formato_pixeles) 1)
+                        (bit_faltante (cdr formato_pixeles 0)))))))
+                     
                       
     (cond  [(ormap pixbit-d_compressed? (pixel_formato image_ingresada)) (modificar_formato_image image_ingresada
-                       (descompress-formato-bit (pixel_formato image_ingresada) (bit_mayor_menor < (histogram image_ingresada))))]
+                       (descompress-formato-bit (pixel_formato image_ingresada) (bit_faltante (pixel_formato image_ingresada) 0)))]
            
            [(ormap pixhex-d_compressed? (pixel_formato image_ingresada)) (modificar_formato_image image_ingresada
                        (descompress-formato-hex (pixel_formato image_ingresada)))]
@@ -359,6 +389,16 @@
             (funcion_pixel (pixel_formato (decompress image)) (largo_pos_y image))
             (funcion_pixel (pixel_formato image) (largo_pos_y image)))))
 
+; Dominio: función_selectora X función_modificadora X función_operación X pixrgb-d
+; Recorrido: pixrgb-d
+; Descripción: Función que modifica un canal de colores o profundidad
+(define adjustChannel (lambda (funcion_get funcion_set funcion_operacion)
+                      (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
+
+; Dominio: int
+; Recorrido: int
+; Descripción: Función que aumenta el canal en uno
+(define incCh (lambda (entero) (+ entero 1)))
 
 ; Dominio: image
 ; Recorrido: image (list)

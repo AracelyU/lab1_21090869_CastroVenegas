@@ -119,18 +119,6 @@
               (histograma_hex (filtro_iguales_hex formato_pixeles (hex (car formato_pixeles))))))))
 
 
-; Dominio: histograma de hex
-; Recorrido: string
-; Descripción: Función que obtiene el hex más repetido del histograma de hex
-; Tipo de recursión: Cola
-(define hex_mayor (lambda (lista_hex result)
-    (if (null? lista_hex)
-        (car (cdr result))
-        (if (> (car(car lista_hex)) (car result))
-            (hex_mayor (cdr lista_hex) (car lista_hex))
-            (hex_mayor (cdr lista_hex) result)))))
-
-
 ; Dominio: formato de pixeles (list) X elemento (string)
 ; Recorrido: list
 ; Descripción: función que crea una lista sin el hex más repetido

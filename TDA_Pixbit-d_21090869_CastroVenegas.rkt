@@ -65,17 +65,6 @@
 ; Descripción: Función para recuperar la profundidad de un pixbit-d
 (define d_bit (lambda (pixbit-d) (cadddr pixbit-d)))
 
-; Verificar si es selector
-; Dominio: image
-; Recorrido: bit (int)
-; Descripción: Función que recopila la cantidad de bit 0 del formato de pixeles
-; Tipo de recursión: Cola
-(define cantidad_bit (lambda (formato_pixeles bit_ingresado result)
-    (if (null? formato_pixeles)
-        result
-        (if (= (bit (car formato_pixeles)) bit_ingresado)
-            (cantidad_bit (cdr formato_pixeles) bit_ingresado (+ result 1))
-            (cantidad_bit (cdr formato_pixeles) bit_ingresado result)))))
 
 ; ----------------------------------- MODIFICADORES---------------------------------------------------------
 
@@ -104,13 +93,16 @@
 ; Recorrido: list
 ; Descripción: Función histograma que recopila numero de bit
 (define histogram_bit (lambda (formato_image)
+
+    (define cantidad_bit (lambda (formato_pixeles bit_ingresado result)
+    (if (null? formato_pixeles)
+        result
+        (if (= (bit (car formato_pixeles)) bit_ingresado)
+            (cantidad_bit (cdr formato_pixeles) bit_ingresado (+ result 1))
+            (cantidad_bit (cdr formato_pixeles) bit_ingresado result)))))
+                        
     (list (list (cantidad_bit formato_image 0 0) 0) (list (cantidad_bit formato_image 1 0) 1))))
 
-; Dominio: histogram de bit
-; Rec: int
-; Descripción: función que obtiene el bit más o menos repetido del histograma
-(define bit_mayor_menor (lambda (signo lista_bit)
-    (if (signo (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
 ; Dominio: formato de pixeles (list) X elemento (int)
 ; Recorrido: formato de pixeles (list)

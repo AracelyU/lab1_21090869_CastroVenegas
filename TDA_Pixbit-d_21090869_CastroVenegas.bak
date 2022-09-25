@@ -112,6 +112,7 @@
 (define bit_mayor_menor (lambda (signo lista_bit)
     (if (signo (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
+
 ; Dominio: formato de pixeles (list) X elemento (int)
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que crea una lista sin el bit más repetido
@@ -134,12 +135,21 @@
             (cons (cambiar_b_bit (car lista) elemento) (descompress-formato-bit (cdr lista) elemento))
             (cons (car lista) (descompress-formato-bit (cdr lista) elemento))))))
 
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que invierte el color de bit de un pixbit-d
+(define invertColorBit (lambda (pixbit-d_pasado)
+    (if (pixbit-d? pixbit-d_pasado)
+        (if (= (bit pixbit-d_pasado) 0)
+            (cambiar_b_bit pixbit-d_pasado 1)
+            (cambiar_b_bit pixbit-d_pasado 0))
+        pixbit-d_pasado)))
+
 ; Dominio: formato de pixeles (list) X largo (int)
 ; Recorrido: string
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixbit->string
 (define pixbit->string (lambda (formato_image largo)
-
-     ; Función que crea la cadena de string
+                            
     (define fila_bit (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
@@ -149,7 +159,6 @@
                    (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
                    (fila_bit (cdr formato_image) fila))))))
 
-     ; Función que forma el string
     (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)
               (string-append (fila_bit formato_image fila) (formar_string formato_image largo (+ fila 1)))

@@ -21,74 +21,86 @@
 ; Dominio: ancho (int) x largo (int) x formato de pixeles (list) 
 ; Recorrido: image
 ; Descripción: Función constructora de imágenes
-(define image (lambda (ancho largo . formato) (list ancho largo formato)))
+(define image (lambda (ancho largo . formato) (list ancho largo formato))) ; requerimiento funcional
 
 ;----------------------------- PERTENENCIA --------------------------------------------------------------------
 
 ; Dominio: image
 ; Recorrido: boleano
 ; Descripción: Función que permite determinar si la imagen corresponde a un pixmap-d.
-(define pixmap? (lambda (image) (andmap pixrgb-d? (pixel-format image))))
+(define pixmap? (lambda (image) (andmap pixrgb-d? (pixel_formato image)))) ; requerimiento funcional
 
 ; Dominio: image
 ; Recorrido: boleano
 ; Descripción: Función que permite determinar si la imagen corresponde a un bitmap-d.
-(define bitmap? (lambda (image) (andmap pixbit-d? (pixel-format image))))
-
+(define bitmap? (lambda (image) (andmap pixbit-d? (pixel_formato image)))) ; requerimiento funcional
+ 
 ; Dominio: image
 ; Recorrido: boleano
 ; Descripción: Función que permite determinar si la imagen corresponde a un hexmap-d.
-(define hexmap? (lambda (image) (andmap pixhex-d? (pixel-format image))))
+(define hexmap? (lambda (image) (andmap pixhex-d? (pixel_formato image)))) ; requerimiento funcional
 
 ; Dominio: image
 ; Recorrido: boleano
 ; Descripción: Función que permite determinar si la imagen sufrio una compresión
-(define compressed? (lambda (image)
-      (if (ormap pixbit-d_compressed? (pixel-format image))
+(define compressed? (lambda (image) ; requerimiento funcional
+      (if (ormap pixbit-d_compressed? (pixel_formato image))
           #t
-          (if (ormap pixrgb-d_compressed? (pixel-format image))
+          (if (ormap pixrgb-d_compressed? (pixel_formato image))
               #t
-              (if (ormap pixhex-d_compressed? (pixel-format image))
+              (if (ormap pixhex-d_compressed? (pixel_formato image))
                   #t
                   (if (or (bitmap? image) (pixmap? image) (hexmap? image))
                       #f
                       #t))))))
+
+; Dominio: formato de pixeles (list) X  int X int
+; Recorrido: boleano
+; Descripción: Función que permite un pixel existe en una imagen
+; Tipo de recursión: Natural
+(define encontrar_pixel? (lambda (lista pos_x pos_y) ; función adicional
+    (if (null? lista)
+        #f
+        (if (and (not (null? (car lista))) (= (x_rgb (car lista)) pos_x) (= (y_rgb (car lista)) pos_y))
+            #t
+            (encontrar_pixel? (cdr lista) pos_x pos_y)))))
+
 
 ;------------------------------- SELECTORES --------------------------------------------------------------
 
 ; Dominio: image
 ; Recorrido: ancho (int)
 ; Descripción: Función que recupera el ancho de la imagen
-(define width-image (lambda (L) (car L)))
+(define ancho_image (lambda (L) (car L))) ; función adicional
 
 ; Dominio: image
 ; Recorrido: largo (int)
 ; Descripción: Función que recupera el largo de la imagen
-(define height-image (lambda (L) (cadr L)))
+(define largo_image (lambda (L) (cadr L))) ; función adicional
 
 ; Dominio: image
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que recupera el formato de pixeles de la imagen
-(define pixel-format (lambda (L) (caddr L))) ; tercera posición (lista)
+(define pixel_formato (lambda (L) (caddr L))) ; función adicional
 
 ; Dominio: image
 ; Recorrido: int
 ; Descripción: Función que recupera la posición final en x
-(define largo_pos_x (lambda (image) (- (width-image image) 1)))
+(define largo_pos_x (lambda (image) (- (ancho_image image) 1))) ; función adicional
 
 ; Dominio: image
 ; Recorrido: entero
 ; Descripción: Función que recupera la posición final en y
-(define largo_pos_y (lambda (image) (- (height-image image) 1)))
+(define largo_pos_y (lambda (image) (- (largo_image image) 1))) ; función adicional
 
 
 ; Dominio: formato de pixeles (list), posicion_x (int), posicion_y (int)
 ; Recorrido: pixel
 ; Descripción: Función que recupera un pixel del formato pixeles según coordenadas (x, y)
-(define encontrar_pixel (lambda (lista pos_x pos_y)
+(define encontrar_pixel (lambda (lista pos_x pos_y) ; función adicional
     (if (null? lista)
         null
-        (if (and (= (car (car lista)) pos_x) (= (cadr (car lista)) pos_y))
+        (if (and (= (x_rgb (car lista)) pos_x) (= (y_rgb (car lista)) pos_y))
             (car lista)
             (encontrar_pixel (cdr lista) pos_x pos_y)))))
 
@@ -98,48 +110,38 @@
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que ordena un formato de pixeles
 ; Tipo de recursión: Natural
-(define ordenar_formato (lambda (lista pos_x pos_y image contador)
+(define ordenar_formato (lambda (lista pos_x pos_y image contador) ; función adicional
+                          
+      (if (or (= contador (* (ancho_image image) (largo_image image))) (= contador (length lista)))
+             null
+            (cond
+                [(not (encontrar_pixel? lista pos_x pos_y))
+                     (if (< pos_y (largo_image image))
+                         (ordenar_formato lista pos_x (+ pos_y 1) image contador)
+                         (ordenar_formato lista (+ pos_x 1) 0 image contador))]
+                
+                [(< pos_y (largo_image image))
+                     (cons (encontrar_pixel lista pos_x pos_y) (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
 
-   (define mayor_y (lambda (lista result)
-   (if (null? lista)
-       result
-       (if (null? (car lista))
-           (mayor_y (cdr lista) result)
-           (if (> (y_rgb (car lista)) result)
-               (mayor_y (cdr lista) (y_rgb (car lista)))
-               (mayor_y (cdr lista) result))))))
-               
-    (if (= contador (* (width-image image) (height-image image)))
-           null
-           (cond
-              [(null? (encontrar_pixel lista pos_x pos_y))
-                        (if (< pos_y (width-image image))
-                            (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1))
-                            (ordenar_formato lista (+ pos_x 1) 0 image contador))]
-
-              [(<= pos_y (mayor_y (pixel-format image) (y_rgb (car (pixel-format image)))))
-               (cons (encontrar_pixel lista pos_x pos_y)
-                 (ordenar_formato lista pos_x (+ pos_y 1) image (+ contador 1)))]
-
-              [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
+                [else (ordenar_formato lista (+ pos_x 1) 0 image contador)]))))
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que modifica el formato de la image
-(define modificar_formato_image (lambda (image_ingresada formato)
+(define modificar_formato_image (lambda (image_ingresada formato) ; función adicional
 
         ; Función que arregla el formato de una imagen
         (define arreglar_image (lambda (image_ingresada)
-        (if (= (length (pixel-format image_ingresada)) 1)
-            (list (width-image image_ingresada) (height-image image_ingresada) (car (pixel-format image_ingresada))) 
+        (if (= (length (pixel_formato image_ingresada)) 1)
+            (list (ancho_image image_ingresada) (largo_image image_ingresada) (car (pixel_formato image_ingresada))) 
             image_ingresada)))
                      
-        (arreglar_image (image (width-image image_ingresada) (height-image image_ingresada) formato))))
+        (arreglar_image (image (ancho_image image_ingresada) (largo_image image_ingresada) formato))))
 
 ; Dominio: posición_y (int) X posición_x (int) X pixel [pixrgb-d / pixhex-d / pixbit-d]
 ; Recorrido: pixel
 ; Descripción: Función que modifica la posicion en y e x según coordenadas (x, y)
-(define modificar_posicion_pixel (lambda (pos_y pos_x pixel)
+(define modificar_posicion_pixel (lambda (pos_y pos_x pixel) ; función adicional
      (cond
        [(pixbit-d? pixel) (cambiar_x_bit (cambiar_y_bit pixel pos_y) pos_x)]
        [(pixhex-d? pixel) (cambiar_x_hex (cambiar_y_hex pixel pos_y) pos_x)]
@@ -149,67 +151,85 @@
 ; Recorrido: image
 ; Descripción: Función que invierte la imagen horizontalmente, flipH
 ; Tipo de recursión: Natural
-(define flipH (lambda (image_ingresada)
-
+(define flipH (lambda (image_ingresada) ; requerimiento funcional
+ 
     ; Función que cambia el formato de pixeles de forma que se invierta horizontalmente
     (define flipH-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
-            null
-            (if (>= contador 0)
-                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles))
-                       (flipH-formato (cdr formato_pixeles) fila (- contador 1) image)) 
-                  (if (<= fila (largo_pos_x image))
-                      (flipH-formato formato_pixeles (+ fila 1) (largo_pos_y image_ingresada) image)
-                       null)))))
-
+             null
+            (if (not (encontrar_pixel? formato_pixeles fila (- (largo_pos_y image) contador)))
+                 (if (>= contador 0)
+                      (flipH-formato formato_pixeles fila (- contador 1) image)
+                      (if (<= fila (largo_pos_x image))
+                           (flipH-formato formato_pixeles (+ fila 1) (largo_pos_y image_ingresada) image)
+                            null))
+                 
+                 (if (>= contador 0)
+                     (cons (modificar_posicion_pixel contador fila (car formato_pixeles)) (flipH-formato (cdr formato_pixeles) fila (- contador 1) image)) 
+                     (if (<= fila (largo_pos_x image))
+                          (flipH-formato formato_pixeles (+ fila 1) (largo_pos_y image_ingresada) image)
+                           null))))))
+                
    (modificar_formato_image image_ingresada 
-         (ordenar_formato (flipH-formato (pixel-format image_ingresada) 0 (largo_pos_y image_ingresada) image_ingresada) 0 0 image_ingresada 0))))
+          (ordenar_formato (flipH-formato (pixel_formato image_ingresada) 0 (largo_pos_y image_ingresada) image_ingresada) 0 0 image_ingresada 0))))
 
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que invierte la imagen verticalmente, flipV
 ; Tipo de recursión: Natural
-(define flipV (lambda (image_ingresada)
+(define flipV (lambda (image_ingresada) ; requerimiento funcional
 
     ; Función que cambia el formato de pixeles de forma que se invierta verticalmente
     (define flipV-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
-            (if (<= contador (largo_pos_y image))
-                 (cons (modificar_posicion_pixel contador fila (car formato_pixeles))
-                       (flipV-formato (cdr formato_pixeles) fila (+ contador 1) image)) 
-                  (if (>= fila 0)
-                      (flipV-formato formato_pixeles (- fila 1) 0 image)
-                       null)))))
 
-     (modificar_formato_image image_ingresada 
-        (ordenar_formato (flipV-formato (pixel-format image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
+            (if (not (encontrar_pixel? formato_pixeles (- (largo_pos_x image) fila) contador))
+               (if (<= contador (largo_pos_y image))
+                     (flipV-formato formato_pixeles fila (+ contador 1) image)
+                     (if (>= fila 0)
+                         (flipV-formato formato_pixeles (- fila 1) 0 image)
+                          null))
+
+                (if (<= contador (largo_pos_y image))
+                     (cons (modificar_posicion_pixel contador fila (car formato_pixeles)) (flipV-formato (cdr formato_pixeles) fila (+ contador 1) image)) 
+                     (if (>= fila 0)
+                         (flipV-formato formato_pixeles (- fila 1) 0 image)
+                          null))))))
+
+     (modificar_formato_image image_ingresada (ordenar_formato
+              (flipV-formato (pixel_formato image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
 
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que rota la imagen 90° a la derecha, rotate90
 ; Tipo de recursión: Natural
-(define rotate90 (lambda (image_ingresada)
+(define rotate90 (lambda (image_ingresada) ; requerimiento funcional
 
     ; Función que cambia el formato de pixeles de forma que rote 90° a la derecha
     (define rotate (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
-            (if (and (>= fila 0) (<= contador (largo_pos_y image)))
-                    (cons (modificar_posicion_pixel fila contador (car formato_pixeles))
-                          (rotate (cdr formato_pixeles) fila (+ contador 1) image))
-                    (if (>= fila 0)
-                        (rotate formato_pixeles (- fila 1) 0 image)
-                        null)))))
+            (if (not (encontrar_pixel? formato_pixeles (- (largo_pos_x image) fila) contador))
+                  (if (<= contador (largo_pos_y image))
+                      (rotate formato_pixeles fila (+ contador 1) image)
+                      (if (>= fila 0)
+                           (rotate formato_pixeles (- fila 1) 0 image)
+                            null))
+                 (if (<= contador (largo_pos_y image))
+                      (cons (modificar_posicion_pixel fila contador (car formato_pixeles)) (rotate (cdr formato_pixeles) fila (+ contador 1) image))
+                      (if (>= fila 0)
+                          (rotate formato_pixeles (- fila 1) 0 image)
+                           null))))))
 
     ; Función que intercambia el ancho con el largo para cuando rotas la imagen
     (define intercambiar_dimensiones (lambda (image_ingresada)
-            (image (height-image image_ingresada) (width-image image_ingresada) (pixel-format image_ingresada))))
+            (image (largo_image image_ingresada) (ancho_image image_ingresada) (pixel_formato image_ingresada))))
 
-    (modificar_formato_image (intercambiar_dimensiones image_ingresada)
-           (ordenar_formato (rotate (pixel-format image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
+    (modificar_formato_image (intercambiar_dimensiones image_ingresada) (ordenar_formato
+           (rotate (pixel_formato image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 (intercambiar_dimensiones image_ingresada) 0))))
 
 ;-------------------------------------------- OTRAS FUNCIONES----------------------------------------------
 
@@ -217,23 +237,21 @@
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que retorna un histograma de frecuencias a partir de los colores de una imagen, histogram
 ; Comentario: Se agrega el histograma para una imagen comprimida bitmap-d para la función descompress más adelante
-(define histogram (lambda (image)
+(define histogram (lambda (image) ; requerimiento funcional
     (cond
-      [(pixmap? image) (histograma_rgb (pixel-format image))]
-      [(bitmap? image) (histogram_bit (pixel-format image))]
-      [(hexmap? image) (histograma_hex (pixel-format image))]
-      [(ormap pixbit-d_compressed? (pixel-format image)) (histogram_bit (pixel-format image))]
+      [(pixmap? image) (histograma_rgb (pixel_formato image))]
+      [(bitmap? image) (histogram_bit (pixel_formato image))]
+      [(hexmap? image) (histograma_hex (pixel_formato image))]
+      [(ormap pixbit-d_compressed? (pixel_formato image)) (histogram_bit (pixel_formato image))]
       [else image])))
-
-
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que convierte una imagen pixmap-d a hexmap-d
-(define imgRGB->imgHex (lambda (image_rgb)
+(define imgRGB->imgHex (lambda (image_rgb) ; requerimiento funcional
 
-   ; Función que cambia un pixmap a hexmap, Dominio: pixel, Recorrido: pixel
-  (define convertir_rgb_hex (lambda (pixel)
+    ; Función que cambia un pixmap a hexmap, Dominio: pixel, Recorrido: pixel
+    (define convertir_rgb_hex (lambda (pixel)
                             
     ; Función para convertir un número a hexadecimal
     (define valor_hex (lambda (a)
@@ -250,15 +268,15 @@
 
     (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (getR pixel) (getG pixel) (getB pixel))) (getD pixel))))
                          
-  (if (pixmap? image_rgb)
-      (modificar_formato_image image_rgb (map convertir_rgb_hex (pixel-format image_rgb)))    
-      image_rgb)))
+    (if (pixmap? image_rgb)
+        (modificar_formato_image image_rgb (map convertir_rgb_hex (pixel_formato image_rgb)))    
+         image_rgb)))
 
 ; Dominio: image X x1 (int) X y1 (int) X x2 (int) X y2 (int)
 ; Recorrido: image
 ; Descripción: Función que recorta una imagen a partir de un cuadrante, crop
 ; Tipo de recursión: Natural
-(define crop (lambda (image_ingresada x1 y1 x2 y2)
+(define crop (lambda (image_ingresada x1 y1 x2 y2) ; requerimiento funcional
 
     ; Función que crea el formato con pixeles cuyas coordenadas están dentro del cuadrante
     (define crop_formato (lambda (formato_pixeles x1 y1 x2 y2)
@@ -268,36 +286,36 @@
                  (cons (car formato_pixeles) (crop_formato (cdr formato_pixeles) x1 y1 x2 y2))
                  (crop_formato (cdr formato_pixeles) x1 y1 x2 y2)))))
 
-     (modificar_formato_image image_ingresada (crop_formato (pixel-format image_ingresada) (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)))))
+     (modificar_formato_image image_ingresada (crop_formato (pixel_formato image_ingresada) (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)))))
 
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que comprime una imagen eliminando aquellos pixeles con el color más frecuente, compress
-(define compress (lambda (image_ingresada)
+(define compress (lambda (image_ingresada) ; requerimiento funcional
     
     (cond     [(bitmap? image_ingresada) (modificar_formato_image image_ingresada
-                        (compress-formato-bit (pixel-format image_ingresada) (bit_mayor_menor > (histogram image_ingresada))))]
+                        (compress-formato-bit (pixel_formato image_ingresada) (bit_mayor_menor > (histogram image_ingresada))))]
          
               [(hexmap? image_ingresada) (modificar_formato_image image_ingresada
-                        (compress-formato-hex (pixel-format image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
+                        (compress-formato-hex (pixel_formato image_ingresada) (hex_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))]
 
               [(pixmap? image_ingresada) (modificar_formato_image image_ingresada
-                        (compress-formato-rgb (pixel-format image_ingresada) (rgb_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))])))
+                        (compress-formato-rgb (pixel_formato image_ingresada) (rgb_mayor (histogram image_ingresada) (car (histogram image_ingresada)))))])))
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que permite descomprimir una imagen comprimida, descompress
-(define decompress (lambda (image_ingresada)
+(define decompress (lambda (image_ingresada) ; requerimiento funcional
                       
-    (cond  [(ormap pixbit-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
-                       (descompress-formato-bit (pixel-format image_ingresada) (bit_mayor_menor < (histogram image_ingresada))))]
+    (cond  [(ormap pixbit-d_compressed? (pixel_formato image_ingresada)) (modificar_formato_image image_ingresada
+                       (descompress-formato-bit (pixel_formato image_ingresada) (bit_mayor_menor < (histogram image_ingresada))))]
            
-           [(ormap pixhex-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
-                       (descompress-formato-hex (pixel-format image_ingresada)))]
+           [(ormap pixhex-d_compressed? (pixel_formato image_ingresada)) (modificar_formato_image image_ingresada
+                       (descompress-formato-hex (pixel_formato image_ingresada)))]
            
-           [(ormap pixrgb-d_compressed? (pixel-format image_ingresada)) (modificar_formato_image image_ingresada
-                       (descompress-formato-rgb (pixel-format image_ingresada)))]
+           [(ormap pixrgb-d_compressed? (pixel_formato image_ingresada)) (modificar_formato_image image_ingresada
+                       (descompress-formato-rgb (pixel_formato image_ingresada)))]
            
            [else image_ingresada])))
 
@@ -305,34 +323,55 @@
 ; Recorrido: image
 ; Descripción: Función que permite aplicar funciones especiales a las imágenes, edit
 ; Tipo de recursión: Natural
-(define edit (lambda (filtro image_ingresado)
-       ; Función map para edit
+(define edit (lambda (filtro image_ingresado) ; requerimiento funcional
        (define map_edit (lambda (filtro lista)
          (if (null? lista)
            null
           (cons (filtro (car lista)) (map_edit filtro (cdr lista))))))
-       (modificar_formato_image image_ingresado (map_edit filtro (pixel-format image_ingresado)))))
+       (modificar_formato_image image_ingresado (map_edit filtro (pixel_formato image_ingresado)))))
+
+; Dominio: pixrgb-d
+; Recorrido: pixrgb-d
+; Descripción: Función que invierte el color de un pixrgb-d, invertColorRGB
+(define invertColorRGB (lambda (pixrgb-d_pasado)
+     (define invertir_color (lambda (color)
+           (abs (- color 255))))
+
+     (if (pixrgb-d? pixrgb-d_pasado)
+        (setB (setG (setR pixrgb-d_pasado (invertir_color (getR pixrgb-d_pasado))) (invertir_color (getG pixrgb-d_pasado))) (invertir_color (getB pixrgb-d_pasado)))
+        pixrgb-d_pasado)))
+
+; Dominio: pixbit-d
+; Recorrido: pixbit-d
+; Descripción: Función que invierte el color de bit de un pixbit-d
+(define invertColorBit (lambda (pixbit-d_pasado)
+    (if (pixbit-d? pixbit-d_pasado)
+        (if (= (bit pixbit-d_pasado) 0)
+            (cambiar_b_bit pixbit-d_pasado 1)
+            (cambiar_b_bit pixbit-d_pasado 0))
+        pixbit-d_pasado)))
 
 ; Dominio: image X función
 ; Recorrido: string
 ; Descripción: Función que transforma una imagen a una representación string, image->string
-(define image->string (lambda (image funcion_pixel)
+(define image->string (lambda (image funcion_pixel) ; requerimiento funcional
         (if (compressed? image)
-            (funcion_pixel (pixel-format (decompress image)) (largo_pos_y image))
-            (funcion_pixel (pixel-format image) (largo_pos_y image)))))
+            (funcion_pixel (pixel_formato (decompress image)) (largo_pos_y image))
+            (funcion_pixel (pixel_formato image) (largo_pos_y image)))))
 
 
 ; Dominio: image
 ; Recorrido: image (list)
 ; Descripción: Función que permite crear una imágen de una profundidad rellenandolo con blanco
-(define depthLayers (lambda (image_ingresada)
- 
+; Tipo de recursión: Natural
+(define depthLayers (lambda (image_ingresada) ; requerimiento funcional
+  
    ; Función que crea la lista de imagenes de profundidad con bitmap y hexmap  
    (define profundidad_bit_hex (lambda (image_ingresada lista reemplazo)
 
      ; Función que rellena el resto de pixeles en blanco (0 - "#000000")
      (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento reemplazo)
-          (if (or (null? lista) (= contador (* (width-image image) (height-image image))))
+          (if (or (null? lista) (= contador (* (ancho_image image) (largo_image image))))
               null
              (cond
                      [(null? (encontrar_pixel lista pos_x pos_y))
@@ -350,7 +389,7 @@
                      [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento reemplazo)]))))
 
                                  
-      ; Función que filtra los elementos que tienen la misma profundidad e
+      ; Función que filtra los elementos que tienen la misma profundidad e para bitmap y hexmap
       (define filtro_profundidad (lambda (formato_pixeles e)
          (if (null? formato_pixeles)
               null
@@ -360,9 +399,9 @@
                       
      (if (null? lista)
          null
-         (if (= (length (pixel-format image_ingresada)) 1)
+         (if (= (length (pixel_formato image_ingresada)) 1)
              (cons image_ingresada null)
-             (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (d_bit (car lista)) reemplazo))
+             (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel_formato image_ingresada) 0 0 image_ingresada 0 (d_bit (car lista)) reemplazo))
              (profundidad_bit_hex image_ingresada (filtro_profundidad lista (d_bit (car lista))) reemplazo))))))
 
 
@@ -371,7 +410,7 @@
 
      ; Función que rellenar pixeles restantes en blanco (255, 255, 255)
      (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
-          (if (or (null? lista) (= contador (* (width-image image) (height-image image))))
+          (if (or (null? lista) (= contador (* (ancho_image image) (largo_image image))))
               null
              (cond
 
@@ -387,7 +426,7 @@
 
                     [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento)]))))
 
-      ; Función filtra los elementos que tienen la misma profundidad e
+      ; Función filtra los elementos que tienen la misma profundidad e para pixmap
       (define filtro_profundidad (lambda (formato_pixeles e)
          (if (null? formato_pixeles)
               null
@@ -397,16 +436,16 @@
 
       (if (null? lista)
          null
-        (if (= (length (pixel-format image_ingresada)) 1)
+        (if (= (length (pixel_formato image_ingresada)) 1)
             (cons image_ingresada null)
-            (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel-format image_ingresada) 0 0 image_ingresada 0 (getD (car lista))))
+            (cons (modificar_formato_image image_ingresada (rellenar_profundidad (pixel_formato image_ingresada) 0 0 image_ingresada 0 (getD (car lista))))
               (profundidad_rgb image_ingresada (filtro_profundidad lista (getD (car lista)))))))))
 
                       
      (cond
-       [(bitmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel-format image_ingresada) 0)]
-       [(hexmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel-format image_ingresada) "#000000")]
-       [(pixmap? image_ingresada) (profundidad_rgb image_ingresada (pixel-format image_ingresada))]
+       [(bitmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel_formato image_ingresada) 0)]
+       [(hexmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel_formato image_ingresada) "#000000")]
+       [(pixmap? image_ingresada) (profundidad_rgb image_ingresada (pixel_formato image_ingresada))]
        [else image_ingresada])))
 
 

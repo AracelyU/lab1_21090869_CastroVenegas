@@ -41,7 +41,7 @@
 ; Dominio: pixrgb-d, lista de color (list)
 ; Recorrido: Boleano
 ; Descripción: Función que compara si un pixrgb-d tiene colores iguales a la lista de colores entregado
-(define color_igual? (lambda (pixel_1 color_lista)
+(define color_igual (lambda (pixel_1 color_lista)
          (if (and (= (getR pixel_1) (car color_lista)) (= (getG pixel_1) (cadr color_lista)) (= (getB pixel_1) (caddr color_lista)))
              #t #f)))
 
@@ -129,6 +129,10 @@
 (define setD (lambda (pixrgb-d_pasado d_nuevo)               
       (pixrgb-d (x_rgb pixrgb-d_pasado) (y_rgb pixrgb-d_pasado) (getR pixrgb-d_pasado) (getG pixrgb-d_pasado)(getB pixrgb-d_pasado) d_nuevo)))
 
+; Dominio: int
+; Recorrido: int
+; Descripción: Función que aumenta el canal en uno
+(define incCh (lambda (entero) (+ entero 1)))
 
 ; Dominio: función_selectora X función_modificadora X función_operación X pixrgb-d
 ; Recorrido: pixrgb-d
@@ -137,36 +141,35 @@
                       (lambda (pixrgb-d_pasado) (funcion_set pixrgb-d_pasado (funcion_operacion (funcion_get pixrgb-d_pasado))))))
 
 ;------------------------------------------- OTRAS FUNCIONES ----------------------------------------------
-; Dominio: int
-; Recorrido: int
-; Descripción: Función que aumenta el canal en uno
-(define incCh (lambda (entero) (+ entero 1)))
 
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
 ; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
-; Tipo de recursión: Utiliza recursión natural y de cola
+; Tipo de recursión: Natural
 (define histograma_rgb (lambda (formato_pixeles)
 
-    ; Descripción: Función que recupera la lista por los elementos iguales a e, recursión natural
+    ; Descripción: Función que recupera la lista por los elementos iguales a e
+    ; Tipo de recursión: Natural
     (define filtro_iguales_rgb (lambda (formato_pixeles e)
         (if (null? formato_pixeles)
             null
-            (if (not (color_igual? (car formato_pixeles) e))
+            (if (not (color_igual (car formato_pixeles) e))
                 (cons (car formato_pixeles) (filtro_iguales_rgb (cdr formato_pixeles) e))
                 (filtro_iguales_rgb (cdr formato_pixeles) e)))))
   
-    ; Descripción: Función que cuenta los elementos iguales a e, recursión cola
+    ; Descripción: Función que cuenta los elementos iguales a e
+    ; Tipo de recursión: Cola
     (define rgb_iguales (lambda (formato_pixeles e result)
         (if (null? formato_pixeles)
            result
-           (if (color_igual? (car formato_pixeles) e)
+           (if (color_igual (car formato_pixeles) e)
                (rgb_iguales (cdr formato_pixeles) e (+ result 1))
                (rgb_iguales (cdr formato_pixeles) e result)))))
+
                          
     (if (null? formato_pixeles)
         null
-        (if (color_igual? (car formato_pixeles) (list -1 -1 -1))
+        (if (color_igual (car formato_pixeles) (list -1 -1 -1))
             (histograma_rgb (filtro_iguales_rgb formato_pixeles (color_lista (car formato_pixeles))))
             (cons (list (rgb_iguales formato_pixeles (color_lista (car formato_pixeles)) 0) (color_lista (car formato_pixeles))) (histograma_rgb (filtro_iguales_rgb formato_pixeles (color_lista (car formato_pixeles)))))))))
 
@@ -184,7 +187,7 @@
 
 ; Dominio: formato de pixeles (list) X elemento (list)
 ; Recorrido: list
-; Descripción: Función que crea una lista sin el rgb más repetido reemplazandolo con string's
+; Descripción: Función que crea una lista sin el rgb más repetido
 ; Tipo de recursión: Natural
 (define compress-formato-rgb (lambda (lista elemento)
 
@@ -207,7 +210,7 @@
                                
     (if (null? lista)
         null
-        (if (color_igual? (car lista) elemento)
+        (if (color_igual (car lista) elemento)
             (cons (convertir_rgb_hex_pixel (car lista))(compress-formato-rgb (cdr lista) elemento))
             (cons (car lista) (compress-formato-rgb (cdr lista) elemento))))))
 
@@ -242,12 +245,24 @@
              (hex->rgb (cdr lista) (- largo 1) (+ result (* (car lista) (expt 16 largo)))))))
 
     (setB (setG (setR pixel (hex->rgb (obtener_valor (getR pixel) 0) 1 0)) (hex->rgb (obtener_valor (getG pixel) 0) 1 0)) (hex->rgb (obtener_valor (getB pixel) 0) 1 0))))
-                      
+
+                                  
      (if (null? lista)
          null
          (if (compress_rgb? (car lista))
              (cons (convertir_valor_hex_rgb (car lista)) (descompress-formato-rgb (cdr lista)))
              (cons (car lista) (descompress-formato-rgb (cdr lista)))))))
+
+; Dominio: pixrgb-d
+; Recorrido: pixrgb-d
+; Descripción: Función que invierte el color de un pixrgb-d, invertColorRGB
+(define invertColorRGB (lambda (pixrgb-d_pasado)
+     (define invertir_color (lambda (color)
+           (abs (- color 255))))
+
+     (if (pixrgb-d? pixrgb-d_pasado)
+        (setB (setG (setR pixrgb-d_pasado (invertir_color (getR pixrgb-d_pasado))) (invertir_color (getG pixrgb-d_pasado))) (invertir_color (getB pixrgb-d_pasado)))
+        pixrgb-d_pasado)))
 
 ; Dominio: formato de pixeles (list) X largo (int)
 ; Recorrido: string
@@ -270,8 +285,7 @@
     ; Función que tranforma un color rgb->hex
     (define convertir_rgb (lambda (c1 c2 c3)
         (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
-
-    ; Función que crea la cadena de string
+                                             
     (define fila_rgb (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
@@ -281,7 +295,6 @@
                       (string-append "#" (convertir_rgb (getR (car formato_image)) (getG (car formato_image)) (getB (car formato_image))) " " (fila_rgb (cdr formato_image) fila))
                        (fila_rgb (cdr formato_image) fila))))))
 
-     ; Función que forma el string, recursión natural
      (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)
               (string-append (fila_rgb formato_image fila) (formar_string formato_image largo (+ fila 1)))

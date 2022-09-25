@@ -32,8 +32,6 @@ de funciones resulte más confusa.
                   (pixrgb-d 1 0 0 0 255 10)
                   (pixrgb-d 1 1 255 255 255 1)))
 
-
-
 ;Creación de una imagen de 2 x 2 del tipo bitmap
 (define img2 (image 2 2
                   (pixbit-d 0 0 0 10)
@@ -52,6 +50,7 @@ de funciones resulte más confusa.
 ; #FF0000 #00FF00
 ; #0000FF #FFFFFF
 
+;(define a (crop image1 0 1 2 3))
 
 ;imprimir una representación string de la imagen
 (display (image->string img2 pixbit->string))
@@ -208,13 +207,19 @@ OBS:
 (display "\n\n\n\nScript básico Pruebas - Agregado\n\n\n")
 
 ; Creación de una imagen de 2 x 3 del tipo pixmap
-(define image1 (image 2 3
+(define image1 (image 4 3
                        (pixrgb-d 0 0 10 10 10 10)
                        (pixrgb-d 0 1 20 20 20 20)
                        (pixrgb-d 0 2 30 30 30 30)
                        (pixrgb-d 1 0 40 40 40 40)
                        (pixrgb-d 1 1 50 50 50 50)
-                       (pixrgb-d 1 2 60 60 60 60)))
+                       (pixrgb-d 1 2 60 60 60 60)
+                       (pixrgb-d 2 0 70 70 70 70)
+                       (pixrgb-d 2 1 80 80 80 80)
+                       (pixrgb-d 2 2 90 90 90 90)
+                       (pixrgb-d 3 0 100 100 100 100)
+                       (pixrgb-d 3 1 110 110 110 110)
+                       (pixrgb-d 3 2 120 120 120 120)))
 
 ; Creación de una imagen de 3 x 3 del tipo bitmap
 (define image2 (image 3 3
@@ -236,7 +241,6 @@ OBS:
                        (pixhex-d 1 0 "#00FF00" 10)
                        (pixhex-d 1 1 "#00FF00" 30)
                        (pixhex-d 1 2 "#F32FFF" 30)))
-
 
 ; probando funciones de pertenencia
 (bitmap? image1) ; la respuesta debería ser #f

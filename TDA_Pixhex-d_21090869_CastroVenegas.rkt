@@ -94,10 +94,10 @@
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
 ; Descripción: Función que recopila la cantidad de elemento de cada tipo de una lista
+; Tipo de recursión: Utiliza recursión natural y cola
 (define histograma_hex (lambda (formato_pixeles)
 
-   ; Descripción: Función que cuenta los elementos iguales a e en una lista
-   ; Tipo de recursión: Cola
+   ; Descripción: Función que cuenta los elementos iguales a e en una lista, recursión de cola
    (define hex_iguales (lambda (formato_pixeles e result)
        (if (null? formato_pixeles)
            result
@@ -105,8 +105,7 @@
                (hex_iguales (cdr formato_pixeles) e (+ result 1))
                (hex_iguales (cdr formato_pixeles) e result)))))
 
-   ; Descripción: Función que recupera los elementos iguales a e
-   ; Tipo de recursión: Natural
+   ; Descripción: Función que recupera los elementos iguales a e, recursión natural
    (define filtro_iguales_hex (lambda (formato_pixeles e)
     (if (null? formato_pixeles)
         null
@@ -137,8 +136,6 @@
 ; Descripción: función que crea una lista sin el hex más repetido
 ; Tipo de recursión: Natural
 (define compress-formato-hex (lambda (lista elemento)
-
-
     ; Descripción: Función que cambia un hexmap a pixmap
    (define convertir_hex_rgb (lambda (string_ingresado)
 
@@ -209,7 +206,8 @@
 ; Recorrido: string
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixhex->string
 (define pixhex->string (lambda (formato_image largo)
-                            
+
+    ; Función que crea cadena de string
     (define fila_hex (lambda (formato_image fila)
         (if (null? formato_image)
             "\n"
@@ -219,6 +217,7 @@
                     (string-append (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila))
                     (fila_hex (cdr formato_image) fila))))))
 
+     ; Función que forma el string
      (define formar_string (lambda (formato_image largo fila)
           (if (<= fila largo)
               (string-append (fila_hex formato_image fila) (formar_string formato_image largo (+ fila 1)))

@@ -5,7 +5,26 @@
 (require "TDA_Pixbit-d_21090869_CastroVenegas.rkt")
 (require "TDA_Pixhex-d_21090869_CastroVenegas.rkt")
 
-;------------------------------------------ IMAGENES DE Script básico Pruebas ---------------------------------------------------------
+;------------------------------------------  Script básico Pruebas ---------------------------------------------------------
+
+#|
+ En esta sección del archivo están todas las funciones del Script básico Pruebas
+
+Script básico Pruebas
+El código presentado a continuación contiene ejemplos que le permitirán probar todas las funciones. No obstante, estas
+funciones no cubren todos los escenarios posibles. Estos ejemplos le servirán como referencia para su
+autoevaluación, sin embargo se recomienda que pueda variar los ejemplos y probar distintos escenarios. Recuerde que en
+su entrega final debe ampliar este script de pruebas con al menos 3 ejemplos más por función. Esto quiere decir, que su
+script de prueba (archivo principal) debe contener todos los ejemplos listados a continuación (sin cambios) además de los suyos.
+
+Las definiciones de imágenes enumeradas de 1 hasta N corresponden a funciones constantes. En este caso se aplican para
+hacer el código más legible evitando una composición directa de las funciones, lo que hace que cada una de las evaluaciones
+de funciones resulte más confusa. 
+
+|#
+
+(display "\nScript básico Pruebas - Documento\n\n\n")
+
 ; Creación de una imagen de 2 x 2 del tipo pixmap
 (define img1 (image 2 2
                   (pixrgb-d 0 0 255 0 0 10)
@@ -172,35 +191,231 @@
 (equal? img25 img2)
 (equal? img26 img1)
 
-;----------------------------------------- IMAGENES ADICIONALES ---------------------------------
+;------------------------------------------  Script básico Pruebas - Agregado ---------------------------------------------------------
+
+#|
+ En esta sección del archivo están todas las funciones del Script básico Pruebas adicionales
+
+Script básico Pruebas
+El código presentado a continuación contiene ejemplos que le permitirán probar todas las funciones. No obstante, estas
+funciones no cubren todos los escenarios posibles. Es para ampliar este script de pruebas con al menos 3 ejemplos más por cada función
+
+OBS:
+-> Las imagenes definidas tendrán el formato imageX para diferenciarlas de las imagenes anteriores
+-> en total salieron 31 imagenes definidas
+|#
+
+(display "\n\n\n\nScript básico Pruebas - Agregado\n\n\n")
+
+; Creación de una imagen de 2 x 3 del tipo pixmap
+(define image1 (image 2 3
+                       (pixrgb-d 0 0 10 10 10 10)
+                       (pixrgb-d 0 1 20 20 20 20)
+                       (pixrgb-d 0 2 30 30 30 30)
+                       (pixrgb-d 1 0 40 40 40 40)
+                       (pixrgb-d 1 1 50 50 50 50)
+                       (pixrgb-d 1 2 60 60 60 60)))
+
+; Creación de una imagen de 3 x 3 del tipo bitmap
+(define image2 (image 3 3
+                       (pixbit-d 0 0 0 10)
+                       (pixbit-d 0 1 1 20)
+                       (pixbit-d 0 2 1 30)
+                       (pixbit-d 1 0 1 20)
+                       (pixbit-d 1 1 0 30)
+                       (pixbit-d 1 2 1 30)
+                       (pixbit-d 2 0 0 20)
+                       (pixbit-d 2 1 1 20)
+                       (pixbit-d 2 2 0 40)))
+
+; Creación de una imagen de 2 x 3 del tipo hexmap
+(define image3 (image 2 3
+                       (pixhex-d 0 0 "#FF0000" 10)
+                       (pixhex-d 0 1 "#0000FF" 20)
+                       (pixhex-d 0 2 "#00FF00" 20)
+                       (pixhex-d 1 0 "#00FF00" 10)
+                       (pixhex-d 1 1 "#00FF00" 30)
+                       (pixhex-d 1 2 "#F32FFF" 30)))
 
 
+; probando funciones de pertenencia
+(bitmap? image1) ; la respuesta debería ser #f
+(bitmap? image2)  ; la respuesta debería ser #t
+(bitmap? image3)  ; la respuesta debería ser #f
+
+(pixmap? image1) ; la respuesta debería ser #t
+(pixmap? image2)  ; la respuesta debería ser #f
+(pixmap? image3)  ; la respuesta debería ser #f
+
+(hexmap? image1) ; la respuesta debería ser #f
+(hexmap? image2)  ; la respuesta debería ser #f
+(hexmap? image3)  ; la respuesta debería ser #t
+
+(compressed? image1) ; la respuesta debería ser #f
+(compressed? image2) ; la respuesta debería ser #f
+(compressed? image3) ; la respuesta debería ser #f
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; definir 4 pixeles de un pixbit-d
-(define pixbit_1 (pixbit-d 0 0 0 10)) ; lista_2
-(define pixbit_2 (pixbit-d 0 1 1 20))
-(define pixbit_3 (pixbit-d 0 2 0 20))
-(define pixbit_4 (pixbit-d 1 0 1 20))
-(define pixbit_5 (pixbit-d 1 1 0 30))
-(define pixbit_6 (pixbit-d 1 2 1 30))
-(define pixbit_7 (pixbit-d 2 0 0 30))
-(define pixbit_8 (pixbit-d 2 1 1 30))
-(define pixbit_9 (pixbit-d 2 2 0 40))
+; probando funciones de flipH, flipV y rotate90
+(flipH image1)
+(flipH image2)
+(flipH image3)
 
-; definir una image 2
-(define image_2 (image 3 3 pixbit_1 pixbit_2 pixbit_3 pixbit_4 pixbit_5 pixbit_6 pixbit_7 pixbit_8 pixbit_9))
+(flipV image1)
+(flipV image2)
+(flipV image3)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,
-; definir 4 pixeles de un pixhex-d
-(define pixhex_1 (pixhex-d 0 0 "#FF0000" 10)) ;lista_3
-(define pixhex_2 (pixhex-d 0 1 "#0000FF" 20))
-(define pixhex_3 (pixhex-d 0 2 "#00FF00" 20))
-(define pixhex_4 (pixhex-d 1 0 "#00FF00" 20))
-(define pixhex_5 (pixhex-d 1 1 "#00FF00" 30))
-(define pixhex_6 (pixhex-d 1 2 "#F32FFF" 30))
+(define image4 (rotate90 image1))
+(define image5 (rotate90 image2))
+(define image6 (rotate90 image3))
 
-; definir una image 3
-(define image_3 (image 2 3 pixhex_1 pixhex_2 pixhex_3 pixhex_4 pixhex_5 pixhex_6))
+; probando funcion crop
+(define image7 (crop image1 1 2 0 1)) ; debería retornar una imágen con cuatro pixel
+(define image8 (crop image2 0 0 0 1)) ; debería retornar una imágen con dos pixeles
+(define image9 (crop image3 0 2 1 1)) ; debería retornar una imágen con cuatro pixeles
+(define image10 (crop image2 0 0 1 1)) ; debería retornar una imágen con cuatro pixeles
 
+; probando imgRGB->imgHex
+(define image11 (imgRGB->imgHex image1))
+(define image12 (imgRGB->imgHex image4))
+(define image13 (imgRGB->imgHex image7))
+
+; probando histograma
+(histogram image1)
+;output:
+;'((1 (10 10 10))
+;  (1 (20 20 20))
+;  (1 (30 30 30))
+;  (1 (40 40 40))
+;  (1 (50 50 50))
+;  (1 (60 60 60)))
+
+(histogram image2)
+;output:
+;'((4 0) (5 1))
+
+(histogram image3)
+;output:
+;'((1 "#FF0000") (1 "#0000FF") (3 "#00FF00")(1 "#F32FFF"))
+
+; probando image->string
+(display (image->string image1 pixrgb->string))
+
+;output:
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
+
+(display (image->string image6 pixhex->string))
+
+;output:
+;##00FF00 ##FF0000 
+;##00FF00 ##0000FF 
+
+(display (image->string image10 pixbit->string))
+
+;output:
+;0 1
+;1 0 
+
+; probando compress
+(define image14 (compress image1))
+(define image15 (compress image2))
+(define image16 (compress image3))
+
+(compressed? image14)  ; la respuesta debería ser #t
+(compressed? image15)  ; la respuesta debería ser #t
+(compressed? image16)  ; la respuesta debería ser #t
+
+; probando funciones invertColorBit, invertColorRGB con edit
+(define image17 (edit invertColorBit image2))
+(define image18 (edit invertColorBit image5))
+(define image19 (edit invertColorBit image8))
+
+(define image20 (edit invertColorRGB image1))
+(define image21 (edit invertColorRGB image4))
+(define image22 (edit invertColorRGB image7))
+
+;se asume que las funciones de ajuste de canal están implementadas. 
+;Puede cambiarlas por otras en su script de pruebas si así lo prefiere 
+(define image23 (edit (adjustChannel getR setR incCh) image1))
+(define image24 (edit (adjustChannel getG setG incCh) image1))
+(define image25 (edit (adjustChannel getB setB incCh) image1))
+
+
+;imágenes no comprimidas
+(display (image->string image1 pixrgb->string))
+;output:
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
+
+(display (image->string image2 pixbit->string))
+;output:
+;0 1 1
+;1 0 1
+;0 1 0 
+
+(display (image->string image3 pixhex->string))
+;output:
+;#FF0000 #0000FF #00FF00 
+;#00FF00 #00FF00 #F32FFF 
+
+;imagenes comprimidas, podrían internamente descomprimirlas para convertir a string ;(opcional)
+(display (image->string image14 pixrgb->string))
+;output:
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
+
+(display (image->string image15 pixbit->string))
+;output:
+;0 1 1
+;1 0 1
+;0 1 0
+
+(display (image->string image16 pixhex->string))
+;output:
+;#FF0000 #0000FF #000FF0 
+;#000FF0 #000FF0 #F32FFF 
+
+
+;imágenes no comprimidas
+(display (image->string image18 pixbit->string))
+;output:
+;1 0 1 
+;0 1 0 
+;1 0 0
+
+(display (image->string image20 pixrgb->string))
+;output:
+;#F5F5F5 #EBEBEB #E1E1E1 
+;#D7D7D7 #CDCDCD #C3C3C3
+
+(display (image->string image11 pixhex->string))
+;output:
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
+
+; probando depthLayers
+(depthLayers image5) 
+(depthLayers image6) 
+(depthLayers image7)
+
+; probando decompress
+(define image26 (decompress image14))
+(define image27 (decompress image15))
+(define image28 (decompress image16))
+
+; girando imagenes
+(define image29 (flipH (flipH (flipH (flipH image3)))))
+(define image30 (flipV (flipV image1)))
+(define image31 (rotate90 (rotate90 (rotate90 (rotate90 image2)))))
+
+;las siguientes comparaciones deberían arrojar #t
+(equal? image26 image1)
+(equal? image27 image2)
+(equal? image29 image3)
+(equal? image30 image1)
+
+;las siguientes comparaciones deberían arrojar #f
+(equal? image25 image2)
+(equal? image13 image5)
+(equal? image20 image3)

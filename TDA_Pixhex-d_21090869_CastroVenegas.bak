@@ -216,7 +216,7 @@
             (if (null? (car formato_image))
                 (string-append "        " (fila_hex (cdr formato_image) fila))
                 (if (= (x_hex (car formato_image)) fila)
-                    (string-append (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila))
+                    (string-append "#" (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila))
                     (fila_hex (cdr formato_image) fila))))))
 
      (define formar_string (lambda (formato_image largo fila)

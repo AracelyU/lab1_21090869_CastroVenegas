@@ -186,17 +186,6 @@
      (modificar_formato_image image_ingresada 
         (ordenar_formato (flipV-formato (pixel-format image_ingresada) (largo_pos_x image_ingresada) 0 image_ingresada) 0 0 image_ingresada 0))))
 
-; definir 4 pixeles de un pixrgb-d
-(define pixrgb_1 (pixrgb-d 0 0 10 10 10 10)) ; lista_1
-(define pixrgb_2 (pixrgb-d 0 1 20 20 20 20))
-(define pixrgb_3 (pixrgb-d 0 2 30 30 30 30))
-(define pixrgb_4 (pixrgb-d 1 0 40 40 40 40))
-(define pixrgb_5 (pixrgb-d 1 1 50 50 50 50))
-(define pixrgb_6 (pixrgb-d 1 2 60 60 60 60))
-
-; definir una image 1
-(define image_1 (image 2 3  pixrgb_1  pixrgb_2  pixrgb_3  pixrgb_4  pixrgb_5  pixrgb_6))
-
 
 ; Dominio: image
 ; Recorrido: image
@@ -257,7 +246,7 @@
     (define rgb->hex (lambda (a) (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
 
     ; Función que tranforma los colores de pixmap a hexmap
-    (define convertir_rgb (lambda (c1 c2 c3) (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
+    (define convertir_rgb (lambda (c1 c2 c3) (string-append "#" (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
     (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (getR pixel) (getG pixel) (getB pixel))) (getD pixel))))
                          
@@ -332,15 +321,6 @@
             (funcion_pixel (pixel-format (decompress image)) (largo_pos_y image))
             (funcion_pixel (pixel-format image) (largo_pos_y image)))))
 
-(define image2 (image 2 2
-                  (pixbit-d 0 0 0 10)
-                  (pixbit-d 0 1 1 20)
-                  (pixbit-d 1 0 1 10)
-                  (pixbit-d 1 1 0 255)))
-
-
-(define b (crop image2 0 0 0 1))
-; (rellenar_profundidad (pixel-format a) 0 0 a 0 (d_bit (car (pixel-format a))) 0)
 
 ; Dominio: image
 ; Recorrido: image (list)

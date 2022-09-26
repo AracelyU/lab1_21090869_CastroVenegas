@@ -236,13 +236,11 @@
 ; Dominio: image
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que retorna un histograma de frecuencias a partir de los colores de una imagen, histogram
-; Comentario: Se agrega el histograma para una imagen comprimida bitmap-d para la función descompress más adelante
 (define histogram (lambda (image) ; requerimiento funcional
     (cond
       [(pixmap? image) (histograma_rgb (pixel_formato image))]
       [(bitmap? image) (histogram_bit (pixel_formato image))]
       [(hexmap? image) (histograma_hex (pixel_formato image))]
-      [(ormap pixbit-d_compressed? (pixel_formato image)) (histogram_bit (pixel_formato image))]
       [else image])))
 
 ; Dominio: image

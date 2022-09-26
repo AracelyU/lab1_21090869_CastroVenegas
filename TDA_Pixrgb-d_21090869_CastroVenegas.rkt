@@ -231,16 +231,7 @@
 ; Recorrido: string
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixrgb->string
 ; Tipo de recursión: Natural
-(define pixrgb->string (lambda (formato_image largo)
-
-    ; Función que verifica si una coordenada existe en una imagen que sufrio un crop
-    (define encontrar_pixel? (lambda (lista pos_x pos_y)
-    (if (null? lista)
-        #f
-        (if (and (not (null? (car lista))) (= (x_rgb (car lista)) pos_x) (= (y_rgb (car lista)) pos_y))
-            #t
-            (encontrar_pixel? (cdr lista) pos_x pos_y)))))                 
-
+(define pixrgb->string (lambda (formato_image image)
     ; Función para convertir un numero a hex
     (define valor_hex (lambda (a)
        (cond
@@ -258,22 +249,28 @@
         (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
     ; Función que crea la cadena de string
-    (define fila_rgb (lambda (formato_image fila)
+    (define fila_rgb (lambda (formato_image fila contador image)
         (if (null? formato_image)
             "\n"
-            (if (or (null? (car formato_image)) )
-                (string-append "       " (fila_rgb (cdr formato_image) fila))
-                (if (= (x_rgb (car formato_image)) fila)
-                      (string-append "#" (convertir_rgb (getR (car formato_image)) (getG (car formato_image)) (getB (car formato_image))) " " (fila_rgb (cdr formato_image) fila))
-                       (fila_rgb (cdr formato_image) fila))))))
+            (cond
+              [(null? (car formato_image))
+               (if (>= contador (cadr image))
+                   (string-append "\n" (fila_rgb formato_image (+ fila 1) 0 image))
+                   (string-append "        " (fila_rgb (cdr formato_image) fila (+ contador 1) image)))]
+
+              [(= (x_rgb (car formato_image)) fila)
+               (string-append "#" (convertir_rgb (getR (car formato_image)) (getG (car formato_image)) (getB (car formato_image))) " " (fila_rgb (cdr formato_image) fila (+ contador 1) image))]
+
+              [(>= contador (cadr image)) (string-append "\n" (fila_rgb formato_image (+ fila 1) 0 image))]
+              ))))
 
      ; Función que forma el string, recursión natural
-     (define formar_string (lambda (formato_image largo fila)
-          (if (<= fila largo)
-              (string-append (fila_rgb formato_image fila) (formar_string formato_image largo (+ fila 1)))
-              "\n")))
+     (define formar_string (lambda (formato_image image)
+              (string-append (fila_rgb formato_image 0 0 image))))
                          
-    (formar_string formato_image largo 0)))
+    (formar_string formato_image image)))
+
+
 
 ; exportar la funcion al exterior
 (provide (all-defined-out))

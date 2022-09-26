@@ -129,25 +129,32 @@
 ; Dominio: formato de pixeles (list) X largo (int)
 ; Recorrido: string
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixbit->string
-(define pixbit->string (lambda (formato_image largo)
+(define pixbit->string (lambda (formato_image image)
 
      ; Función que crea la cadena de string
-    (define fila_bit (lambda (formato_image fila)
+    (define fila_bit (lambda (formato_image fila contador image)
         (if (null? formato_image)
             "\n"
-            (if (null? (car formato_image))
-                (string-append "  " (fila_bit (cdr formato_image) fila))
-                (if (= (x_bit (car formato_image)) fila)
-                   (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila))
-                   (fila_bit (cdr formato_image) fila))))))
+            (cond
+              [(null? (car formato_image))
+               (if (>= contador (cadr image))
+                   (string-append "\n" (fila_bit formato_image (+ fila 1) 0 image))
+                   (string-append "  " (fila_bit (cdr formato_image) fila (+ contador 1) image)))]
+
+              [(= (x_bit (car formato_image)) fila)
+                 (string-append (number->string (bit (car formato_image))) " " (fila_bit (cdr formato_image) fila (+ contador 1) image))]
+
+              [(>= contador (cadr image)) (string-append "\n" (fila_bit formato_image (+ fila 1) 0 image))]
+              ))))
+
 
      ; Función que forma el string
-    (define formar_string (lambda (formato_image largo fila)
-          (if (<= fila largo)
-              (string-append (fila_bit formato_image fila) (formar_string formato_image largo (+ fila 1)))
-               "\n")))
+    (define formar_string (lambda (formato_image image)
+              (string-append (fila_bit formato_image 0 0 image))))
                          
-    (formar_string formato_image largo 0)))
+    (formar_string formato_image image)))
+
+
 
 
 ; exportar la funcion al exterior

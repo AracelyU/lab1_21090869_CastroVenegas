@@ -381,13 +381,31 @@
             (cambiar_b_bit pixbit-d_pasado 0))
         pixbit-d_pasado)))
 
+
 ; Dominio: image X función
 ; Recorrido: string
 ; Descripción: Función que transforma una imagen a una representación string, image->string
 (define image->string (lambda (image funcion_pixel) ; requerimiento funcional
+
+      (define crop_formato (lambda (lista pos_x pos_y contador image)
+        (if (= contador (* (ancho_image image) (largo_image image)))
+             null
+            (cond
+                [(not (encontrar_pixel? lista pos_x pos_y))
+                     (if (< pos_y (largo_image image))
+                         (cons null (crop_formato lista pos_x (+ pos_y 1) (+ contador 1) image))
+                         (crop_formato lista (+ pos_x 1) 0 contador image))]
+                
+                [(< pos_y (largo_image image))
+                     (cons (encontrar_pixel lista pos_x pos_y) (crop_formato lista pos_x (+ pos_y 1) (+ contador 1) image))]
+
+                [else (crop_formato lista (+ pos_x 1) 0 contador image)]))))
+
         (if (compressed? image)
-            (funcion_pixel (pixel_formato (decompress image)) (largo_pos_y image))
-            (funcion_pixel (pixel_formato image) (largo_pos_y image)))))
+            (funcion_pixel (crop_formato (pixel_formato (decompress image)) 0 0 0 image) image)
+            (funcion_pixel (crop_formato (pixel_formato image) 0 0 0 image) image))
+
+))
 
 ; Dominio: función_selectora X función_modificadora X función_operación X pixrgb-d
 ; Recorrido: pixrgb-d

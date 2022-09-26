@@ -193,25 +193,30 @@
 ; Dominio: formato de pixeles (list) X largo (int)
 ; Recorrido: string
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixhex->string
-(define pixhex->string (lambda (formato_image largo)
+(define pixhex->string (lambda (formato_image image)
 
     ; Función que crea cadena de string
-    (define fila_hex (lambda (formato_image fila)
+    (define fila_hex (lambda (formato_image fila contador image)
         (if (null? formato_image)
             "\n"
-            (if (null? (car formato_image))
-                (string-append "        " (fila_hex (cdr formato_image) fila))
-                (if (= (x_hex (car formato_image)) fila)
-                    (string-append (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila))
-                    (fila_hex (cdr formato_image) fila))))))
+            (cond
+              [(null? (car formato_image))
+               (if (>= contador (cadr image))
+                   (string-append "\n" (fila_hex formato_image (+ fila 1) 0 image))
+                   (string-append "        " (fila_hex (cdr formato_image) fila (+ contador 1) image)))]
+
+              [(= (x_hex (car formato_image)) fila)
+               (string-append (hex (car formato_image)) " " (fila_hex (cdr formato_image) fila (+ contador 1) image))]
+
+              [(>= contador (cadr image)) (string-append "\n" (fila_hex formato_image (+ fila 1) 0 image))]
+              ))))
+
 
      ; Función que forma el string
-     (define formar_string (lambda (formato_image largo fila)
-          (if (<= fila largo)
-              (string-append (fila_hex formato_image fila) (formar_string formato_image largo (+ fila 1)))
-              "\n")))
+     (define formar_string (lambda (formato_image image)
+              (string-append (fila_hex formato_image 0 0 image))))
                          
-    (formar_string formato_image largo 0)))
+    (formar_string formato_image image)))
 
 
 ; exportar la funcion al exterior

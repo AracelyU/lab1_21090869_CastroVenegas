@@ -1,5 +1,18 @@
+Requerimiento No Funcionales    Evaluación (criterio)
+Autoevaluación			1
+Lenguaje			1
+Versión				1
+Standard			1
+No variables			1
+Documentación			0.75
+Dom->Rec			1
+Organización			1
+Historial			1
+Script de pruebas		1
+Prerrequisitos			1
+
 Requerimientos Funcionales	Evaluación (criterio)
-TDAs                            0.75
+TDAs                            1
 image                           1
 bitmap?                         1
 pixmap?                         1

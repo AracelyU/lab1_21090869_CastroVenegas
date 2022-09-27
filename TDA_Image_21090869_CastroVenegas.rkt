@@ -237,16 +237,27 @@
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que retorna un histograma de frecuencias a partir de los colores de una imagen, histogram
 (define histogram (lambda (image) ; requerimiento funcional
-    (cond
-      [(pixmap? image) (histograma_rgb (pixel_formato image))]
-      [(bitmap? image) (histogram_bit (pixel_formato image))]
-      [(hexmap? image) (histograma_hex (pixel_formato image))]
-      [else image])))
+    (if (compressed? image)
+      (cond
+         [(pixmap? (decompress image)) (histograma_rgb (pixel_formato (decompress image)))]
+         [(bitmap? (decompress image)) (histogram_bit (pixel_formato (decompress image)))]
+         [(hexmap? (decompress image)) (histograma_hex (pixel_formato (decompress image)))]
+         [else image])
+
+       (cond
+         [(pixmap? image) (histograma_rgb (pixel_formato image))]
+         [(bitmap? image) (histogram_bit (pixel_formato image))]
+         [(hexmap? image) (histograma_hex (pixel_formato image))]
+         [else image]))))
 
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que convierte una imagen pixmap-d a hexmap-d
 (define imgRGB->imgHex (lambda (image_rgb) ; requerimiento funcional
+
+    ; Función que modifica la profundidad de un pixhex-d
+    (define cambiar_d_hex (lambda (pixhex-d_pasado d_nuevo)               
+      (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) (hex pixhex-d_pasado) d_nuevo)))
 
     ; Función que cambia un pixmap a hexmap, Dominio: pixel, Recorrido: pixel
     (define convertir_rgb_hex (lambda (pixel)
@@ -500,7 +511,7 @@
                       
      (cond
        [(bitmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel_formato image_ingresada) 0)]
-       [(hexmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel_formato image_ingresada) "#000000")]
+       [(hexmap? image_ingresada) (profundidad_bit_hex image_ingresada (pixel_formato image_ingresada) "#FFFFFF")]
        [(pixmap? image_ingresada) (profundidad_rgb image_ingresada (pixel_formato image_ingresada))]
        [else image_ingresada])))
 

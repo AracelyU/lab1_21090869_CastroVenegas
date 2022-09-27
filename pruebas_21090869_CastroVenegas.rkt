@@ -273,7 +273,7 @@ OBS:
 (define image5 (rotate90 image2))
 (define image6 (rotate90 image3))
 
-; probando funcion crop
+; función crop
 (define image7 (crop image1 1 2 0 1)) ; debería retornar una imágen con cuatro pixel
 (define image8 (crop image2 0 0 0 1)) ; debería retornar una imágen con dos pixeles
 (define image9 (crop image3 0 2 1 1)) ; debería retornar una imágen con cuatro pixeles

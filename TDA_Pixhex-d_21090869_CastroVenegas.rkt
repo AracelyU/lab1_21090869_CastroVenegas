@@ -82,13 +82,6 @@
 (define cambiar_h_hex (lambda (pixhex-d_pasado h_nuevo)               
       (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) h_nuevo (d_hex pixhex-d_pasado))))
 
-; Dominio: pixhex-d
-; Recorrido: pixhex-d
-; Descripción: Función que modifica la profundidad de un pixhex-d
-(define cambiar_d_hex (lambda (pixhex-d_pasado d_nuevo)               
-      (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) (hex pixhex-d_pasado) d_nuevo)))
-
-
 ;--------------------------------------- OTRAS FUNCIONES -----------------------------------------------------------------------------------
 
 ; Dominio: formato de pixeles (list)

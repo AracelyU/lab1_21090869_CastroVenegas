@@ -16,6 +16,6 @@ Se necesita del programa Dr.Racket 6.11 o superior para poder ejecutar los códi
 del repositorio y la carpeta con código fuente.
 
 Como ejecutar:
-El archivo pruebas_21090869_AracelyCastro trae ejemplos para los requerimientos funcionales. Para ejecutar 
+El archivo pruebas_21090869_CastroVenegas trae ejemplos para los requerimientos funcionales. Para ejecutar 
 estos ejemplos primero se debe tener todos los TDAs en una carpeta, junto con el archivo pruebas_21090869_AracelyCastro. Luego, se 
 debe aplicar "run".

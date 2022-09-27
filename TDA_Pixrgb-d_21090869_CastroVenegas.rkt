@@ -134,10 +134,12 @@
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
 ; Descripción: función que recopila la cantidad de elemento de cada tipo de una lista
-; Tipo de recursión: Utiliza recursión natural y de cola
+; Tipo de recursión: Utiliza recursión natural y de cola para crear lista con base a estados pendientes o retornar un valor inmediato
 (define histograma_rgb (lambda (formato_pixeles)
 
     ; Descripción: Función que recupera la lista por los elementos nos iguales a e, recursión natural
+    ; Dom: formato de pixeles (list) X elemento. Rec: formato de pixeles (list)
+    ; Tipo de recursión: Natural para cerar una lista con base a estados pendientes
     (define filtro_iguales_rgb (lambda (formato_pixeles e)
         (if (null? formato_pixeles)
             null
@@ -146,6 +148,8 @@
                 (filtro_iguales_rgb (cdr formato_pixeles) e)))))
   
     ; Descripción: Función que cuenta los elementos iguales a e, recursión cola
+    ; Dom: formato de pixeles (list) X elemento X int
+    ; Tipo de recursión: cola para obtener resultados inmediatos tras la lista vacia
     (define rgb_iguales (lambda (formato_pixeles e result)
         (if (null? formato_pixeles)
            result
@@ -167,9 +171,11 @@
 (define compress-formato-rgb (lambda (lista elemento)
 
     ; Descripción: Función que convierte los colores de rgb de enteros a string
+    ; Dom: pixel. Rec: pixel
     (define convertir_rgb_hex_pixel (lambda (pixel)
 
-        ; Función para convertir un numero a hex
+        ; Descripción: Función para convertir un numero a hex
+        ; Dom: int. Rec: string
         (define valor_hex (lambda (a)
            (cond
               [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
@@ -177,7 +183,8 @@
               [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
               [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
 
-         ; Función que transforma un color a string
+         ; Descripción: Función que transforma un color a string
+         ; Dom: int. Rec: string
         (define rgb->hex (lambda (a)
            (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))
 
@@ -193,13 +200,15 @@
 ; Dominio: formaro de pixeles (list)
 ; Recorrido: list
 ; Descripción: Función que descomprime cada pixrgb-d comprimido
-; Tipo de recursión: Natural
+; Tipo de recursión: cola, utilizada en hex->rgb
 (define descompress-formato-rgb (lambda (lista)
 
      ; Descripción: Función que convierte una pixrgb-d comprimido a su forma original
+     ; Dom: pixel. Rec: pixel                             
     (define convertir_valor_hex_rgb (lambda (pixel)
 
-        ; Función para convertir un caracter a numero
+        ; Descripción: Función para convertir un char a número
+        ; Dom: char. Rec: int
         (define valor_entero (lambda (a)
           (cond
              [(char=? a #\1) 1][(char=? a #\2) 2][(char=? a #\3) 3][(char=? a #\4) 4]
@@ -207,13 +216,16 @@
              [(char=? a #\9) 9][(char=? a #\A) 10][(char=? a #\B) 11][(char=? a #\C) 12]
              [(char=? a #\D) 13][(char=? a #\E) 14][(char=? a #\F) 15][else 0])))
                                       
-     ; Función que recupera los valores de cada string
+     ; Descripción: Función que recupera los valores de cada string
+     ; Dom: string X int. Rec: list
     (define obtener_valor (lambda (string_ingresado posicion)
         (if (> posicion (- (string-length string_ingresado) 1))
             null
             (cons (valor_entero (string-ref string_ingresado posicion)) (obtener_valor string_ingresado (+ posicion 1))))))
 
-    ; Función que transforma una lista de valores en un entero
+    ; Descripción: Función que transforma una lista de valores en un entero
+    ; Dom: formato de pixeles (list) X int X int
+    ; Tipo de recursión: cola para obtener un resultado inmediato
     (define hex->rgb (lambda (lista largo result)
          (if (< largo 0)
              result
@@ -232,7 +244,9 @@
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixrgb->string
 ; Tipo de recursión: Natural
 (define pixrgb->string (lambda (formato_image image)
-    ; Función para convertir un numero a hex
+                         
+    ; Descripción: Función para convertir un numero a hex
+     ; Dom: int. Rec: string
     (define valor_hex (lambda (a)
        (cond
           [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
@@ -240,15 +254,19 @@
           [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
           [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
 
-    ; Función que transforma un c1 a hex
+    ; Descripción: Función que transforma un c1 a hex
+    ; Dom: int. Rec: string
     (define rgb->hex (lambda (a)
        (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
 
-    ; Función que tranforma un color rgb->hex
+    ; Descripción: Función que tranforma un color rgb->hex
+    ; Dom: int X int X int. Rec: string
     (define convertir_rgb (lambda (c1 c2 c3)
         (string-append (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
-    ; Función que crea la cadena de string
+    ; Descripción: Función que crea la cadena de string
+    ; Dom: formato de pixeles (list) X int X int X image
+    ; Tipo de recursión: Natural para crear un string con estados pendientes
     (define fila_rgb (lambda (formato_image fila contador image)
         (if (null? formato_image)
             "\n"

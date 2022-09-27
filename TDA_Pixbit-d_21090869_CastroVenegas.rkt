@@ -92,6 +92,7 @@
 ; Dominio: formato de pixeles (list)
 ; Recorrido: list
 ; Descripción: Función histograma que recopila numero de bit
+; Tipo de recursión: cola entregar una resultado inmediato nada más la lista este vacía
 (define histogram_bit (lambda (formato_image)
 
     (define cantidad_bit (lambda (formato_pixeles bit_ingresado result)
@@ -107,7 +108,7 @@
 ; Dominio: formato de pixeles (list) X elemento (int)
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que crea una lista sin el bit más repetido
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural, para crear una lista con base a estados pendientes
 (define compress-formato-bit (lambda (lista elemento)
     (if (null? lista)
         null
@@ -118,7 +119,7 @@
 ; Dominio: formato de pixeles (list) X elemento (int)
 ; Recorrido: formato de pixeles (list)
 ; Descripción: función que devuelve los valores perdidos tras compress
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural, para crear una lista con base a estados pendientes
 (define descompress-formato-bit (lambda (lista elemento)
     (if (null? lista)
         null
@@ -129,9 +130,12 @@
 ; Dominio: formato de pixeles (list) X largo (int)
 ; Recorrido: string
 ; Descripción: Función que convierte el formato de pixeles en una cadena de string, pixbit->string
+; Tipo de recursión: Natural utilizado en fila_bit para crear el string
 (define pixbit->string (lambda (formato_image image)
 
-     ; Función que crea la cadena de string
+     ; Descripción: Función que crea la cadena de string
+     ; Dom: formato de pixeles (list) X int X int X image. Rec: string
+     ; Tipo de recursión: Natural para crear un string con base a estados pendientes
     (define fila_bit (lambda (formato_image fila contador image)
         (if (null? formato_image)
             "\n"
@@ -148,7 +152,8 @@
               ))))
 
 
-     ; Función que forma el string
+     ; Descripción: Función que forma el string
+     ; Dom: formato de pixeles (list) X image. Rec: string
     (define formar_string (lambda (formato_image image)
               (string-append (fila_bit formato_image 0 0 image))))
                          

@@ -57,7 +57,7 @@
 ; Dominio: formato de pixeles (list) X  int X int
 ; Recorrido: boleano
 ; Descripción: Función que permite un pixel existe en una imagen
-; Tipo de recursión: Natural
+; Tipo de recursión: cola pues se recorre la lista de forma recursiva y solo se necesita una salida inmediata.
 (define encontrar_pixel? (lambda (lista pos_x pos_y) ; función adicional
     (if (null? lista)
         #f
@@ -109,7 +109,7 @@
 ; Dominio: formato de pixeles (list) X posición_x (int) X posición_y (int) X image_ingresada (image) X contador (int)
 ; Recorrido: formato de pixeles (list)
 ; Descripción: Función que ordena un formato de pixeles
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural, pues para crear una lista nueva con base en otra se uso recursión con estados pendientes.
 (define ordenar_formato (lambda (lista pos_x pos_y image contador) ; función adicional
                           
       (if (or (= contador (* (ancho_image image) (largo_image image))) (= contador (length lista)))
@@ -150,10 +150,12 @@
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que invierte la imagen horizontalmente, flipH
-; Tipo de recursión: Natural
-(define flipH (lambda (image_ingresada) ; requerimiento funcional
+; Tipo de recursión: Natural, utilizado en flipH-formato
+(define flipH (lambda (image_ingresada) ; requerimiento funcional  para poder formar una lista con base a estados pendientes
  
-    ; Función que cambia el formato de pixeles de forma que se invierta horizontalmente
+    ; Descripción: Función que cambia el formato de pixeles de forma que se invierta horizontalmente
+    ; Dom: formato de pixeles (list) X int X int X image. Rec: formato de pixeles (list)
+    ; Tipo de recursión: Natural para poder formar una lista con base a estados pendientes
     (define flipH-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
              null
@@ -177,10 +179,12 @@
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que invierte la imagen verticalmente, flipV
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural, utilizado en flipV-formato para poder formar una lista con base a estados pendientes
 (define flipV (lambda (image_ingresada) ; requerimiento funcional
 
-    ; Función que cambia el formato de pixeles de forma que se invierta verticalmente
+    ; Descripción: Función que cambia el formato de pixeles de forma que se invierta verticalmente
+    ; Dom: formato de pixeles (list) X int X int X image. Rec: formato de pixeles (list)
+    ; Tipo de recursión: Natural para poder formar una lista con base a estados pendientes
     (define flipV-formato (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
@@ -205,10 +209,12 @@
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que rota la imagen 90° a la derecha, rotate90
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural, utilizado en rotate para poder formar una lista con base a estados pendientes
 (define rotate90 (lambda (image_ingresada) ; requerimiento funcional
 
-    ; Función que cambia el formato de pixeles de forma que rote 90° a la derecha
+    ; Descripción: Función que cambia el formato de pixeles de forma que rote 90° a la derecha
+    ; Dom: formato de pixeles (list) X int X int X image. Rec: formato de pixeles (list)
+    ; Tipo de recursión: Natural para poder formar una lista con base a estados pendientes
     (define rotate (lambda (formato_pixeles fila contador image)
         (if (null? formato_pixeles)
             null
@@ -224,7 +230,8 @@
                           (rotate formato_pixeles (- fila 1) 0 image)
                            null))))))
 
-    ; Función que intercambia el ancho con el largo para cuando rotas la imagen
+    ; Descripción: Función que intercambia el ancho con el largo para cuando rotas la imagen
+    ; Dom: image. Rec: image
     (define intercambiar_dimensiones (lambda (image_ingresada)
             (image (largo_image image_ingresada) (ancho_image image_ingresada) (pixel_formato image_ingresada))))
 
@@ -255,26 +262,32 @@
 ; Descripción: Función que convierte una imagen pixmap-d a hexmap-d
 (define imgRGB->imgHex (lambda (image_rgb) ; requerimiento funcional
 
-    ; Función que modifica la profundidad de un pixhex-d
+    ; Descripción: Función que modifica la profundidad de un pixhex-d
+    ; Dom: pixhex-d X int. Rec: pixhex-d
     (define cambiar_d_hex (lambda (pixhex-d_pasado d_nuevo)               
       (pixhex-d (x_hex pixhex-d_pasado) (y_hex pixhex-d_pasado) (hex pixhex-d_pasado) d_nuevo)))
 
-    ; Función que cambia un pixmap a hexmap, Dominio: pixel, Recorrido: pixel
+    ; Descripción: Función que cambia un pixmap a hexmap,
+    ;Dom: pixel, Rec: pixel                    
     (define convertir_rgb_hex (lambda (pixel)
                             
-    ; Función para convertir un número a hexadecimal
+    ; Descripción: Función para convertir un número a hexadecimal
+    ; Dom: int. Rec: string
     (define valor_hex (lambda (a)
        (cond   [(= a 1) "1"][(= a 2) "2"][(= a 3) "3"][(= a 4) "4"]
                [(= a 5) "5"][(= a 6) "6"][(= a 7) "7"][(= a 8) "8"]
                [(= a 9) "9"][(= a 10) "A"][(= a 11) "B"][(= a 12) "C"]
                [(= a 13) "D"][(= a 14) "E"][(= a 15) "F"][else "0"])))
 
-    ; Función que transforma un color a hexadecimal
+    ; Descripción: Función que transforma un color a hexadecimal
+    ; Dom: int. Rec: string
     (define rgb->hex (lambda (a) (string-append (valor_hex (quotient a 16)) (valor_hex (remainder a 16)))))                 
 
-    ; Función que tranforma los colores de pixmap a hexmap
+    ; Descripción: Función que tranforma los colores de pixrgb-d a pixhex-d
+    ; Dom: pixrgb-d. Rec: string
     (define convertir_rgb (lambda (c1 c2 c3) (string-append "#" (rgb->hex c1)(rgb->hex c2)(rgb->hex c3))))
 
+  
     (cambiar_d_hex (cambiar_h_hex pixel (convertir_rgb (getR pixel) (getG pixel) (getB pixel))) (getD pixel))))
                          
     (if (pixmap? image_rgb)
@@ -284,10 +297,12 @@
 ; Dominio: image X x1 (int) X y1 (int) X x2 (int) X y2 (int)
 ; Recorrido: image
 ; Descripción: Función que recorta una imagen a partir de un cuadrante, crop
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural, utilizado en crop_formato para crear una lista con base a estados pendientes
 (define crop (lambda (image_ingresada x1 y1 x2 y2) ; requerimiento funcional
 
-    ; Función que crea el formato con pixeles cuyas coordenadas están dentro del cuadrante
+    ; Descripción: Función que crea el formato con pixeles cuyas coordenadas están dentro del cuadrante
+    ; Dom: formato de pixeles (list) X int X int X int X int. Rec: formato de pixeles (list)
+    ; Tipo de recursión: Natural para poder formar una lista con base a estados pendientes
     (define crop_formato (lambda (formato_pixeles x1 y1 x2 y2)
         (if (null? formato_pixeles)
             null
@@ -301,21 +316,28 @@
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que comprime una imagen eliminando aquellos pixeles con el color más frecuente, compress
+; Tipo de recursión: cola, utilizado en hex_mayor para encontrar el string más repetido para comprimir una imagen Hexmap-d
 (define compress (lambda (image_ingresada) ; requerimiento funcional
 
+    ; Descripción: Función que encuentra el bit mayor del histograma de pixbit-d
+    ; Dom: formato de pixeles (list). Rec: int
     (define bit_mayor (lambda (lista_bit)
         (if (> (car (car lista_bit)) (car (car (cdr lista_bit)))) 0 1)))
 
+    ; Descripción: Función que encuentra el color RGB mayor del histograma de pixrgb-d
+    ; Dom: formato de pixeles (list). Rec: list                 
     (define rgb_mayor (lambda (lista_rgb result)
-    (if (null? lista_rgb)
+      (if (null? lista_rgb)
         (car (cdr result))
         (if (> (car(car lista_rgb)) (car result))
             (rgb_mayor (cdr lista_rgb) (car lista_rgb))
             (rgb_mayor (cdr lista_rgb) result)))))
 
-
+     ; Descripción: Función que encuentra el string más repetido del histograma de pixhex-d
+     ; Dom: formato de pixeles (list) X list. Rec: string
+     ; Tipo de recursión: Cola para encontrar inmediatamente el resultado tras vaciar la lista
      (define hex_mayor (lambda (lista_hex result)
-    (if (null? lista_hex)
+       (if (null? lista_hex)
         (car (cdr result))
         (if (> (car(car lista_hex)) (car result))
             (hex_mayor (cdr lista_hex) (car lista_hex))
@@ -334,9 +356,14 @@
 
 ; Dominio: image
 ; Recorrido: image
-; Descripción: Función que permite descomprimir una imagen comprimida, descompress
+; Descripción: Función que permite descomprimir una imagen comprimida
+; Tipo de recursión: cola, utilizado en bit_faltante para encontrar el elemento al reemplazar
+; en una imagen Bitmap-d comprimida
 (define decompress (lambda (image_ingresada) ; requerimiento funcional
 
+    ; Descripción Función que busca el bit faltante de una imagen Bitmap-d comprimida
+    ; Dom: formato de pixeles (list) x int. Rec: int
+    ; Tipo de recursión: cola para obtener el resultado inmediato tras vacias la lista
     (define bit_faltante (lambda (formato_pixeles result)
             (if (null? formato_pixeles)
                 result
@@ -361,7 +388,7 @@
 ; Dominio: image
 ; Recorrido: image
 ; Descripción: Función que permite aplicar funciones especiales a las imágenes, edit
-; Tipo de recursión: Natural
+; Tipo de recursión: Natural para crear la lista a partir de estados pendientes
 (define edit (lambda (filtro image_ingresado) ; requerimiento funcional
        (define map_edit (lambda (filtro lista)
          (if (null? lista)
@@ -394,8 +421,13 @@
 ; Dominio: image X función
 ; Recorrido: string
 ; Descripción: Función que transforma una imagen a una representación string, image->string
+; Tipo de recursión: Natural, utilizado en crop_formato para rellenar posiciones eliminadas en una
+; image crop con listas vacias.
 (define image->string (lambda (image funcion_pixel) ; requerimiento funcional
 
+      ; Descripción: Función que rellena las coordenadas (x,y) que no existen en la imagen crop con listas vacias
+      ; Dom: formato de pixeles (list) X int X int X int X image. Rec: formato de pixeles (list)
+      ; Tipo de recursión: Natural para crear una lista con base a estador pendientes
       (define crop_formato (lambda (lista pos_x pos_y contador image)
         (if (= contador (* (ancho_image image) (largo_image image)))
              null
@@ -433,10 +465,13 @@
 ; Tipo de recursión: Natural
 (define depthLayers (lambda (image_ingresada) ; requerimiento funcional
   
-   ; Función que crea la lista de imagenes de profundidad con bitmap y hexmap  
+   ; Descripción: Función que crea la lista de imagenes de profundidad con Bitmap-d y Hexmap-d
+   ; Dom: image X formato de pixeles (list) X (int o string)
    (define profundidad_bit_hex (lambda (image_ingresada lista reemplazo)
 
-     ; Función que rellena el resto de pixeles en blanco (0 - "#000000")
+     ; Descripción: Función que rellena el resto de pixeles en blanco (0 - "#000000")
+     ; Dom: formato de pixeles (list) X int X int X image X int X (int o string). Rec: formato de pixeles (list)
+     ; Tipo de recursión: Natural para crear una lista con base a estados pendientes 
      (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento reemplazo)
           (if (or (null? lista) (= contador (* (ancho_image image) (largo_image image))))
               null
@@ -456,7 +491,8 @@
                      [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento reemplazo)]))))
 
                                  
-      ; Función que filtra los elementos que tienen la misma profundidad e para bitmap y hexmap
+      ; Descripción: Función que filtra los elementos que tienen la misma profundidad e para Bitmap-d y Hexmap-d
+      ; Dom: formato de pixeles (list) X elemento
       (define filtro_profundidad (lambda (formato_pixeles e)
          (if (null? formato_pixeles)
               null
@@ -472,10 +508,13 @@
              (profundidad_bit_hex image_ingresada (filtro_profundidad lista (d_bit (car lista))) reemplazo))))))
 
 
-    ; Función que crea la lista de imagenes de profundidad con pixmap
+    ; Descripción: Función que crea la lista de imagenes de profundidad con Pixmap-d
+    ; Dom: image X formato de pixeles (list). Rec: formato de pixeles (list)
     (define profundidad_rgb (lambda (image_ingresada lista)
 
      ; Función que rellenar pixeles restantes en blanco (255, 255, 255)
+     ; Dom: formato de pixeles (list) X int X int X image X int X elemento. Rec: formato de pixeles (list)
+     ; Tipo de recursión: Natural para crear una lista con base a estados pendientes
      (define rellenar_profundidad (lambda (lista pos_x pos_y image contador elemento)
           (if (or (null? lista) (= contador (* (ancho_image image) (largo_image image))))
               null
@@ -493,7 +532,8 @@
 
                     [else (rellenar_profundidad lista (+ pos_x 1) 0 image contador elemento)]))))
 
-      ; Función filtra los elementos que tienen la misma profundidad e para pixmap
+      ; Descripción: Función filtra los elementos que tienen la misma profundidad e para Pixmap-d
+      ; Dom: formato de pixeles (list) X elemento
       (define filtro_profundidad (lambda (formato_pixeles e)
          (if (null? formato_pixeles)
               null
@@ -516,8 +556,7 @@
        [else image_ingresada])))
 
 
-; exportar la funcion al exterior
-#|
+; exportar los requerimientos funcionales al exterior
 (provide image)
 (provide bitmap?)
 (provide hexmap?)
@@ -533,5 +572,10 @@
 (provide edit)
 (provide image->string)
 (provide decompress)
-|#
-(provide (all-defined-out))
+(provide invertColorBit)
+(provide invertColorRGB)
+(provide incCh)
+(provide adjustChannel)
+(provide depthLayers)
+
+;(provide (all-defined-out))

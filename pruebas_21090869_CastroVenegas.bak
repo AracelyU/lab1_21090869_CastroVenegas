@@ -292,13 +292,7 @@ OBS:
 ;  (1 (30 30 30))
 ;  (1 (40 40 40))
 ;  (1 (50 50 50))
-;  (1 (60 60 60))
-;  (1 (70 70 70))
-;  (1 (80 80 80))
-;  (1 (90 90 90))
-;  (1 (100 100 100))
-;  (1 (110 110 110))
-;  (1 (120 120 120)))
+;  (1 (60 60 60)))
 
 (histogram image2)
 ;output:
@@ -312,19 +306,14 @@ OBS:
 (display (image->string image1 pixrgb->string))
 
 ;output:
-#|
-#0A0A0A #141414 #1E1E1E 
-#282828 #323232 #3C3C3C 
-#464646 #505050 #5A5A5A 
-#646464 #6E6E6E #787878 
-|#
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
 
 (display (image->string image6 pixhex->string))
 
 ;output:
-;#00FF00 #FF0000 
-;#00FF00 #0000FF 
-;#F32FFF #00FF00
+;##00FF00 ##FF0000 
+;##00FF00 ##0000FF 
 
 (display (image->string image10 pixbit->string))
 
@@ -360,12 +349,9 @@ OBS:
 ;imágenes no comprimidas
 (display (image->string image1 pixrgb->string))
 ;output:
-#|
-#0A0A0A #141414 #1E1E1E 
-#282828 #323232 #3C3C3C 
-#464646 #505050 #5A5A5A 
-#646464 #6E6E6E #787878 
-|#
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
+
 (display (image->string image2 pixbit->string))
 ;output:
 ;0 1 1
@@ -380,12 +366,8 @@ OBS:
 ;imagenes comprimidas, podrían internamente descomprimirlas para convertir a string ;(opcional)
 (display (image->string image14 pixrgb->string))
 ;output:
-#|
-#0A0A0A #141414 #1E1E1E 
-#282828 #323232 #3C3C3C 
-#464646 #505050 #5A5A5A 
-#646464 #6E6E6E #787878 
-|#
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
 
 (display (image->string image15 pixbit->string))
 ;output:
@@ -408,21 +390,14 @@ OBS:
 
 (display (image->string image20 pixrgb->string))
 ;output:
-#|
-#0A0A0A #141414 #1E1E1E 
-#282828 #323232 #3C3C3C 
-#464646 #505050 #5A5A5A 
-#646464 #6E6E6E #787878
-|#
+;#F5F5F5 #EBEBEB #E1E1E1 
+;#D7D7D7 #CDCDCD #C3C3C3
 
 (display (image->string image11 pixhex->string))
 ;output:
-#|
-#0A0A0A #141414 #1E1E1E 
-#282828 #323232 #3C3C3C 
-#464646 #505050 #5A5A5A 
-#646464 #6E6E6E #787878 
-|#
+;#0A0A0A #141414 #1E1E1E 
+;#282828 #323232 #3C3C3C 
+
 ; probando depthLayers
 (depthLayers image5) 
 (depthLayers image6) 

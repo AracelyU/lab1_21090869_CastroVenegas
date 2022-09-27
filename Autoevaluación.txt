@@ -4,7 +4,7 @@ Lenguaje			1
 Versión				1
 Standard			1
 No variables			1
-Documentación			0.75
+Documentación			1
 Dom->Rec			1
 Organización			1
 Historial			1
